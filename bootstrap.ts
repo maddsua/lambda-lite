@@ -10,8 +10,6 @@ await startServer({
 	serve: {
 		port: getNumber(Deno.env.get('OCTO_PORT') || Deno.env.get('PORT')),
 		hostname: Deno.env.get('OCTO_HOSTNAME'),
-		cert: Deno.env.get('OCTO_TLS_CERT'),
-		key: Deno.env.get('OCTO_TLS_KEY')
 	},
 	octo: {
 		routesDir: Deno.env.get('OCTO_ROUTES_DIR'),

@@ -1,4 +1,4 @@
-# functions
+# lambda-lite
 
 A deno based API server framework
 
@@ -15,10 +15,6 @@ Set these environment vartiables to configure server behavior:
 `OCTO_PORT` : Port on which server should start (passed directly to Deno.serve)
 
 `OCTO_HOSTNAME` : Server host (passed directly to Deno.serve)
-
-`OCTO_TLS_CERT` : Server TLS certificate plaintext (passed directly to Deno.serve)
-
-`OCTO_TLS_KEY` : Server TLS key plaintext (passed directly to Deno.serve)
 
 `OCTO_ROUTES_DIR` : Directory containing all route functions
 
