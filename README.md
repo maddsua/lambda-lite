@@ -2,7 +2,7 @@
 
 A deno based API server framework
 
-You can threat it like it's Netlify functions but it runs everywhere. I was working with Functions a lot and I really like it but they can't be run separately in docker containers and with other services.
+You can treat it like it's Netlify functions but it runs everywhere. I was working with Functions a lot and I really like it but they can't be run separately in docker containers and with other services.
 
 Yeah, other platforms have their own implementations of that concept too, but Cloduflare Pages Functions / Workers are still undercooked, things are not better with smaller platforms and Vercel's stuff just sucks.
 
