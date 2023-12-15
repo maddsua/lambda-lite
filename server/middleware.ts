@@ -60,7 +60,7 @@ export class LambdaMiddleware {
 			const handlerCtx: HandlerCtx = {
 				handler: routeCtx.handler,
 				rateLimiter: routeCtx.ratelimit === null ? null : (Object.keys(routeCtx.ratelimit || {}).length ? new RateLimiter(routeCtx.ratelimit) : undefined),
-				originChecker: routeCtx.allowedOrigings === null ? null : (routeCtx.allowedOrigings?.length ? new OriginChecker(routeCtx.allowedOrigings) : undefined),
+				originChecker: routeCtx.allowedOrigings === 'all' ? null : (routeCtx.allowedOrigings?.length ? new OriginChecker(routeCtx.allowedOrigings) : undefined),
 				expandPath: routeCtx.expand || route.endsWith('/*')
 			};
 

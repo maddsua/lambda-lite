@@ -5,7 +5,7 @@ import { importFileExtensions } from "./config.ts";
 export interface RouteConfig {
 	expand?: boolean;
 	ratelimit?: RateLimiterConfig | null;
-	allowedOrigings?: string[] | null;
+	allowedOrigings?: string[] | 'all';
 };
 
 export interface FileRouteConfig extends RouteConfig {
