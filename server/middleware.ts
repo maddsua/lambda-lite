@@ -12,7 +12,7 @@ const getRequestIdFromProxy = (headers: Headers, headerName: string | null | und
 };
 
 const generateRequestId = () => {
-	const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+	const characters = '0123456789abcdef';
 	const randomChar = () => characters.charAt(Math.floor(Math.random() * characters.length));
 	return Array.apply(null, Array(8)).map(randomChar).join('');
 };
