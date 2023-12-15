@@ -1,8 +1,8 @@
-import { ServerRoutes } from "./routes.ts";
+import type { ServerRoutes } from "./routes.ts";
+import type { RouteHandler } from "../mod.ts";
 import { JSONResponse } from "./api.ts";
 import { OriginChecker, RateLimiter, type RateLimiterConfig } from "./accessControl.ts";
 import { ServiceConsole } from "./console.ts";
-import { RouteHandler } from "../mod.ts";
 
 const getRequestIdFromProxy = (headers: Headers, headerName: string | null | undefined) => {
 	if (!headerName) return undefined;
