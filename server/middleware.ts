@@ -18,7 +18,7 @@ const generateRequestId = () => {
 	return Array.apply(null, Array(8)).map(randomChar).join('');
 };
 
-export interface OctopussOptions {
+export interface MiddlewareOptions {
 	routesDir?: string;
 	proxy?: {
 		forwardedIPHeader?: string;
@@ -38,14 +38,14 @@ interface HandlerCtx {
 	handler: RouteHandler;
 };
 
-export class OctoMiddleware {
+export class LambdaMiddleware {
 
-	config: Partial<OctopussOptions>;
+	config: Partial<MiddlewareOptions>;
 	handlersPool: Record<string, HandlerCtx>;
 	rateLimiter: RateLimiter | null;
 	originChecker: OriginChecker | null;
 
-	constructor (routes: ServerRoutes, config?: Partial<OctopussOptions>) {
+	constructor (routes: ServerRoutes, config?: Partial<MiddlewareOptions>) {
 
 		this.config = config || {};
 		this.rateLimiter = config?.rateLimit ? new RateLimiter(config.rateLimit) : null;
@@ -208,7 +208,7 @@ export class OctoMiddleware {
 				return responseObject;
 
 			} catch (error) {
-				console.error('Octo middleware error:', (error as Error).message || error);
+				console.error('Lambda middleware error:', (error as Error).message || error);
 				return new JSONResponse({
 					error_text: 'unhandled middleware error'
 				}, { status: 500 }).toResponse();
@@ -217,7 +217,7 @@ export class OctoMiddleware {
 		})();
 
 		//	add some headers so the shit always works
-		routeResponse.headers.set('x-powered-by', 'octopuss');
+		routeResponse.headers.set('x-powered-by', 'maddsua/lambda-lite');
 		if (allowedOrigin) routeResponse.headers.set('Access-Control-Allow-Origin', allowedOrigin);
 		if (exposeRequestID) routeResponse.headers.set('x-request-id', requestID);
 
