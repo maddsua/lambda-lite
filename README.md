@@ -2,7 +2,9 @@
 
 A deno based API server framework
 
-You can threat it like it's Netlify functions but it runs everywhere. A proper readme comes soon.
+You can threat it like it's Netlify functions but it runs everywhere. I was working with Functions a lot and I really like it but they can't be run separately in docker containers and with other services.
+
+Yeah, other platforms have their own implementations of that concept too, but Cloduflare Pages Functions / Workers are still undercooked, things are not better with smaller platforms and Vercel's stuff just sucks.
 
 ## Usage
 
@@ -35,11 +37,57 @@ Set these environment vartiables to configure server behavior:
 Start command:
 
 ```
-deno run --allow-all https://raw.githubusercontent.com/maddsua/functions/[tag]/bootstrap.ts
+deno run --allow-all https://raw.githubusercontent.com/maddsua/lambda-lite/[tag]/bootstrap.ts
 ```
 
 \* don't forget to replace `[tag]` with actual version tag
 
-## Example setup diagram
+### Configurable mode
 
-<img src="docs/jamstack-diagram.png" alt="JAMstack diagram" />
+Create a main file using this example:
+
+```typescript
+import { startServer } from 'https://raw.githubusercontent.com/maddsua/lambda-lite/[tag]/mod.ts';
+
+startServer({
+  serve: {
+    port: 8080
+  },
+  proxy: {
+    requestIdHeader: 'x-request-id',
+    forwardedIPHeader: 'x-envoy-external-address'
+  },
+  allowedOrigings: [
+    "example.com"
+  ]
+  handlers: {
+    '/post_order': {
+      handler: (requect, context) => {
+		// do whatever
+		return new Resonse(null, { status: 201 })
+	  }
+    },
+    '/health': {
+      handler: () => new Response(null, { status: 200 }),
+      config: {
+        allowedOrigings: null
+      }
+    }
+  }
+});
+
+```
+
+Now launch it with `deno run --allow-all main.ts`
+
+\* again, don't forget to replace `[tag]` with actual version tag
+
+---
+
+## More
+
+If you don't get what it's all about check out Netlify Functions docs - it's literally the same idea
+
+https://docs.netlify.com/functions/overview/
+
+https://www.netlify.com/platform/core/functions/
