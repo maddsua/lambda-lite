@@ -12,21 +12,23 @@ You can threat it like it's Netlify functions but it runs everywhere. A proper r
 
 Set these environment vartiables to configure server behavior:
 
-`OCTO_PORT` : Port on which server should start (passed directly to Deno.serve)
+`LLAPP_PORT` : Port on which server should start (passed directly to Deno.serve)
 
-`OCTO_HOSTNAME` : Server host (passed directly to Deno.serve)
+`LLAPP_HOSTNAME` : Server host (passed directly to Deno.serve)
 
-`OCTO_ROUTES_DIR` : Directory containing all route functions
+`LLAPP_ROUTES_DIR` : Directory containing all route functions
 
-`OCTO_HANDLE_CORS` : Whether to handle CORS automatically based on set allowed origins (true/false)
+`LLAPP_HANDLE_CORS` : Whether to handle CORS automatically based on set allowed origins (true/false)
 
-`OCTO_ALLOWED_ORIGINS` : Allowed origins (comma-separated)
+`LLAPP_ALLOWED_ORIGINS` : Allowed origins (comma-separated)
 
-`OCTO_RATELIMIT_PERIOD` : Set window period for rate limiter
+`LLAPP_RATELIMIT_PERIOD` : Set window period for rate limiter
 
-`OCTO_RATELIMIT_REQUESTS` : Set allowed number or requests withing rate limiter window
+`LLAPP_RATELIMIT_REQUESTS` : Set allowed number or requests withing rate limiter window
 
-`OCTO_EXPOSE_REQUEST_ID` : Whether to expose request id in response headers
+`LLAPP_EXPOSE_REQUEST_ID` : Whether to expose request id in response headers
+
+\* LLAPP stands for "lambda-lite app". Pun intended.
 
 #### Run
 
