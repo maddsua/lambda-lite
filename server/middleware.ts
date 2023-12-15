@@ -1,6 +1,5 @@
 import type { ServerRoutes } from "./routes.ts";
-import type { RouteHandler } from "../mod.ts";
-import { JSONResponse } from "./api.ts";
+import { type RouteHandler, JSONResponse } from "./api.ts";
 import { OriginChecker, RateLimiter, type RateLimiterConfig } from "./accessControl.ts";
 import { ServiceConsole } from "./console.ts";
 
