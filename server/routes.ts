@@ -69,7 +69,7 @@ export const loadFunctionsFromFS = async (fromDir: string): Promise<ServerRoutes
 			routes[pathname as keyof typeof routes] = Object.assign({}, config, { handler });
 
 		} catch (error) {
-			throw new Error(`Failed to import route module ${entry}: ${(error as Error).message}`);
+			throw new Error(`Failed to import route module ${entry}: ${(error as Error | null)?.message}`);
 		}
 	}
 

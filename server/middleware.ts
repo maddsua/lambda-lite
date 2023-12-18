@@ -49,6 +49,27 @@ export interface MiddlewareOptions {
 	 * Enable automatic health responses on this url
 	 */
 	healthcheckPath?: `/${string}`;
+
+	/**
+	 * Default app response payloads
+	 */
+	defaultResponses?: {
+
+		/**
+		 * Default response to root http path when no handler was matched
+		 */
+		index?: 'notfound' | 'info' | 'teapot' | 'forbidden'
+
+		/**
+		 * Default not found response
+		 */
+		notfound?: 'notfound' | 'forbidden';
+
+		/**
+		 * Default error response
+		 */
+		error?: 'basic' | 'log';
+	};
 };
 
 interface HandlerCtx {
@@ -146,9 +167,40 @@ export class LambdaMiddleware {
 	
 			//	go cry in the corned if it's not found
 			if (!routectx) {
-				return new JSONResponse({
-					error_text: 'route not found'
-				}, { status: 404 }).toResponse();
+
+				if (pathname === '/') {
+
+					switch (this.config.defaultResponses?.index) {
+
+						case 'forbidden': return new JSONResponse({
+							error_text: 'you\'re not really welcome here mate'
+						}, { status: 403 }).toResponse();
+
+						case 'info': return new JSONResponse({
+							server: 'maddsua/lambda-lite',
+							status: 'operational'
+						}, { status: 200 }).toResponse();
+
+						case 'teapot': return new JSONResponse({
+							error_text: '🤷‍♂️'
+						}, { status: 418 }).toResponse();
+					
+						default: return new JSONResponse({
+							error_text: 'route not found'
+						}, { status: 404 }).toResponse();
+					}
+				}
+
+				switch (this.config.defaultResponses?.notfound) {
+
+					case 'forbidden': return new JSONResponse({
+						error_text: 'you\'re not really welcome here mate'
+					}, { status: 403 }).toResponse();
+
+					default: return new JSONResponse({
+						error_text: 'route not found'
+					}, { status: 404 }).toResponse();
+				}
 			}
 
 			//	check request origin
@@ -228,10 +280,19 @@ export class LambdaMiddleware {
 				return responseObject;
 
 			} catch (error) {
-				console.error('Lambda middleware error:', (error as Error).message || error);
-				return new JSONResponse({
-					error_text: 'unhandled middleware error'
-				}, { status: 500 }).toResponse();
+				console.error('Lambda middleware error:', (error as Error | null)?.message || error);
+
+				switch (this.config.defaultResponses?.error) {
+
+					case 'log': return new JSONResponse({
+						error_text: 'unhandled middleware error',
+						error_log: (error as Error | null)?.message || JSON.stringify(error)
+					}, { status: 500 }).toResponse();
+
+					default: return new JSONResponse({
+						error_text: 'unhandled middleware error'
+					}, { status: 500 }).toResponse();
+				}
 			}
 
 		})();
