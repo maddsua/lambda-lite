@@ -55,10 +55,6 @@ export interface MiddlewareOptions {
 	 */
 	allowedOrigings?: string[];
 	/**
-	 * Show request id in response headers
-	 */
-	exposeRequestID?: boolean;
-	/**
 	 * Enable automatic health responses on this url
 	 */
 	healthcheckPath?: `/${string}`;
@@ -155,7 +151,6 @@ export class LambdaMiddleware {
 		const requestOrigin = request.headers.get('origin');
 		const handleCORS = this.config.handleCORS !== false;
 		let allowedOrigin: string | null = null;
-		let exposeRequestID = false;
 		let requestDisplayUrl = '/';
 
 		const console = new ServiceConsole(requestID);
@@ -286,9 +281,6 @@ export class LambdaMiddleware {
 				}).toResponse();
 			}
 
-			//	expose request id
-			if (this.config.exposeRequestID) exposeRequestID = true;
-
 			//	execute route function
 			try {
 
@@ -329,7 +321,7 @@ export class LambdaMiddleware {
 		//	add some headers so the shit always works
 		routeResponse.headers.set('x-powered-by', 'maddsua/lambda-lite');
 		if (allowedOrigin) routeResponse.headers.set('Access-Control-Allow-Origin', allowedOrigin);
-		if (exposeRequestID) routeResponse.headers.set('x-request-id', requestID);
+		routeResponse.headers.set('x-request-id', requestID);
 
 		//	log for, you know, reasons
 		console.log(`(${requestIP}) ${request.method} "${requestDisplayUrl}" --> ${routeResponse.status}`);
