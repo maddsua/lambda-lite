@@ -99,10 +99,10 @@ export class LambdaMiddleware {
 
 			const routeCtx = routes[route as keyof typeof routes];
 
-			const routeExpandedByUrl = route.endsWith('/*');
+			const routeExpandByUrl = route.endsWith('/*');
 
 			//	warn about path expansion
-			if (typeof routeCtx.expand === 'boolean' && routeExpandedByUrl) {
+			if (typeof routeCtx.expand === 'boolean' && routeExpandByUrl) {
 				console.warn(`Route %c"${route}"%c has both expanding path and %cconfig.expand%c set, the last will be used`, 'color: yellow', 'color: inherit', 'color: yellow', 'color: inherit');
 			}
 
@@ -110,10 +110,10 @@ export class LambdaMiddleware {
 				handler: routeCtx.handler,
 				rateLimiter: routeCtx.ratelimit === null ? null : (Object.keys(routeCtx.ratelimit || {}).length ? new RateLimiter(routeCtx.ratelimit) : undefined),
 				originChecker: routeCtx.allowedOrigings === 'all' ? null : (routeCtx.allowedOrigings?.length ? new OriginChecker(routeCtx.allowedOrigings) : undefined),
-				expandPath: routeCtx.expand || routeExpandedByUrl
+				expandPath: typeof routeCtx.expand === 'boolean' ? routeCtx.expand : routeExpandByUrl
 			};
 
-			const applyHandlerPath = routeExpandedByUrl ? (route.slice(0, route.lastIndexOf('/')) || '/') : route;
+			const applyHandlerPath = (routeExpandByUrl && handlerCtx.expandPath) ? (route.slice(0, route.lastIndexOf('/')) || '/') : route;
 			this.handlersPool[applyHandlerPath] = handlerCtx;
 		}
 
