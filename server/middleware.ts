@@ -113,7 +113,7 @@ export class LambdaMiddleware {
 				expandPath: typeof routeCtx.expand === 'boolean' ? routeCtx.expand : routeExpandByUrl
 			};
 
-			const applyHandlerPath = (routeExpandByUrl && handlerCtx.expandPath) ? (route.slice(0, route.lastIndexOf('/')) || '/') : route;
+			const applyHandlerPath = routeExpandByUrl ? (route.slice(0, route.lastIndexOf('/')) || '/') : route;
 			this.handlersPool[applyHandlerPath] = handlerCtx;
 		}
 
