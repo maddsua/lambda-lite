@@ -2,10 +2,13 @@ import { RateLimiterConfig } from "./accessControl.ts";
 import type { RouteHandler } from "./api.ts";
 import { importFileExtensions } from "./config.ts";
 
+export type HTTPMethod = 'CONNECT' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'POST' | 'PUT' | 'TRACE';
+
 export interface RouteConfig {
 	expand?: boolean;
 	ratelimit?: RateLimiterConfig | null;
 	allowedOrigings?: string[] | 'all';
+	allowedMethods?: HTTPMethod[] | HTTPMethod;
 };
 
 export interface FileRouteConfig extends RouteConfig {

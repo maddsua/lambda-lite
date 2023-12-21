@@ -17,6 +17,19 @@ const generateRequestId = () => {
 	return Array.apply(null, Array(8)).map(randomChar).join('');
 };
 
+class MethodChecker {
+	data: Set<string>;
+
+	constructor(methods: string[]) {
+		const methodsNormalized = methods.map(item => item.trim().toUpperCase()).filter(item => item.length);
+		this.data = new Set(methodsNormalized);
+	}
+
+	check(method: string): boolean {
+		return this.data.has(method.toUpperCase());
+	}
+}
+
 export interface MiddlewareOptions {
 	/**
 	 * Path to the directory containing handler functions
@@ -76,6 +89,7 @@ interface HandlerCtx {
 	expandPath?: boolean;
 	rateLimiter?: RateLimiter | null;
 	originChecker?: OriginChecker | null;
+	methodChecker?: MethodChecker;
 	handler: RouteHandler;
 };
 
@@ -110,7 +124,8 @@ export class LambdaMiddleware {
 				handler: routeCtx.handler,
 				rateLimiter: routeCtx.ratelimit === null ? null : (Object.keys(routeCtx.ratelimit || {}).length ? new RateLimiter(routeCtx.ratelimit) : undefined),
 				originChecker: routeCtx.allowedOrigings === 'all' ? null : (routeCtx.allowedOrigings?.length ? new OriginChecker(routeCtx.allowedOrigings) : undefined),
-				expandPath: typeof routeCtx.expand === 'boolean' ? routeCtx.expand : routeExpandByUrl
+				expandPath: typeof routeCtx.expand === 'boolean' ? routeCtx.expand : routeExpandByUrl,
+				methodChecker: routeCtx.allowedMethods?.length ? new MethodChecker(Array.isArray(routeCtx.allowedMethods) ? routeCtx.allowedMethods : [routeCtx.allowedMethods]) : undefined
 			};
 
 			const applyHandlerPath = routeExpandByUrl ? (route.slice(0, route.lastIndexOf('/')) || '/') : route;
@@ -237,6 +252,17 @@ export class LambdaMiddleware {
 					return new JSONResponse({
 						error_text: 'too many requests'
 					}, { status: 429 }).toResponse();
+				}
+			}
+
+			//	check request method
+			if (routectx.methodChecker) {
+				const methodAllowed = routectx.methodChecker.check(request.method);
+				if (!methodAllowed) {
+					console.log(`Method not allowed (${request.method})`);
+					return new JSONResponse({
+						error_text: 'method not allowed'
+					}, { status: 405 }).toResponse();
 				}
 			}
 

@@ -3,7 +3,8 @@ import Component from './index.tsx';
 import { RouteConfig } from "../../server/routes.ts";
 
 export const config: RouteConfig = {
-	expand: true
+	expand: true,
+	allowedMethods: ['GET', 'OPTIONS']
 };
 
 export const handler = () => {
