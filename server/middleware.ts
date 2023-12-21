@@ -157,8 +157,8 @@ export class LambdaMiddleware {
 
 		const routeResponse = await (async () => {
 
-			const { pathname, search } = new URL(request.url);
-			requestDisplayUrl = pathname + search;
+			const { pathname } = new URL(request.url);
+			requestDisplayUrl = pathname;
 
 			// find route function
 			let routectx = this.handlersPool[pathname];
