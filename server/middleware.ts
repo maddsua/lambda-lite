@@ -99,19 +99,22 @@ export class LambdaMiddleware {
 
 			const routeCtx = routes[route as keyof typeof routes];
 
+			const routeExpandedByUrl = route.endsWith('/*');
+
+			//	warn about path expansion
+			if (typeof routeCtx.expand === 'boolean' && routeExpandedByUrl) {
+				console.warn(`Route %c"${route}"%c has both expanding path and %cconfig.expand%c set, the last will be used`, 'color: yellow', 'color: inherit', 'color: yellow', 'color: inherit');
+			}
+
 			const handlerCtx: HandlerCtx = {
 				handler: routeCtx.handler,
 				rateLimiter: routeCtx.ratelimit === null ? null : (Object.keys(routeCtx.ratelimit || {}).length ? new RateLimiter(routeCtx.ratelimit) : undefined),
 				originChecker: routeCtx.allowedOrigings === 'all' ? null : (routeCtx.allowedOrigings?.length ? new OriginChecker(routeCtx.allowedOrigings) : undefined),
-				expandPath: routeCtx.expand || route.endsWith('/*')
+				expandPath: routeCtx.expand || routeExpandedByUrl
 			};
 
-			//	warn about path expansion
-			if (routeCtx.expand === false && handlerCtx.expandPath) {
-				console.warn(`Route %c"${route}"%c has both expanding path and %cconfig.expand%c set, the last will be used`, 'color: yellow', 'color: inherit', 'color: yellow', 'color: inherit');
-			}
-
-			this.handlersPool[route] = handlerCtx;
+			const applyHandlerPath = routeExpandedByUrl ? (route.slice(0, route.lastIndexOf('/')) || '/') : route;
+			this.handlersPool[applyHandlerPath] = handlerCtx;
 		}
 
 		//	setup healthcheck path
