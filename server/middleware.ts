@@ -1,7 +1,12 @@
 import type { ServerRoutes } from "./routes.ts";
 import { type RouteHandler, JSONResponse } from "./api.ts";
-import { OriginChecker, RateLimiter, type RateLimiterConfig } from "./accessControl.ts";
 import { ServiceConsole } from "./console.ts";
+import {
+	OriginChecker,
+	RateLimiter, type RateLimiterConfig,
+	MethodChecker,
+	ServiceTokenChecker
+} from "./accessControl.ts";
 
 const getRequestIdFromProxy = (headers: Headers, headerName: string | null | undefined) => {
 	if (!headerName) return undefined;
@@ -16,19 +21,6 @@ const generateRequestId = () => {
 	const randomChar = () => characters.charAt(Math.floor(Math.random() * characters.length));
 	return Array.apply(null, Array(8)).map(randomChar).join('');
 };
-
-class MethodChecker {
-	data: Set<string>;
-
-	constructor(methods: string[]) {
-		const methodsNormalized = methods.map(item => item.trim().toUpperCase()).filter(item => item.length);
-		this.data = new Set(methodsNormalized);
-	}
-
-	check(method: string): boolean {
-		return this.data.has(method.toUpperCase());
-	}
-}
 
 export interface MiddlewareOptions {
 	/**
@@ -54,6 +46,11 @@ export interface MiddlewareOptions {
 	 * Set a list of allowed origings. Requests that don't match these origins will be rejected with authorization error
 	 */
 	allowedOrigings?: string[];
+
+	/**
+	 * Set a security token that a client would need to pass in authorization header in order to access the service
+	 */
+	serviceToken?: string;
 	/**
 	 * Enable automatic health responses on this url
 	 */
@@ -86,6 +83,7 @@ interface HandlerCtx {
 	rateLimiter?: RateLimiter | null;
 	originChecker?: OriginChecker | null;
 	methodChecker?: MethodChecker;
+	serviceTokenChecker?: ServiceTokenChecker | null;
 	handler: RouteHandler;
 };
 
@@ -93,14 +91,16 @@ export class LambdaMiddleware {
 
 	config: Partial<MiddlewareOptions>;
 	handlersPool: Record<string, HandlerCtx>;
-	rateLimiter: RateLimiter | null;
-	originChecker: OriginChecker | null;
+	rateLimiter?: RateLimiter;
+	originChecker?: OriginChecker;
+	serviceTokenChecker?: ServiceTokenChecker;
 
 	constructor (routes: ServerRoutes, config?: Partial<MiddlewareOptions>) {
 
 		this.config = config || {};
-		this.rateLimiter = config?.rateLimit ? new RateLimiter(config.rateLimit) : null;
-		this.originChecker = config?.allowedOrigings?.length ? new OriginChecker(config.allowedOrigings) : null;
+		this.rateLimiter = config?.rateLimit ? new RateLimiter(config.rateLimit) : undefined;
+		this.originChecker = config?.allowedOrigings?.length ? new OriginChecker(config.allowedOrigings) : undefined;
+		this.serviceTokenChecker = config?.serviceToken ? new ServiceTokenChecker(config.serviceToken) : undefined;
 
 		//	transform routes
 		this.handlersPool = {};
@@ -121,7 +121,8 @@ export class LambdaMiddleware {
 				rateLimiter: routeCtx.ratelimit === null ? null : (Object.keys(routeCtx.ratelimit || {}).length ? new RateLimiter(routeCtx.ratelimit) : undefined),
 				originChecker: routeCtx.allowedOrigings === 'all' ? null : (routeCtx.allowedOrigings?.length ? new OriginChecker(routeCtx.allowedOrigings) : undefined),
 				expandPath: typeof routeCtx.expand === 'boolean' ? routeCtx.expand : routeExpandByUrl,
-				methodChecker: routeCtx.allowedMethods?.length ? new MethodChecker(Array.isArray(routeCtx.allowedMethods) ? routeCtx.allowedMethods : [routeCtx.allowedMethods]) : undefined
+				methodChecker: routeCtx.allowedMethods?.length ? new MethodChecker(Array.isArray(routeCtx.allowedMethods) ? routeCtx.allowedMethods : [routeCtx.allowedMethods]) : undefined,
+				serviceTokenChecker: routeCtx.serviceToken === null ? null : routeCtx.serviceToken ? new ServiceTokenChecker(routeCtx.serviceToken) : undefined
 			};
 
 			const applyHandlerPath = routeExpandByUrl ? (route.slice(0, route.lastIndexOf('/')) || '/') : route;
@@ -247,6 +248,31 @@ export class LambdaMiddleware {
 					return new JSONResponse({
 						error_text: 'too many requests'
 					}, { status: 429 }).toResponse();
+				}
+			}
+
+			//	check service token
+			const useServiceChecker = routectx.serviceTokenChecker !== null ? (routectx.serviceTokenChecker || this.serviceTokenChecker) : null;
+			if (useServiceChecker) {
+
+				const bearerHeader = request.headers.get('x-service-token') || request.headers.get('authorization');
+				if (!bearerHeader) {
+					return new JSONResponse({
+						error_text: 'service access token is required'
+					}, {
+						status: 401,
+						headers: {
+							'WWW-Authenticate': 'Basic realm="API"'
+						}
+					}).toResponse();
+				}
+
+				const checkResult = await useServiceChecker.check(bearerHeader);
+				if (!checkResult) {
+					console.warn(`Invalid service token provided (${bearerHeader})`);
+					return new JSONResponse({
+						error_text: 'invalid service access token'
+					}, { status: 403 }).toResponse();
 				}
 			}
 

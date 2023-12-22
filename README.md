@@ -28,7 +28,7 @@ Set these environment vartiables to configure server behavior:
 
 `LLAPP_RATELIMIT_REQUESTS` : Set allowed number or requests withing rate limiter window
 
-`LLAPP_EXPOSE_REQUEST_ID` : Whether to expose request id in response headers
+`LLAPP_SERVICE_TOKEN` : Set service access token
 
 \* LLAPP stands for "lambda-lite app". Pun intended.
 
