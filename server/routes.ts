@@ -9,7 +9,7 @@ export interface RouteConfig {
 	ratelimit?: RateLimiterConfig | null;
 	allowedOrigings?: string[] | 'all';
 	allowedMethods?: HTTPMethod[] | HTTPMethod;
-	serviceToken?: string;
+	serviceToken?: string | null;
 };
 
 export interface FileRouteConfig extends RouteConfig {
