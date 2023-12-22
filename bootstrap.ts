@@ -17,7 +17,8 @@ await startServer({
 	rateLimit: {
 		period: getNumber(Deno.env.get('LLAPP_RATELIMIT_PERIOD')),
 		requests: getNumber(Deno.env.get('LLAPP_RATELIMIT_REQUESTS')),
-	}
+	},
+	serviceToken: Deno.env.get('LLAPP_SERVICE_TOKEN')
 });
 
 console.log('\n%c Startup done \n', 'background-color: green; color: black');
