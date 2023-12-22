@@ -4,7 +4,8 @@ import { ServiceConsole } from "./console.ts";
 import {
 	OriginChecker,
 	RateLimiter, type RateLimiterConfig,
-	MethodChecker
+	MethodChecker,
+	ServiceTokenChecker
 } from "./accessControl.ts";
 
 const getRequestIdFromProxy = (headers: Headers, headerName: string | null | undefined) => {
@@ -45,6 +46,11 @@ export interface MiddlewareOptions {
 	 * Set a list of allowed origings. Requests that don't match these origins will be rejected with authorization error
 	 */
 	allowedOrigings?: string[];
+
+	/**
+	 * Set a security token that a client would need to pass in authorization header in order to access the service
+	 */
+	serviceToken?: string;
 	/**
 	 * Enable automatic health responses on this url
 	 */
@@ -77,6 +83,7 @@ interface HandlerCtx {
 	rateLimiter?: RateLimiter | null;
 	originChecker?: OriginChecker | null;
 	methodChecker?: MethodChecker;
+	serviceTokenChecker?: ServiceTokenChecker;
 	handler: RouteHandler;
 };
 
@@ -86,12 +93,14 @@ export class LambdaMiddleware {
 	handlersPool: Record<string, HandlerCtx>;
 	rateLimiter: RateLimiter | null;
 	originChecker: OriginChecker | null;
+	serviceTokenChecker: ServiceTokenChecker | null;
 
 	constructor (routes: ServerRoutes, config?: Partial<MiddlewareOptions>) {
 
 		this.config = config || {};
 		this.rateLimiter = config?.rateLimit ? new RateLimiter(config.rateLimit) : null;
 		this.originChecker = config?.allowedOrigings?.length ? new OriginChecker(config.allowedOrigings) : null;
+		this.serviceTokenChecker = config?.serviceToken ? new ServiceTokenChecker(config.serviceToken) : null;
 
 		//	transform routes
 		this.handlersPool = {};
@@ -112,7 +121,8 @@ export class LambdaMiddleware {
 				rateLimiter: routeCtx.ratelimit === null ? null : (Object.keys(routeCtx.ratelimit || {}).length ? new RateLimiter(routeCtx.ratelimit) : undefined),
 				originChecker: routeCtx.allowedOrigings === 'all' ? null : (routeCtx.allowedOrigings?.length ? new OriginChecker(routeCtx.allowedOrigings) : undefined),
 				expandPath: typeof routeCtx.expand === 'boolean' ? routeCtx.expand : routeExpandByUrl,
-				methodChecker: routeCtx.allowedMethods?.length ? new MethodChecker(Array.isArray(routeCtx.allowedMethods) ? routeCtx.allowedMethods : [routeCtx.allowedMethods]) : undefined
+				methodChecker: routeCtx.allowedMethods?.length ? new MethodChecker(Array.isArray(routeCtx.allowedMethods) ? routeCtx.allowedMethods : [routeCtx.allowedMethods]) : undefined,
+				serviceTokenChecker: routeCtx.serviceToken ? new ServiceTokenChecker(routeCtx.serviceToken) : undefined
 			};
 
 			const applyHandlerPath = routeExpandByUrl ? (route.slice(0, route.lastIndexOf('/')) || '/') : route;
@@ -238,6 +248,17 @@ export class LambdaMiddleware {
 					return new JSONResponse({
 						error_text: 'too many requests'
 					}, { status: 429 }).toResponse();
+				}
+			}
+
+			//	check service token
+			const useServiceChecker = routectx.serviceTokenChecker || this.serviceTokenChecker;
+			if (useServiceChecker) {
+				if (!useServiceChecker.check(request.headers)) {
+					console.warn(`Invalid service token provided`);
+					return new JSONResponse({
+						error_text: 'invalid service access token'
+					}, { status: 403 }).toResponse();
 				}
 			}
 
