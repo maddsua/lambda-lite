@@ -1,7 +1,11 @@
 import type { ServerRoutes } from "./routes.ts";
 import { type RouteHandler, JSONResponse } from "./api.ts";
-import { OriginChecker, RateLimiter, type RateLimiterConfig } from "./accessControl.ts";
 import { ServiceConsole } from "./console.ts";
+import {
+	OriginChecker,
+	RateLimiter, type RateLimiterConfig,
+	MethodChecker
+} from "./accessControl.ts";
 
 const getRequestIdFromProxy = (headers: Headers, headerName: string | null | undefined) => {
 	if (!headerName) return undefined;
@@ -16,19 +20,6 @@ const generateRequestId = () => {
 	const randomChar = () => characters.charAt(Math.floor(Math.random() * characters.length));
 	return Array.apply(null, Array(8)).map(randomChar).join('');
 };
-
-class MethodChecker {
-	data: Set<string>;
-
-	constructor(methods: string[]) {
-		const methodsNormalized = methods.map(item => item.trim().toUpperCase()).filter(item => item.length);
-		this.data = new Set(methodsNormalized);
-	}
-
-	check(method: string): boolean {
-		return this.data.has(method.toUpperCase());
-	}
-}
 
 export interface MiddlewareOptions {
 	/**
