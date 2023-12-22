@@ -256,7 +256,6 @@ export class LambdaMiddleware {
 			if (useServiceChecker) {
 
 				const bearerHeader = request.headers.get('authorization');
-
 				if (!bearerHeader) {
 					return new JSONResponse({
 						error_text: 'service access token is required'
@@ -268,7 +267,8 @@ export class LambdaMiddleware {
 					}).toResponse();
 				}
 
-				if (!useServiceChecker.check(bearerHeader)) {
+				const checkResult = await useServiceChecker.check(bearerHeader);
+				if (!checkResult) {
 					console.warn(`Invalid service token provided (${bearerHeader})`);
 					return new JSONResponse({
 						error_text: 'invalid service access token'
