@@ -28,6 +28,8 @@ Set these environment vartiables to configure server behavior:
 
 `LLAPP_RATELIMIT_REQUESTS` : Set allowed number or requests withing rate limiter window
 
+`LLAPP_SERVICE_TOKEN` : Set service access token
+
 \* LLAPP stands for "lambda-lite app". Pun intended.
 
 #### Run
