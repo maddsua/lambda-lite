@@ -83,7 +83,7 @@ interface HandlerCtx {
 	rateLimiter?: RateLimiter | null;
 	originChecker?: OriginChecker | null;
 	methodChecker?: MethodChecker;
-	serviceTokenChecker?: ServiceTokenChecker;
+	serviceTokenChecker?: ServiceTokenChecker | null;
 	handler: RouteHandler;
 };
 
@@ -91,16 +91,16 @@ export class LambdaMiddleware {
 
 	config: Partial<MiddlewareOptions>;
 	handlersPool: Record<string, HandlerCtx>;
-	rateLimiter: RateLimiter | null;
-	originChecker: OriginChecker | null;
-	serviceTokenChecker: ServiceTokenChecker | null;
+	rateLimiter?: RateLimiter;
+	originChecker?: OriginChecker;
+	serviceTokenChecker?: ServiceTokenChecker;
 
 	constructor (routes: ServerRoutes, config?: Partial<MiddlewareOptions>) {
 
 		this.config = config || {};
-		this.rateLimiter = config?.rateLimit ? new RateLimiter(config.rateLimit) : null;
-		this.originChecker = config?.allowedOrigings?.length ? new OriginChecker(config.allowedOrigings) : null;
-		this.serviceTokenChecker = config?.serviceToken ? new ServiceTokenChecker(config.serviceToken) : null;
+		this.rateLimiter = config?.rateLimit ? new RateLimiter(config.rateLimit) : undefined;
+		this.originChecker = config?.allowedOrigings?.length ? new OriginChecker(config.allowedOrigings) : undefined;
+		this.serviceTokenChecker = config?.serviceToken ? new ServiceTokenChecker(config.serviceToken) : undefined;
 
 		//	transform routes
 		this.handlersPool = {};
@@ -122,7 +122,7 @@ export class LambdaMiddleware {
 				originChecker: routeCtx.allowedOrigings === 'all' ? null : (routeCtx.allowedOrigings?.length ? new OriginChecker(routeCtx.allowedOrigings) : undefined),
 				expandPath: typeof routeCtx.expand === 'boolean' ? routeCtx.expand : routeExpandByUrl,
 				methodChecker: routeCtx.allowedMethods?.length ? new MethodChecker(Array.isArray(routeCtx.allowedMethods) ? routeCtx.allowedMethods : [routeCtx.allowedMethods]) : undefined,
-				serviceTokenChecker: routeCtx.serviceToken ? new ServiceTokenChecker(routeCtx.serviceToken) : undefined
+				serviceTokenChecker: routeCtx.serviceToken === null ? null : routeCtx.serviceToken ? new ServiceTokenChecker(routeCtx.serviceToken) : undefined
 			};
 
 			const applyHandlerPath = routeExpandByUrl ? (route.slice(0, route.lastIndexOf('/')) || '/') : route;
@@ -252,7 +252,7 @@ export class LambdaMiddleware {
 			}
 
 			//	check service token
-			const useServiceChecker = routectx.serviceTokenChecker || this.serviceTokenChecker;
+			const useServiceChecker = routectx.serviceTokenChecker !== null ? (routectx.serviceTokenChecker || this.serviceTokenChecker) : null;
 			if (useServiceChecker) {
 				if (!useServiceChecker.check(request.headers)) {
 					console.warn(`Invalid service token provided`);
