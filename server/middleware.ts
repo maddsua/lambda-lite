@@ -255,7 +255,7 @@ export class LambdaMiddleware {
 			const useServiceChecker = routectx.serviceTokenChecker !== null ? (routectx.serviceTokenChecker || this.serviceTokenChecker) : null;
 			if (useServiceChecker) {
 
-				const bearerHeader = request.headers.get('authorization');
+				const bearerHeader = request.headers.get('x-service-token') || request.headers.get('authorization');
 				if (!bearerHeader) {
 					return new JSONResponse({
 						error_text: 'service access token is required'
