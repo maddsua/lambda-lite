@@ -254,8 +254,22 @@ export class LambdaMiddleware {
 			//	check service token
 			const useServiceChecker = routectx.serviceTokenChecker !== null ? (routectx.serviceTokenChecker || this.serviceTokenChecker) : null;
 			if (useServiceChecker) {
-				if (!useServiceChecker.check(request.headers)) {
-					console.warn(`Invalid service token provided`);
+
+				const bearerHeader = request.headers.get('authorization');
+
+				if (!bearerHeader) {
+					return new JSONResponse({
+						error_text: 'service access token is required'
+					}, {
+						status: 401,
+						headers: {
+							'WWW-Authenticate': 'Basic realm="API"'
+						}
+					}).toResponse();
+				}
+
+				if (!useServiceChecker.check(bearerHeader)) {
+					console.warn(`Invalid service token provided (${bearerHeader})`);
 					return new JSONResponse({
 						error_text: 'invalid service access token'
 					}, { status: 403 }).toResponse();
