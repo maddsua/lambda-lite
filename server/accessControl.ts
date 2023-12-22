@@ -145,7 +145,6 @@ export class MethodChecker {
 };
 
 export class ServiceTokenChecker {
-	
 	token: string;
 	fakeDelayRange: number;
 
