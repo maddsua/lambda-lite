@@ -88,13 +88,15 @@ export class LambdaMiddleware {
 			const { pathname } = new URL(request.url);
 			requestDisplayUrl = pathname;
 
-			// find route function
-			let routectx = this.handlersPool[pathname];
+			// find route path
+			const routePathname = pathname.slice(0, pathname.endsWith('/') ? pathname.length - 1 : pathname.length);
+			let routectx = this.handlersPool[routePathname];
 
-			// match route function
+			// try to find matching wildcart route path
 			if (!routectx) {
-				const pathComponents = pathname.slice(1).split('/');
-				for (let idx = pathComponents.length - 1; idx >= 0; idx--) {
+
+				const pathComponents = routePathname.slice(1).split('/');
+				for (let idx = pathComponents.length; idx >= 0; idx--) {
 	
 					const nextRoute = '/' + pathComponents.slice(0, idx).join('/');
 					const nextCtx = this.handlersPool[nextRoute];
