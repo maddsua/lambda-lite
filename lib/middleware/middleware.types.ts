@@ -105,6 +105,10 @@ export interface MiddlewareOptions {
 	 * Logging settings
 	 */
 	loglevel?: {
+
+		/**
+		 * Log incoming requests and their response metadata
+		 */
 		requests?: boolean;
 	};
 };
