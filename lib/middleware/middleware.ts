@@ -54,7 +54,7 @@ export class LambdaMiddleware {
 				serviceTokenChecker: routeCtx.serviceToken === null ? null : routeCtx.serviceToken ? new ServiceTokenChecker(routeCtx.serviceToken) : undefined
 			};
 
-			const applyHandlerPath = route.replace(/\/(index|\*)?$/i, '');
+			const applyHandlerPath = route.replace(/\/\*?$/i, '');
 			this.handlersPool[applyHandlerPath.length ? applyHandlerPath : '/'] = handlerCtx;
 		}
 
