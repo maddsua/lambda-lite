@@ -1,16 +1,24 @@
-import { type ServerRoutes, loadFunctionsFromFS } from "./routes.ts";
-import { defaultConfig } from "./config.ts";
-import { LambdaMiddleware, type MiddlewareOptions } from "./middleware.ts";
+import type { ServerRoutes, MiddlewareOptions } from '../../middleware/middleware.types.ts';
+import { LambdaMiddleware} from '../../middleware/middleware.ts';
+import { defaultConfig } from './config.ts';
+import { loadFunctionsFromFS } from './routes.ts';
 
 export interface StartServerOptions extends MiddlewareOptions {
+
 	/**
 	 * Basic http server options (passed directory to Deno.serve call)
 	 */
 	serve?: Deno.ServeOptions | Deno.ServeTlsOptions;
+
 	/**
 	 * Define function handlers here if not using FS module loading
 	 */
 	routes?: ServerRoutes;
+
+	/**
+	 * Path to the directory containing handler functions
+	 */
+	routesDir?: string;
 };
 
 export const startServer = async (opts?: StartServerOptions) => {
@@ -20,9 +28,9 @@ export const startServer = async (opts?: StartServerOptions) => {
 	const middleware = new LambdaMiddleware(routes, opts);
 
 	if (!opts?.serve) {
-		Deno.serve(middleware.handler.bind(middleware));
-		return
+		Deno.serve((request, info) => middleware.handler(request, info.remoteAddr));
+		return;
 	}
 
-	Deno.serve(opts?.serve, middleware.handler.bind(middleware));
+	Deno.serve(opts.serve, (request, info) => middleware.handler(request, info.remoteAddr));
 };

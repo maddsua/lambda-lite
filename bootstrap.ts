@@ -3,8 +3,8 @@
  * Provide env variables and just run it from url
  */
 
-import { startServer } from "./server/server.ts";
-import { getNumber } from "./server/envutils.ts";
+import { startServer } from "./lib/server/deno/server.ts";
+import { getNumber } from "./lib/util/envutils.ts";
 
 await startServer({
 	serve: {

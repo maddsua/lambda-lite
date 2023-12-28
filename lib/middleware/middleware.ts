@@ -1,82 +1,11 @@
-import type { ServerRoutes } from "./routes.ts";
-import { type RouteHandler, JSONResponse } from "./api.ts";
-import { ServiceConsole } from "./console.ts";
-import {
-	OriginChecker,
-	RateLimiter, type RateLimiterConfig,
-	MethodChecker,
-	ServiceTokenChecker
-} from "./accessControl.ts";
-
-const getRequestIdFromProxy = (headers: Headers, headerName: string | null | undefined) => {
-	if (!headerName) return undefined;
-	const header = headers.get(headerName);
-	if (!header) return undefined;
-	const shortid = header.slice(0, header.indexOf('-'));
-	return shortid.length <= 8 ? shortid : shortid.slice(0, 8);
-};
-
-const generateRequestId = () => {
-	const characters = '0123456789abcdef';
-	const randomChar = () => characters.charAt(Math.floor(Math.random() * characters.length));
-	return Array.apply(null, Array(8)).map(randomChar).join('');
-};
-
-export interface MiddlewareOptions {
-	/**
-	 * Path to the directory containing handler functions
-	 */
-	routesDir?: string;
-	/**
-	 * Proxy options. The stuff that gets passed to the application by the reverse proxy if you have one
-	 */
-	proxy?: {
-		forwardedIPHeader?: string;
-		requestIdHeader?: string;
-	},
-	/**
-	 * Request rate limiting options
-	 */
-	rateLimit?: Partial<RateLimiterConfig>;
-	/**
-	 * Enables automatic CORS response
-	 */
-	handleCORS?: boolean;
-	/**
-	 * Set a list of allowed origings. Requests that don't match these origins will be rejected with authorization error
-	 */
-	allowedOrigings?: string[];
-
-	/**
-	 * Set a security token that a client would need to pass in authorization header in order to access the service
-	 */
-	serviceToken?: string;
-	/**
-	 * Enable automatic health responses on this url
-	 */
-	healthcheckPath?: `/${string}`;
-
-	/**
-	 * Default app response payloads
-	 */
-	defaultResponses?: {
-
-		/**
-		 * Default response to root http path when no handler was matched
-		 */
-		index?: 'notfound' | 'info' | 'teapot' | 'forbidden'
-
-		/**
-		 * Default not found response
-		 */
-		notfound?: 'notfound' | 'forbidden';
-
-		/**
-		 * Default error response
-		 */
-		error?: 'basic' | 'log';
-	};
-};
+import type { ServerRoutes, RouteHandler, MiddlewareOptions, NetworkInfo } from './middleware.types.ts';
+import { JSONResponse } from '../api/jsonResponse.ts';
+import { ServiceConsole } from '../util/console.ts';
+import { OriginChecker } from '../accessControl/originChecker.ts';
+import { RateLimiter } from '../accessControl/rateLimiter.ts';
+import { MethodChecker } from '../accessControl/methodChecker.ts';
+import { ServiceTokenChecker } from '../accessControl/serviceTokenChecker.ts';
+import { getRequestIdFromProxy, generateRequestId } from '../util/misc.ts';
 
 interface HandlerCtx {
 	expandPath?: boolean;
@@ -142,12 +71,10 @@ export class LambdaMiddleware {
 		}
 	}
 
-	async handler (request: Request, info: Deno.ServeHandlerInfo): Promise<Response> {
+	async handler (request: Request, info: NetworkInfo): Promise<Response> {
 
 		const requestID = getRequestIdFromProxy(request.headers, this.config.proxy?.requestIdHeader) || generateRequestId();
-		const requestIP = (this.config.proxy?.forwardedIPHeader ?
-			request.headers.get(this.config.proxy.forwardedIPHeader) : undefined) ||
-			info.remoteAddr.hostname;
+		const clientIP = ((this.config.proxy?.forwardedIPHeader ? request.headers.get(this.config.proxy.forwardedIPHeader) : undefined)) || info.hostname;
 
 		const requestOrigin = request.headers.get('origin');
 		const handleCORS = this.config.handleCORS !== false;
@@ -242,7 +169,7 @@ export class LambdaMiddleware {
 			//	check rate limiter
 			const useRateLimiter = routectx.rateLimiter !== null ? (routectx.rateLimiter || this.rateLimiter) : null;
 			if (useRateLimiter) {
-				const rateCheck = useRateLimiter.check({ ip: requestIP });
+				const rateCheck = useRateLimiter.check({ ip: clientIP });
 				if (!rateCheck.ok) {
 					console.log(`Too many requests (${rateCheck.requests}). Wait for ${rateCheck.reset}s`);
 					return new JSONResponse({
@@ -310,7 +237,12 @@ export class LambdaMiddleware {
 			//	execute route function
 			try {
 
-				const handlerResponse = await routectx.handler(request, { console, requestID, requestIP });
+				const requestInfo = Object.assign({
+					clientIP,
+					requestID
+				}, info);
+
+				const handlerResponse = await routectx.handler(request, { console, requestInfo });
 
 				//	here we convert a non-standard response object to a standard one
 				//	all non standard should provide a "toResponse" method to do that
@@ -327,6 +259,7 @@ export class LambdaMiddleware {
 				return responseObject;
 
 			} catch (error) {
+
 				console.error('Lambda middleware error:', (error as Error | null)?.message || error);
 
 				switch (this.config.defaultResponses?.error) {
@@ -350,7 +283,7 @@ export class LambdaMiddleware {
 		routeResponse.headers.set('x-request-id', requestID);
 
 		//	log for, you know, reasons
-		console.log(`(${requestIP}) ${request.method} ${requestDisplayUrl} --> ${routeResponse.status}`);
+		console.log(`(${clientIP}) ${request.method} ${requestDisplayUrl} --> ${routeResponse.status}`);
 
 		return routeResponse;
 	}

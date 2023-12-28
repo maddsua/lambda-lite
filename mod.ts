@@ -1,8 +1,7 @@
-import type { RouteConfig } from "./server/routes.ts";
-import type { RouteHandler } from "./server/api.ts";
-import { JSONResponse } from "./server/api.ts";
-import { startServer } from "./server/server.ts";
-import * as envutils from './server/envutils.ts';
+import type { RouteConfig, RouteHandler } from "./lib/middleware/middleware.types.ts";
+import { JSONResponse } from "./lib/api/jsonResponse.ts";
+import { startServer } from "./lib/server/deno/server.ts";
+import * as envutils from './lib/util/envutils.ts';
 
 export {
 	RouteHandler,

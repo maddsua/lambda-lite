@@ -1,25 +1,9 @@
-import { RateLimiterConfig } from "./accessControl.ts";
-import type { RouteHandler } from "./api.ts";
-import { importFileExtensions } from "./config.ts";
-
-export type HTTPMethod = 'CONNECT' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'POST' | 'PUT' | 'TRACE';
-
-export interface RouteConfig {
-	expand?: boolean;
-	ratelimit?: RateLimiterConfig | null;
-	allowedOrigings?: string[] | 'all';
-	allowedMethods?: HTTPMethod[] | HTTPMethod;
-	serviceToken?: string | null;
-};
+import { importFileExtensions } from './config.ts';
+import type { ServerRoutes, RouteConfig } from '../../middleware/middleware.types.ts';
 
 export interface FileRouteConfig extends RouteConfig {
 	url?: string;
 };
-
-export interface RouteCtx extends RouteConfig {
-	handler: RouteHandler;
-};
-export type ServerRoutes = Record<`/${string}`, RouteCtx>;
 
 export const loadFunctionsFromFS = async (fromDir: string): Promise<ServerRoutes> => {
 

@@ -1,4 +1,3 @@
-import type { ServiceConsole } from "./console.ts";
 
 /**
  * Alternative Response class that automatically handles JSON serialization
@@ -26,21 +25,3 @@ export class JSONResponse<T extends object> {
 		});
 	}
 };
-
-export interface RequestContext {
-	/**
-	 * Request-specific console
-	 */
-	console: ServiceConsole;
-	/**
-	 * Client's IP address
-	 */
-	requestIP: string;
-	/**
-	 * Unique request ID
-	 */
-	requestID: string;
-};
-
-export type RouteResponse = JSONResponse<object> | Response;
-export type RouteHandler = (request: Request, context: RequestContext) => Promise<RouteResponse> | RouteResponse;
