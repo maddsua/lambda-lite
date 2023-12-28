@@ -1,4 +1,4 @@
-import type { ServerRoutes, MiddlewareOptions, NetworkInfo } from '../../middleware/middleware.types.ts';
+import type { ServerRoutes, MiddlewareOptions } from '../../middleware/middleware.types.ts';
 import { LambdaMiddleware} from '../../middleware/middleware.ts';
 
 export interface StartServerOptions extends MiddlewareOptions {
