@@ -283,7 +283,8 @@ export class LambdaMiddleware {
 		routeResponse.headers.set('x-request-id', requestID);
 
 		//	log for, you know, reasons
-		console.log(`(${clientIP}) ${request.method} ${requestDisplayUrl} --> ${routeResponse.status}`);
+		if (this.config.loglevel?.requests !== false)	
+			console.log(`(${clientIP}) ${request.method} ${requestDisplayUrl} --> ${routeResponse.status}`);
 
 		return routeResponse;
 	}

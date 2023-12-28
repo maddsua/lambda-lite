@@ -100,4 +100,11 @@ export interface MiddlewareOptions {
 		 */
 		error?: 'basic' | 'log';
 	};
+
+	/**
+	 * Logging settings
+	 */
+	loglevel?: {
+		requests?: boolean;
+	};
 };
