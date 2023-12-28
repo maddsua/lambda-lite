@@ -1,4 +1,4 @@
-import type { ServerRoutes, MiddlewareOptions } from '../../middleware/middleware.types.ts';
+import type { ServerRoutes, MiddlewareOptions, NetworkInfo } from '../../middleware/middleware.types.ts';
 import { LambdaMiddleware} from '../../middleware/middleware.ts';
 
 export interface StartServerOptions extends MiddlewareOptions {
@@ -9,8 +9,18 @@ export interface StartServerOptions extends MiddlewareOptions {
 	routes: ServerRoutes;
 };
 
-export const startServer = async (opts: StartServerOptions) => {
+export const startServer = <EnvType>(opts: StartServerOptions) => {
 
 	const middleware = new LambdaMiddleware(opts.routes, opts);
 
+	return {
+		async fetch(request: Request, env: EnvType, ctx: object) {
+			
+			return await middleware.handler(request, {
+				transport: 'tcp',
+				port: 443,
+				hostname: request.headers.get('x-real-ip') || request.headers.get('cf-connecting-ip') || '127.0.0.1'
+			});
+		}
+	};
 };
