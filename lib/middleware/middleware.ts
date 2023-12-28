@@ -54,8 +54,8 @@ export class LambdaMiddleware {
 				serviceTokenChecker: routeCtx.serviceToken === null ? null : routeCtx.serviceToken ? new ServiceTokenChecker(routeCtx.serviceToken) : undefined
 			};
 
-			const applyHandlerPath = routeExpandByUrl ? (route.slice(0, route.lastIndexOf('/')) || '/') : route;
-			this.handlersPool[applyHandlerPath] = handlerCtx;
+			const applyHandlerPath = route.replace(/\/(index|\*)?$/i, '');
+			this.handlersPool[applyHandlerPath.length ? applyHandlerPath : '/'] = handlerCtx;
 		}
 
 		//	setup healthcheck path
