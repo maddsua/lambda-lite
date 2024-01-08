@@ -1,4 +1,10 @@
-import type { ServerRoutes, RouteHandler, MiddlewareOptions, NetworkInfo } from './middleware.types.ts';
+import type {
+	ServerRoutes,
+	RouteHandler,
+	MiddlewareOptions,
+	NetworkInfo,
+	RequestContext,
+} from './middleware.types.ts';
 import { JSONResponse } from '../api/jsonResponse.ts';
 import { ServiceConsole } from '../util/console.ts';
 import { OriginChecker } from '../accessControl/originChecker.ts';
@@ -244,7 +250,15 @@ export class LambdaMiddleware {
 					requestID
 				}, info);
 
-				const handlerResponse = await routectx.handler(request, { console, requestInfo });
+				const requestEnv = typeof this.config.env === 'function' ? await this.config.env() : this.config.env || {};
+
+				const requestContext: RequestContext = {
+					console,
+					requestInfo,
+					waitUntil: this.config.waitUntilCallback || (async (promise: Promise<any>) => await promise)
+				};
+
+				const handlerResponse = await routectx.handler(request, requestEnv, requestContext);
 
 				//	here we convert a non-standard response object to a standard one
 				//	all non standard should provide a "toResponse" method to do that
