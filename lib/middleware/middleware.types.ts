@@ -13,6 +13,10 @@ export interface RequestInfo extends NetworkInfo {
 	requestID: string;
 };
 
+type EnvBase = Record<string, string>;
+
+export type ContextWaitUntilCallback = (promise: Promise<any>) => void;
+
 export interface RequestContext {
 
 	/**
@@ -24,10 +28,12 @@ export interface RequestContext {
 	 * Request info info, duh
 	 */
 	requestInfo: RequestInfo;
+
+	waitUntil: ContextWaitUntilCallback;
 };
 
 export type RouteResponse = JSONResponse<object> | Response;
-export type RouteHandler = (request: Request, context: RequestContext) => Promise<RouteResponse> | RouteResponse;
+export type RouteHandler = (request: Request, env: EnvBase, context: RequestContext) => Promise<RouteResponse> | RouteResponse;
 
 export type HTTPMethod = 'CONNECT' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'POST' | 'PUT' | 'TRACE';
 
@@ -44,6 +50,8 @@ export interface RouteCtx extends RouteConfig {
 };
 
 export type ServerRoutes = Record<`/${string}`, RouteCtx>;
+
+export type MiddlewareEnv = EnvBase | (() => Promise<EnvBase> | EnvBase);
 
 export interface MiddlewareOptions {
 
@@ -111,4 +119,14 @@ export interface MiddlewareOptions {
 		 */
 		requests?: boolean;
 	};
+
+	/**
+	 * Environment variables
+	 */
+	env?: MiddlewareEnv;
+
+	/**
+	 * Context wait until callback
+	 */
+	waitUntilCallback?: ContextWaitUntilCallback
 };
