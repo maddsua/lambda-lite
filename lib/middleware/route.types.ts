@@ -1,4 +1,4 @@
-import type { JSONResponse } from "../api/jsonResponse.ts";
+import type { JSONResponse } from "../rest/jsonResponse.ts";
 import type { RateLimiterConfig } from "../accessControl/rateLimiter.ts";
 import type { RequestContext } from "./runtime.types.ts";
 import type { EnvBase } from "../util/envutils.ts";

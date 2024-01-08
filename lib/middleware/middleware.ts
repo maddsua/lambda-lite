@@ -1,14 +1,14 @@
 import type { NetworkInfo, RequestContext, RuntimeContext } from './runtime.types.ts';
-import type { MiddlewareOptions } from "./options.types.ts";
-import type { RouteHandler, RouterRoutes } from "./route.types.ts";
-import { JSONResponse } from '../api/jsonResponse.ts';
+import type { MiddlewareOptions } from './options.types.ts';
+import type { RouteHandler, RouterRoutes } from './route.types.ts';
+import { JSONResponse } from '../rest/jsonResponse.ts';
 import { ServiceConsole } from '../util/console.ts';
 import { OriginChecker } from '../accessControl/originChecker.ts';
 import { RateLimiter } from '../accessControl/rateLimiter.ts';
 import { MethodChecker } from '../accessControl/methodChecker.ts';
 import { ServiceTokenChecker } from '../accessControl/serviceTokenChecker.ts';
 import { getRequestIdFromProxy, generateRequestId } from '../util/misc.ts';
-import { getRuntimeEnv } from "../util/envutils.ts";
+import { getRuntimeEnv } from '../util/envutils.ts';
 
 interface HandlerCtx {
 	expandPath?: boolean;
