@@ -1,4 +1,6 @@
-import type { ServerRoutes, RouteHandler, MiddlewareOptions, NetworkInfo } from './middleware.types.ts';
+import type { NetworkInfo, RequestContext, RuntimeContext } from './runtime.types.ts';
+import type { MiddlewareOptions } from "./options.types.ts";
+import type { RouteHandler, RouterRoutes } from "./route.types.ts";
 import { JSONResponse } from '../api/jsonResponse.ts';
 import { ServiceConsole } from '../util/console.ts';
 import { OriginChecker } from '../accessControl/originChecker.ts';
@@ -6,6 +8,7 @@ import { RateLimiter } from '../accessControl/rateLimiter.ts';
 import { MethodChecker } from '../accessControl/methodChecker.ts';
 import { ServiceTokenChecker } from '../accessControl/serviceTokenChecker.ts';
 import { getRequestIdFromProxy, generateRequestId } from '../util/misc.ts';
+import { getRuntimeEnv } from "../util/envutils.ts";
 
 interface HandlerCtx {
 	expandPath?: boolean;
@@ -24,7 +27,7 @@ export class LambdaMiddleware {
 	originChecker?: OriginChecker;
 	serviceTokenChecker?: ServiceTokenChecker;
 
-	constructor (routes: ServerRoutes, config?: Partial<MiddlewareOptions>) {
+	constructor (routes: RouterRoutes, config?: Partial<MiddlewareOptions>) {
 
 		this.config = config || {};
 		this.rateLimiter = config?.rateLimit ? new RateLimiter(config.rateLimit) : undefined;
@@ -71,7 +74,7 @@ export class LambdaMiddleware {
 		}
 	}
 
-	async handler (request: Request, info: NetworkInfo): Promise<Response> {
+	async handler (request: Request, info: NetworkInfo, context?: RuntimeContext): Promise<Response> {
 
 		const requestID = getRequestIdFromProxy(request.headers, this.config.proxy?.requestIdHeader) || generateRequestId();
 		const clientIP = ((this.config.proxy?.forwardedIPHeader ? request.headers.get(this.config.proxy.forwardedIPHeader) : undefined)) || info.hostname;
@@ -244,7 +247,15 @@ export class LambdaMiddleware {
 					requestID
 				}, info);
 
-				const handlerResponse = await routectx.handler(request, { console, requestInfo });
+				const requestContext: RequestContext = {
+					console,
+					requestInfo,
+					env: context?.env || getRuntimeEnv(),
+					//	this needs to be fixed at some point
+					waitUntil: context?.waitUntil || (async (promise: Promise<any>) => await promise)
+				};
+
+				const handlerResponse = await routectx.handler(request, requestContext);
 
 				//	here we convert a non-standard response object to a standard one
 				//	all non standard should provide a "toResponse" method to do that
