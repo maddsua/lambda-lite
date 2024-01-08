@@ -1,4 +1,4 @@
-import { startServer } from "../mod.ts";
+import { startServer } from "../deno.mod.ts";
 
 await startServer({
 	serve: {
