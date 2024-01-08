@@ -1,11 +1,6 @@
-import type {
-	ServerRoutes,
-	RouteHandler,
-	MiddlewareOptions,
-	NetworkInfo,
-	RequestContext,
-	RuntimeContext,
-} from './middleware.types.ts';
+import type { NetworkInfo, RequestContext, RuntimeContext } from './runtime.types.ts';
+import type { MiddlewareOptions } from "./options.types.ts";
+import type { RouteHandler, RouterRoutes } from "./route.types.ts";
 import { JSONResponse } from '../api/jsonResponse.ts';
 import { ServiceConsole } from '../util/console.ts';
 import { OriginChecker } from '../accessControl/originChecker.ts';
@@ -32,7 +27,7 @@ export class LambdaMiddleware {
 	originChecker?: OriginChecker;
 	serviceTokenChecker?: ServiceTokenChecker;
 
-	constructor (routes: ServerRoutes, config?: Partial<MiddlewareOptions>) {
+	constructor (routes: RouterRoutes, config?: Partial<MiddlewareOptions>) {
 
 		this.config = config || {};
 		this.rateLimiter = config?.rateLimit ? new RateLimiter(config.rateLimit) : undefined;
@@ -256,6 +251,7 @@ export class LambdaMiddleware {
 					console,
 					requestInfo,
 					env: context?.env || getRuntimeEnv(),
+					//	this needs to be fixed at some point
 					waitUntil: context?.waitUntil || (async (promise: Promise<any>) => await promise)
 				};
 

@@ -1,4 +1,5 @@
-import type { ServerRoutes, MiddlewareOptions } from '../../middleware/middleware.types.ts';
+import type { MiddlewareOptions } from "../../middleware/options.types.ts";
+import type { RouterRoutes } from "../../middleware/route.types.ts";
 import { LambdaMiddleware} from '../../middleware/middleware.ts';
 import { defaultConfig } from './config.ts';
 import { loadFunctionsFromFS } from './routes.ts';
@@ -13,7 +14,7 @@ export interface StartServerOptions extends MiddlewareOptions {
 	/**
 	 * Define function handlers here if not using FS module loading
 	 */
-	routes?: ServerRoutes;
+	routes?: RouterRoutes;
 
 	/**
 	 * Path to the directory containing handler functions
