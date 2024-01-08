@@ -4,6 +4,7 @@ import type {
 	MiddlewareOptions,
 	NetworkInfo,
 	RequestContext,
+	RuntimeContext,
 } from './middleware.types.ts';
 import { JSONResponse } from '../api/jsonResponse.ts';
 import { ServiceConsole } from '../util/console.ts';
@@ -12,6 +13,7 @@ import { RateLimiter } from '../accessControl/rateLimiter.ts';
 import { MethodChecker } from '../accessControl/methodChecker.ts';
 import { ServiceTokenChecker } from '../accessControl/serviceTokenChecker.ts';
 import { getRequestIdFromProxy, generateRequestId } from '../util/misc.ts';
+import { getRuntimeEnv } from "../util/envutils.ts";
 
 interface HandlerCtx {
 	expandPath?: boolean;
@@ -77,7 +79,7 @@ export class LambdaMiddleware {
 		}
 	}
 
-	async handler (request: Request, info: NetworkInfo): Promise<Response> {
+	async handler (request: Request, info: NetworkInfo, context?: RuntimeContext): Promise<Response> {
 
 		const requestID = getRequestIdFromProxy(request.headers, this.config.proxy?.requestIdHeader) || generateRequestId();
 		const clientIP = ((this.config.proxy?.forwardedIPHeader ? request.headers.get(this.config.proxy.forwardedIPHeader) : undefined)) || info.hostname;
@@ -250,15 +252,14 @@ export class LambdaMiddleware {
 					requestID
 				}, info);
 
-				const requestEnv = typeof this.config.env === 'function' ? await this.config.env() : this.config.env || {};
-
 				const requestContext: RequestContext = {
 					console,
 					requestInfo,
-					waitUntil: this.config.waitUntilCallback || (async (promise: Promise<any>) => await promise)
+					env: context?.env || getRuntimeEnv(),
+					waitUntil: context?.waitUntil || (async (promise: Promise<any>) => await promise)
 				};
 
-				const handlerResponse = await routectx.handler(request, requestEnv, requestContext);
+				const handlerResponse = await routectx.handler(request, requestContext);
 
 				//	here we convert a non-standard response object to a standard one
 				//	all non standard should provide a "toResponse" method to do that
