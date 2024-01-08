@@ -1,11 +1,13 @@
 {
+	"name": "lambda-lite",
+	"version": "1.5.0",
 	"scripts": {
 		"worker:build": "esbuild test/worker.ts --bundle --minify --charset=utf8 --format=esm --outfile=.temp/worker.bundle.js",
 		"worker:build:dev": "esbuild test/worker.ts --bundle --charset=utf8 --watch --format=esm --outfile=.temp/worker.bundle.js",
 		"wrangler:dev": "wrangler dev .temp/worker.bundle.js",
 		"dev": "run-p worker:build:dev wrangler:dev"
 	},
-	"dependencies": {
+	"devDependencies": {
 		"esbuild": "^0.19.11",
 		"npm-run-all": "^4.1.5",
 		"wrangler": "^3.22.3"
