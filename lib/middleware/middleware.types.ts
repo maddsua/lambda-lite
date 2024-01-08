@@ -1,6 +1,7 @@
 import type { RateLimiterConfig } from '../accessControl/rateLimiter.ts';
 import type { JSONResponse } from '../api/jsonResponse.ts';
 import type { ServiceConsole } from '../util/console.ts';
+import type { EnvBase } from "../util/envutils.ts";
 
 export interface NetworkInfo {
 	transport: 'tcp' | 'udp';
@@ -13,11 +14,14 @@ export interface RequestInfo extends NetworkInfo {
 	requestID: string;
 };
 
-type EnvBase = Record<string, string>;
-
 export type ContextWaitUntilCallback = (promise: Promise<any>) => void;
 
-export interface RequestContext {
+export interface RuntimeContext {
+	env: EnvBase;
+	waitUntil: ContextWaitUntilCallback;
+};
+
+export interface RequestContext<E extends EnvBase = {}> {
 
 	/**
 	 * Request-specific console
@@ -29,11 +33,19 @@ export interface RequestContext {
 	 */
 	requestInfo: RequestInfo;
 
+	/**
+	 * Runtime env variables
+	 */
+	env: E;
+
+	/**
+	 * Runtime context wait until callback
+	 */
 	waitUntil: ContextWaitUntilCallback;
 };
 
 export type RouteResponse = JSONResponse<object> | Response;
-export type RouteHandler = (request: Request, env: EnvBase, context: RequestContext) => Promise<RouteResponse> | RouteResponse;
+export type RouteHandler<E extends EnvBase = {}> = (request: Request, context: RequestContext<E>) => Promise<RouteResponse> | RouteResponse;
 
 export type HTTPMethod = 'CONNECT' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'POST' | 'PUT' | 'TRACE';
 
@@ -119,14 +131,4 @@ export interface MiddlewareOptions {
 		 */
 		requests?: boolean;
 	};
-
-	/**
-	 * Environment variables
-	 */
-	env?: MiddlewareEnv;
-
-	/**
-	 * Context wait until callback
-	 */
-	waitUntilCallback?: ContextWaitUntilCallback
 };
