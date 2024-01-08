@@ -9,18 +9,27 @@ export interface StartServerOptions extends MiddlewareOptions {
 	routes: ServerRoutes;
 };
 
-export const startServer = <EnvType>(opts: StartServerOptions) => {
-
-	const middleware = new LambdaMiddleware(opts.routes, opts);
-
-	return {
-		async fetch(request: Request, env: EnvType, ctx: object) {
-			
-			return await middleware.handler(request, {
-				transport: 'tcp',
-				port: 443,
-				hostname: request.headers.get('x-real-ip') || request.headers.get('cf-connecting-ip') || '127.0.0.1'
-			});
-		}
+interface RequestProps {
+	request: Request;
+	env: Record<string, string>;
+	ctx: {
+		waitUntil: (promise: Promise<any>) => void;
+		passThroughOnException: () => void;
 	};
+};
+
+export const workerFetchHandler = async ({ request, env, ctx }: RequestProps, middleware: LambdaMiddleware) => {
+
+	const networkInfo = {
+		transport: 'tcp',
+		port: 443,
+		hostname: request.headers.get('x-real-ip') || request.headers.get('cf-connecting-ip') || '127.0.0.1'
+	} as const;
+
+	const context = {
+		env,
+		waitUntil: ctx.waitUntil
+	};
+
+	return middleware.handler(request, networkInfo, context);
 };
