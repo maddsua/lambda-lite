@@ -1,6 +1,6 @@
 {
-	"name": "lambda-lite",
-	"version": "1.5.0",
+	"name": "lambda-lite-dev",
+	"!warn": "yo this package is not on npm. use esbuild with url imports instead",
 	"scripts": {
 		"worker:build": "esbuild test/worker.test.ts --bundle --minify --charset=utf8 --format=esm --outfile=.temp/worker.bundle.js",
 		"worker:build:dev": "esbuild test/worker.test.ts --bundle --charset=utf8 --watch --format=esm --outfile=.temp/worker.bundle.js",
