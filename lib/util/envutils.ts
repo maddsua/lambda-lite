@@ -1,6 +1,4 @@
 
-export type EnvBase = Record<string, string>;
-
 export const getNumber = (envVar: string | null | undefined, fallback?: number): number | undefined => {
 	if (!envVar?.length) return typeof fallback === 'number' ? fallback : undefined;
 	const temp = parseFloat(envVar);
@@ -21,10 +19,16 @@ export const getSeparatedList = (envVar: string | null | undefined, token?: stri
 export const getCommaSeparated = (envVar: string | null | undefined): string[] | undefined => getSeparatedList(envVar);
 
 declare let process: {
-	env: EnvBase;
+	env: object;
 };
 
-export const getRuntimeEnv = (): EnvBase => {
+declare let Deno: {
+	env: {
+		toObject: () => object;
+	}	
+};
+
+export const getRuntimeEnv = (): object => {
 
 	try {
 		

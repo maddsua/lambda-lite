@@ -1,5 +1,4 @@
 import type { ServiceConsole } from '../util/console.ts';
-import type { EnvBase } from "../util/envutils.ts";
 
 export interface NetworkInfo {
 	transport: 'tcp' | 'udp';
@@ -15,11 +14,11 @@ export interface RequestInfo extends NetworkInfo {
 export type ContextWaitUntilCallback = (promise: Promise<any>) => void;
 
 export interface RuntimeContext {
-	env: EnvBase;
+	env: object;
 	waitUntil: ContextWaitUntilCallback;
 };
 
-export interface RequestContext<E extends EnvBase = {}> {
+export interface RequestContext<E extends object = {}> {
 
 	/**
 	 * Request-specific console

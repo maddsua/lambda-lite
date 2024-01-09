@@ -8,7 +8,7 @@ export interface StartServerOptions extends MiddlewareOptions {
 
 interface RequestProps {
 	request: Request;
-	env: Record<string, string>;
+	env: object;
 	ctx: {
 		waitUntil: (promise: Promise<any>) => void;
 		passThroughOnException: () => void;
