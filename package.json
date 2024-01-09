@@ -1,6 +1,20 @@
 {
-	"name": "lambda-lite-dev",
-	"!warn": "yo this package is not on npm. use esbuild with url imports instead",
+	"name": "lambda-lite",
+	"version": "1.5.0",
+	"exports": {
+		".": {
+			"default": "./npm.mod.ts",
+			"types": "./npm.mod.ts"
+		},
+		"./deno": {
+			"default": "./deno.mod.ts",
+			"types": "./deno.mod.ts"
+		},
+		"./cloudflare": {
+			"default": "./cloudflare.mod.ts",
+			"types": "./cloudflare.mod.ts"
+		}
+	},
 	"scripts": {
 		"worker:build": "esbuild test/worker.test.ts --bundle --minify --charset=utf8 --format=esm --outfile=.temp/worker.bundle.js",
 		"worker:build:dev": "esbuild test/worker.test.ts --bundle --charset=utf8 --watch --format=esm --outfile=.temp/worker.bundle.js",
@@ -11,5 +25,10 @@
 		"esbuild": "^0.19.11",
 		"npm-run-all": "^4.1.5",
 		"wrangler": "^3.22.3"
-	}
+	},
+	"files": [
+		"lib/**/*.ts",
+		"cloudflare.mod.ts",
+		"deno.mod.ts"
+	]
 }
