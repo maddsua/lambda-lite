@@ -6,16 +6,7 @@ export interface StartServerOptions extends MiddlewareOptions {
 	routes: RouterRoutes;
 };
 
-interface RequestProps {
-	request: Request;
-	env: object;
-	ctx: {
-		waitUntil: (promise: Promise<any>) => void;
-		passThroughOnException: () => void;
-	};
-};
-
-export const workerFetchHandler = async ({ request, env, ctx }: RequestProps, middleware: LambdaMiddleware) => {
+export const workerFetchHandler = async (request: Request, ctx: object, middleware: LambdaMiddleware) => {
 
 	const networkInfo = {
 		transport: 'tcp',
@@ -23,10 +14,5 @@ export const workerFetchHandler = async ({ request, env, ctx }: RequestProps, mi
 		hostname: request.headers.get('x-real-ip') || request.headers.get('cf-connecting-ip') || '127.0.0.1'
 	} as const;
 
-	const context = {
-		env,
-		waitUntil: ctx.waitUntil
-	};
-
-	return middleware.handler(request, networkInfo, context);
+	return middleware.handler(request, networkInfo, ctx);
 };

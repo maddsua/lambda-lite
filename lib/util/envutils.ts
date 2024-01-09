@@ -17,31 +17,3 @@ export const getSeparatedList = (envVar: string | null | undefined, token?: stri
 };
 
 export const getCommaSeparated = (envVar: string | null | undefined): string[] | undefined => getSeparatedList(envVar);
-
-declare let process: {
-	env: object;
-};
-
-declare let Deno: {
-	env: {
-		toObject: () => object;
-	}	
-};
-
-export const getRuntimeEnv = (): object => {
-
-	try {
-		
-		if (typeof Deno === 'object')
-			return Deno.env.toObject();
-		
-		if (typeof process === 'object')
-			return process.env;
-
-	} catch (_error) {
-		//	I just don't wanna do any real error handling
-		return {};
-	}
-
-	return {};
-};
