@@ -1,4 +1,3 @@
-//	Use esbuild with "esbuild-plugin-cache" to bundle this bad boi
 
 import type { RouteConfig, RouteHandler } from "./lib/middleware/route.types.ts";
 import { JSONResponse } from "./lib/rest/jsonResponse.ts";
