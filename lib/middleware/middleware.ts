@@ -160,8 +160,7 @@ export class LambdaMiddleware {
 				if (!plugin.executeBefore) continue;
 
 				const temp = await plugin.executeBefore({
-					middlewareRequest,
-					//originalRequest: request,
+					request: middlewareRequest,
 					info: requestInfo,
 					middleware: this
 				});
@@ -224,8 +223,7 @@ export class LambdaMiddleware {
 				if (!plugin.executeAfter) continue;
 
 				const temp = await plugin.executeAfter({
-					middlewareRequest,
-					//originalRequest: request,
+					request: middlewareRequest,
 					response: middlewareResponse,
 					info: requestInfo,
 					middleware: this
