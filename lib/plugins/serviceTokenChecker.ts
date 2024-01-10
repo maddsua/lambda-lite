@@ -1,5 +1,5 @@
 import { JSONResponse } from "../rest/jsonResponse.ts";
-import type { PluginGenerator, MiddlewarePluginBase, SpawnProps } from "../middleware/plugins.ts";
+import type { MiddlewarePlugin, MiddlewarePluginInstance, SpawnProps } from "../middleware/plugins.ts";
 import type { ServiceConsole } from "../util/console.ts";
 
 const pluginID = 'lambda_lite-plugin-service_token_checker';
@@ -15,7 +15,7 @@ const uint8sEqual = (a: Uint8Array, b: Uint8Array): boolean => {
 	return true;
 };
 
-class ServiceTokenCheckerPluginImpl implements MiddlewarePluginBase {
+class ServiceTokenCheckerPluginImpl implements MiddlewarePluginInstance {
 
 	id = pluginID;
 	tokenHash: Uint8Array;
@@ -75,7 +75,7 @@ interface InitParams {
 	fakeDelayRange?: number;
 };
 
-class ServiceTokenCheckerPlugin implements PluginGenerator {
+class ServiceTokenCheckerPlugin implements MiddlewarePlugin {
 
 	id = pluginID;
 	tokenHash: Uint8Array | null;

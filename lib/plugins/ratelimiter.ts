@@ -1,10 +1,10 @@
 import { JSONResponse } from "../rest/jsonResponse.ts";
-import type { PluginGenerator, MiddlewarePluginBase, SpawnProps } from "../middleware/plugins.ts";
+import type { MiddlewarePlugin, MiddlewarePluginInstance, SpawnProps } from "../middleware/plugins.ts";
 import type { ServiceConsole } from "../util/console.ts";
 
 const pluginID = 'lambda_lite-plugin-method_checker';
 
-class RateLimiterPluginImpl implements MiddlewarePluginBase {
+class RateLimiterPluginImpl implements MiddlewarePluginInstance {
 
 	id = pluginID;
 	activity: ActivityMap;
@@ -76,7 +76,7 @@ interface ActivityEntry {
 
 type ActivityMap = Map<string, ActivityEntry>;
 
-class RateLimiterPlugin implements PluginGenerator {
+class RateLimiterPlugin implements MiddlewarePlugin {
 
 	id = pluginID;
 

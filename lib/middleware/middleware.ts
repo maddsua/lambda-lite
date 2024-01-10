@@ -4,11 +4,11 @@ import type { RouteHandler, RouterRoutes } from './route.ts';
 import { JSONResponse } from '../rest/jsonResponse.ts';
 import { ServiceConsole } from '../util/console.ts';
 import { getRequestIdFromProxy, generateRequestId } from '../util/misc.ts';
-import { PluginGenerator } from './plugins.ts';
+import { MiddlewarePlugin } from './plugins.ts';
 
 interface HandlerCtx {
 	expandPath?: boolean;
-	plugins?: PluginGenerator[];
+	plugins?: MiddlewarePlugin[];
 	handler: RouteHandler;
 };
 

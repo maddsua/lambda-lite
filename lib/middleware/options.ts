@@ -1,4 +1,4 @@
-import { PluginGenerator } from "./plugins.ts";
+import { MiddlewarePlugin } from "./plugins.ts";
 
 export interface MiddlewareOptions {
 
@@ -55,5 +55,5 @@ export interface MiddlewareOptions {
 	/**
 	 * Middleware plugins
 	 */
-	plugins?: PluginGenerator[];
+	plugins?: MiddlewarePlugin[];
 };

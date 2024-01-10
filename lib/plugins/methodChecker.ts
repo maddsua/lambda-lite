@@ -1,10 +1,10 @@
 import { JSONResponse } from "../rest/jsonResponse.ts";
-import type { PluginGenerator, MiddlewarePluginBase, SpawnProps } from "../middleware/plugins.ts";
+import type { MiddlewarePlugin, MiddlewarePluginInstance, SpawnProps } from "../middleware/plugins.ts";
 import type { ServiceConsole } from "../util/console.ts";
 
 const pluginID = 'lambda_lite-plugin-method_checker';
 
-class MethodCheckerPluginImpl implements MiddlewarePluginBase {
+class MethodCheckerPluginImpl implements MiddlewarePluginInstance {
 
 	id = pluginID;
 	allowedMethods: Set<string>;
@@ -42,7 +42,7 @@ interface InitParams {
 	methods: HTTPMethod[] & { 0: HTTPMethod };
 };
 
-class MethodCheckerPlugin implements PluginGenerator {
+class MethodCheckerPlugin implements MiddlewarePlugin {
 
 	id = pluginID;
 	allowedMethods: Set<string>;

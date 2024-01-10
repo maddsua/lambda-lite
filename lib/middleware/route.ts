@@ -1,6 +1,6 @@
 import type { JSONResponse } from "../rest/jsonResponse.ts";
 import type { ServiceConsole } from "../util/console.ts";
-import { PluginGenerator } from "./plugins.ts";
+import { MiddlewarePlugin } from "./plugins.ts";
 
 export interface NetworkInfo {
 	transport: 'tcp' | 'udp';
@@ -31,7 +31,7 @@ export type RouteHandler<C extends object = {}> = (request: Request, context: Re
 
 export interface RouteConfig {
 	expand?: boolean;
-	plugins?: PluginGenerator[];
+	plugins?: MiddlewarePlugin[];
 };
 
 export interface RouteCtx extends RouteConfig {

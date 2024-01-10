@@ -19,7 +19,7 @@ interface PluginAfterResult {
 type PluginAfterReturnTypeIntm = PluginAfterResult | null;
 type PluginAfterReturnType = Promise<PluginAfterReturnTypeIntm> | PluginAfterReturnTypeIntm;
 
-export interface MiddlewarePluginBase {
+export interface MiddlewarePluginInstance {
 	id: string;
 	executeBefore?: (request: Request) => PluginBeforeReturnType;
 	executeAfter?: (response: Response) => PluginAfterReturnType;
@@ -31,7 +31,7 @@ export interface SpawnProps {
 	console: ServiceConsole;
 };
 
-export interface PluginGenerator {
+export interface MiddlewarePlugin {
 	id: string;
-	spawn: (props: SpawnProps) => Promise<MiddlewarePluginBase> | MiddlewarePluginBase;
+	spawn: (props: SpawnProps) => Promise<MiddlewarePluginInstance> | MiddlewarePluginInstance;
 };

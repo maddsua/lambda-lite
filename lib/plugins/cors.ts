@@ -1,10 +1,10 @@
 import { JSONResponse } from "../rest/jsonResponse.ts";
-import type { PluginGenerator, MiddlewarePluginBase, SpawnProps } from "../middleware/plugins.ts";
+import type { MiddlewarePlugin, MiddlewarePluginInstance, SpawnProps } from "../middleware/plugins.ts";
 import type { ServiceConsole } from "../util/console.ts";
 
 const pluginID = 'lambda_lite-plugin-cors';
 
-class CorsPluginImpl implements MiddlewarePluginBase {
+class CorsPluginImpl implements MiddlewarePluginInstance {
 
 	id = pluginID;
 	allowedOrigins: string[] | 'all';
@@ -116,7 +116,7 @@ interface InitParams {
 	allowOrigins: string[] | 'all';
 };
 
-class CorsPlugin implements PluginGenerator {
+class CorsPlugin implements MiddlewarePlugin {
 
 	id = pluginID;
 	allowedOrigins: string[] | 'all';
