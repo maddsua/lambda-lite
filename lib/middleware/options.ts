@@ -1,4 +1,5 @@
 import type { RateLimiterConfig } from "../accessControl/rateLimiter.ts";
+import { MiddlewarePlugins } from "./plugins.ts";
 
 export interface MiddlewareOptions {
 
@@ -66,4 +67,9 @@ export interface MiddlewareOptions {
 		 */
 		requests?: boolean;
 	};
+
+	/**
+	 * Middleware plugins
+	 */
+	plugins: MiddlewarePlugins;
 };
