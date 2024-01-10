@@ -75,6 +75,30 @@ class CorsPluginImpl implements MiddlewarePluginBase {
 			};
 		}
 
+		//	respond to CORS preflight
+		if (request.method == 'OPTIONS') {
+
+			const requestedCorsHeaders = request.headers.get('Access-Control-Request-Headers');
+			const defaultCorsHeaders = 'Origin, X-Requested-With, Content-Type, Accept';
+
+			const requestedCorsMethod = request.headers.get('Access-Control-Request-Method');
+			const defaultCorsMethods = 'GET, POST, PUT, OPTIONS, DELETE';
+
+			const preflightHeaders = {
+				'Access-Control-Allow-Methods': requestedCorsMethod || defaultCorsMethods,
+				'Access-Control-Allow-Headers': requestedCorsHeaders || defaultCorsHeaders,
+				'Access-Control-Max-Age': '3600',
+				'Access-Control-Allow-Credentials': 'true'
+			};
+
+			return {
+				respondWith: new Response(null, {
+					status: 204,
+					headers: preflightHeaders
+				})
+			};
+		}
+
 		this.setAllowOrigin = requestOrigin;
 
 		return null;
