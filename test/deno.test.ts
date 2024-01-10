@@ -11,7 +11,7 @@ await startServer({
 	routesDir: 'test/functions',
 	healthcheckPath: '/health',
 	plugins: [
-	//	allowMethods({ methods: ['GET'] }),
+	//	allowMethods('GET'),
 	//	serviceTokenChecker({ token: 'test'}),
 		cors({ allowOrigins: 'all' }),
 		ratelimiter({
