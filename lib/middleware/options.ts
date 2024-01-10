@@ -23,7 +23,7 @@ export interface MiddlewareOptions {
 		/**
 		 * Default response to root http path when no handler was matched
 		 */
-		index?: 'notfound' | 'info' | 'teapot' | 'forbidden'
+		index?: 'notfound' | 'info' | 'teapot' | 'forbidden';
 
 		/**
 		 * Default not found response
