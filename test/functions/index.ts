@@ -7,7 +7,7 @@ export const config: RouteConfig = {
 	allowedMethods: ['GET', 'OPTIONS']
 };
 
-export const handler: RouteHandler = (request, { env }) => {
+export const handler: RouteHandler = (request, context) => {
 	const htmlcontent = Component().render();
 	return new Response(htmlcontent, {
 		headers: {
