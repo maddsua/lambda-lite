@@ -148,36 +148,36 @@ export class LambdaMiddleware {
 			const runPlugins = routectx.plugins?.map(item => item.spawn());
 
 			//	run "before" plugins
-			let pluginModifiedReqest: Request | null = null;
-			let pluginBeforeResponse: Response | null = null;
-
+			let middlewareRequest = request;
+			let middlewareResponse: Response | null = null;
 
 			for (const plugin of runPlugins || []) {
 
 				if (!plugin.executeBefore) continue;
 
 				const temp = await plugin.executeBefore({
-					request: pluginModifiedReqest || request,
+					middlewareRequest,
+					//originalRequest: request,
 					info: requestInfo,
 					middleware: this
 				});
 
 				if (temp?.modifiedRequest) {
-					pluginModifiedReqest = temp.modifiedRequest;
+					middlewareRequest = temp.modifiedRequest;
 				}
 
 				if (temp?.overrideResponse) {
-					pluginBeforeResponse = temp.overrideResponse;
+					middlewareResponse = temp.overrideResponse;
 					break;
 				}
 			}
 
 			//	execute route function
-			if (!pluginBeforeResponse) pluginBeforeResponse = await (async () => {
+			if (!middlewareResponse) middlewareResponse = await (async () => {
 
 				try {
 
-					const handlerResponse = await routectx.handler(request, requestContext);
+					const handlerResponse = await routectx.handler(middlewareRequest, requestContext);
 	
 					//	here we convert a non-standard response object to a standard one
 					//	all non standard should provide a "toResponse" method to do that
@@ -218,19 +218,20 @@ export class LambdaMiddleware {
 				if (!plugin.executeAfter) continue;
 
 				const temp = await plugin.executeAfter({
-					request: pluginModifiedReqest || request,
-					response: pluginBeforeResponse,
+					middlewareRequest,
+					//originalRequest: request,
+					response: middlewareResponse,
 					info: requestInfo,
 					middleware: this
 				});
 
 				if (temp?.overrideResponse) {
 					if (temp.chainable === false) return temp.overrideResponse;
-					pluginBeforeResponse = temp.overrideResponse;
+					middlewareResponse = temp.overrideResponse;
 				}
 			}
 
-			return pluginBeforeResponse;
+			return middlewareResponse;
 
 		})();
 
