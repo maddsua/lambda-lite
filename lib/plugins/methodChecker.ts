@@ -1,5 +1,6 @@
 import { JSONResponse } from "../rest/jsonResponse.ts";
-import { PluginGenerator, MiddlewarePluginBase, PluginBeforeProps } from "../middleware/plugins.ts";
+import { PluginGenerator, MiddlewarePluginBase, PluginBeforeProps, SpawnProps } from "../middleware/plugins.ts";
+import { ServiceConsole } from "../util/console.ts";
 
 const pluginID = 'lambda_lite-plugin-method_checker';
 
@@ -8,13 +9,16 @@ class MethodCheckerPluginImpl implements MiddlewarePluginBase {
 	id = pluginID;
 	allowedMethods: Set<string>;
 	useLogs?: boolean;
+	console: ServiceConsole;
 
 	constructor(init: {
 		allowedMethods: Set<string>;
 		useLogs?: boolean;
+		console: ServiceConsole;
 	}) {
 		this.allowedMethods = init.allowedMethods;
 		this.useLogs = init.useLogs;
+		this.console = init.console;
 	}
 
 	executeBefore(props: PluginBeforeProps) {
@@ -22,7 +26,7 @@ class MethodCheckerPluginImpl implements MiddlewarePluginBase {
 		const allowedMethods = this.allowedMethods.has(props.request.method);
 		if (!allowedMethods) {
 
-			if (this.useLogs) console.log(`[Method checker plugin] Method not allowed (${props.request.method})`);
+			if (this.useLogs) this.console.log(`[Method checker plugin] Method not allowed (${props.request.method})`);
 
 			return {
 				overrideResponse: new JSONResponse({
@@ -53,10 +57,11 @@ class MethodCheckerPlugin implements PluginGenerator {
 		this.useLogs = init.useLogs;
 	}
 
-	spawn() {
+	spawn(props: SpawnProps) {
 		return new MethodCheckerPluginImpl({
 			allowedMethods: this.allowedMethods,
-			useLogs: this.useLogs
+			useLogs: this.useLogs,
+			console: props.console
 		});
 	}
 }
