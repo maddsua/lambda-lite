@@ -1,6 +1,6 @@
-import type { NetworkInfo } from './route.types.ts';
-import type { MiddlewareOptions } from './options.types.ts';
-import type { RouteHandler, RouterRoutes } from './route.types.ts';
+import type { NetworkInfo } from './route.ts';
+import type { MiddlewareOptions } from './options.ts';
+import type { RouteHandler, RouterRoutes } from './route.ts';
 import { JSONResponse } from '../rest/jsonResponse.ts';
 import { ServiceConsole } from '../util/console.ts';
 import { OriginChecker } from '../accessControl/originChecker.ts';

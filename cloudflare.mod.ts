@@ -1,5 +1,5 @@
 
-import type { RouteConfig, RouteHandler } from "./lib/middleware/route.types.ts";
+import type { RouteConfig, RouteHandler } from "./lib/middleware/route.ts";
 import { JSONResponse } from "./lib/rest/jsonResponse.ts";
 import { LambdaMiddleware } from "./npm.mod.ts";
 import { workerFetchHandler, type StartServerOptions } from "./lib/adapters/cloudflare/worker.ts";
