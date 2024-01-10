@@ -101,39 +101,42 @@ export class LambdaMiddleware {
 			//	go cry in the corned if it's not found
 			if (!routectx) {
 
-				if (pathname === '/') {
+				middlewareResponse = (() => {
 
-					switch (this.config.defaultResponses?.index) {
+					if (pathname === '/') {
+	
+						switch (this.config.defaultResponses?.index) {
+	
+							case 'forbidden': return new JSONResponse({
+								error_text: 'you\'re not really welcome here mate'
+							}, { status: 403 }).toResponse();
+	
+							case 'info': return new JSONResponse({
+								server: 'maddsua/lambda-lite',
+								status: 'operational'
+							}, { status: 200 }).toResponse();
+	
+							case 'teapot': return new JSONResponse({
+								error_text: 'yo bro r u lost?'
+							}, { status: 418 }).toResponse();
+						
+							default: return new JSONResponse({
+								error_text: 'route not found'
+							}, { status: 404 }).toResponse();
+						}
+					}
 
+					switch (this.config.defaultResponses?.notfound) {
+	
 						case 'forbidden': return new JSONResponse({
 							error_text: 'you\'re not really welcome here mate'
 						}, { status: 403 }).toResponse();
-
-						case 'info': return new JSONResponse({
-							server: 'maddsua/lambda-lite',
-							status: 'operational'
-						}, { status: 200 }).toResponse();
-
-						case 'teapot': return new JSONResponse({
-							error_text: '🤷‍♂️'
-						}, { status: 418 }).toResponse();
-					
+	
 						default: return new JSONResponse({
 							error_text: 'route not found'
 						}, { status: 404 }).toResponse();
 					}
-				}
-
-				switch (this.config.defaultResponses?.notfound) {
-
-					case 'forbidden': return new JSONResponse({
-						error_text: 'you\'re not really welcome here mate'
-					}, { status: 403 }).toResponse();
-
-					default: return new JSONResponse({
-						error_text: 'route not found'
-					}, { status: 404 }).toResponse();
-				}
+				})();
 			}
 
 			const requestInfo = Object.assign({
@@ -146,7 +149,7 @@ export class LambdaMiddleware {
 				requestInfo,
 			});
 
-			const runPlugins = routectx.plugins?.map(item => item.spawn());
+			const runPlugins = (routectx?.plugins || this.config.plugins)?.map(item => item.spawn());
 
 			//	run "before" plugins
 			let middlewareRequest = request;
