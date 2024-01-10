@@ -1,4 +1,5 @@
 import type { LambdaMiddleware } from './middleware.ts';
+import type { RequestInfo } from './route.ts';
 
 export interface PluginResult {
 	modifiedRequest?: Request;
@@ -13,12 +14,19 @@ export type MiddlewarePluginResult = PluginResult | null | undefined;
 
 export interface PluginProps {
 	request: Request;
+	response: Response | null;
+	info: RequestInfo;
 	middleware: LambdaMiddleware;
 };
 
-export type PluginCallback = (props: PluginProps) => PluginReturnType;
+export interface MiddlewarePlugin {
+	id: string;
+	execute: (props: PluginProps) => PluginReturnType;
+};
 
 export interface MiddlewarePluginSequenceItem {
-	callback: PluginCallback;
+	instance: MiddlewarePlugin;
 	sequernce?: 'after' | 'before';
 };
+
+export type MiddlewarePlugins = MiddlewarePluginSequenceItem[];
