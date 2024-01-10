@@ -4,7 +4,7 @@
 
 This is a Deno-first package and yes, there's no tsconfig in here. Use deno-ts to get all the IDE features.
 
-This package only provides TypeScript version of the library (there are no other versions lmao) so if you gonna use it with anything that is not Deno bundle it with esbuild first. And for Deno, just use http imports ffs.
+It's npm package only provides TypeScript version of the library (there are no other versions lmao) so if you gonna use it with anything that is not Deno bundle it with esbuild first. And for Deno, just use http imports ffs.
 
 Oh and don't use tsc with it. You've been warned.
 
