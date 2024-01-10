@@ -6,7 +6,7 @@ interface PluginBeforeResult {
 	overrideResponse?: Response;
 };
 
-type PluginBeforeReturnTypeIntm = PluginBeforeResult | null | undefined;
+type PluginBeforeReturnTypeIntm = PluginBeforeResult | null;
 type PluginBeforeReturnType = Promise<PluginBeforeReturnTypeIntm> | PluginBeforeReturnTypeIntm;
 
 interface PluginAfterResult {
@@ -14,17 +14,17 @@ interface PluginAfterResult {
 	chainable?: boolean;
 };
 
-type PluginAfterReturnTypeIntm = PluginAfterResult | null | undefined;
+type PluginAfterReturnTypeIntm = PluginAfterResult | null;
 type PluginAfterReturnType = Promise<PluginAfterReturnTypeIntm> | PluginAfterReturnTypeIntm;
 
-interface PluginBeforeProps {
+export interface PluginBeforeProps {
 	middlewareRequest: Request;
 	//originalRequest: Request;
 	info: RequestInfo;
 	middleware: LambdaMiddleware;
 };
 
-interface PluginAfterProps {
+export interface PluginAfterProps {
 	middlewareRequest: Request;
 	//originalRequest: Request;
 	info: RequestInfo;
