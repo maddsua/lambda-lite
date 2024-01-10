@@ -157,12 +157,12 @@ export class LambdaMiddleware {
 				middleware: this
 			}));
 
-			const runPlugins = pluginPromises?.length ? await Promise.all(pluginPromises) : undefined;
+			const runPlugins = pluginPromises?.length ? await Promise.all(pluginPromises) : [];
 
 			//	run "before" plugins
 			let middlewareRequest = request;
 
-			for (const plugin of runPlugins || []) {
+			for (const plugin of runPlugins) {
 	
 				if (!plugin.executeBefore) continue;
 
@@ -227,7 +227,7 @@ export class LambdaMiddleware {
 				}
 			}
 
-			for (const plugin of runPlugins || []) {
+			for (const plugin of runPlugins) {
 
 				if (!plugin.executeAfter) continue;
 
