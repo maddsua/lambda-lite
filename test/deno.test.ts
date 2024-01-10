@@ -1,6 +1,7 @@
 import { startServer } from "../deno.mod.ts";
 import { methodChecker } from "../lib/plugins/methodChecker.ts";
 import { serviceTokenChecker } from "../lib/plugins/serviceTokenChecker.ts";
+import { cors } from "../lib/plugins/cors.ts";
 
 await startServer({
 	serve: {
@@ -9,7 +10,8 @@ await startServer({
 	routesDir: 'test/functions',
 	healthcheckPath: '/health',
 	plugins: [
-		methodChecker({ methods: ['GET'] }),
-		serviceTokenChecker({ token: 'test'})
+	//	methodChecker({ methods: ['GET'] }),
+	//	serviceTokenChecker({ token: 'test'}),
+	cors({ allowOrigins: ['localhost'] })
 	]
 });
