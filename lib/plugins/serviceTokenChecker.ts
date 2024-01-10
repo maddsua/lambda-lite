@@ -57,7 +57,7 @@ class ServiceTokenCheckerPluginImpl implements MiddlewarePluginInstance {
 				await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fakeDelayRange)));
 			}
 
-			this.console?.error(`Invalid service token provided (${authBearer})`);
+			this.console?.error(`[Service token] Invalid service token provided (${authBearer})`);
 
 			return {
 				respondWith: new JSONResponse({
