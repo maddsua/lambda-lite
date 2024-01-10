@@ -1,4 +1,4 @@
-import { JSONResponse } from "../../deno.mod.ts";
+import { JSONResponse } from "../rest/jsonResponse.ts";
 import { PluginGenerator, MiddlewarePluginBase, PluginBeforeProps } from "../middleware/plugins.ts";
 
 const pluginID = 'lambda_lite-plugin-method_checker';
