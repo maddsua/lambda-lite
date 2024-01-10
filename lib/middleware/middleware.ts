@@ -69,6 +69,7 @@ export class LambdaMiddleware {
 		const clientIP = ((this.config.proxy?.forwardedIPHeader ? request.headers.get(this.config.proxy.forwardedIPHeader) : undefined)) || info.hostname;
 
 		let requestDisplayUrl = '/';
+		let middlewareResponse: Response | null = null;
 
 		const console = new ServiceConsole(requestID);
 
@@ -149,28 +150,31 @@ export class LambdaMiddleware {
 
 			//	run "before" plugins
 			let middlewareRequest = request;
-			let middlewareResponse: Response | null = null;
 
-			for (const plugin of runPlugins || []) {
+			if (!middlewareResponse && runPlugins?.length) {
 
-				if (!plugin.executeBefore) continue;
-
-				const temp = await plugin.executeBefore({
-					middlewareRequest,
-					//originalRequest: request,
-					info: requestInfo,
-					middleware: this
-				});
-
-				if (temp?.modifiedRequest) {
-					middlewareRequest = temp.modifiedRequest;
-				}
-
-				if (temp?.overrideResponse) {
-					middlewareResponse = temp.overrideResponse;
-					break;
+				for (const plugin of runPlugins) {
+	
+					if (!plugin.executeBefore) continue;
+	
+					const temp = await plugin.executeBefore({
+						middlewareRequest,
+						//originalRequest: request,
+						info: requestInfo,
+						middleware: this
+					});
+	
+					if (temp?.modifiedRequest) {
+						middlewareRequest = temp.modifiedRequest;
+					}
+	
+					if (temp?.overrideResponse) {
+						middlewareResponse = temp.overrideResponse;
+						break;
+					}
 				}
 			}
+
 
 			//	execute route function
 			if (!middlewareResponse) {
@@ -215,21 +219,23 @@ export class LambdaMiddleware {
 				}
 			}
 
-			for (const plugin of runPlugins || []) {
-
-				if (!plugin.executeAfter) continue;
-
-				const temp = await plugin.executeAfter({
-					middlewareRequest,
-					//originalRequest: request,
-					response: middlewareResponse,
-					info: requestInfo,
-					middleware: this
-				});
-
-				if (temp?.overrideResponse) {
-					if (temp.chainable === false) return temp.overrideResponse;
-					middlewareResponse = temp.overrideResponse;
+			if (runPlugins?.length) {
+				for (const plugin of runPlugins) {
+	
+					if (!plugin.executeAfter) continue;
+	
+					const temp = await plugin.executeAfter({
+						middlewareRequest,
+						//originalRequest: request,
+						response: middlewareResponse,
+						info: requestInfo,
+						middleware: this
+					});
+	
+					if (temp?.overrideResponse) {
+						if (temp.chainable === false) return temp.overrideResponse;
+						middlewareResponse = temp.overrideResponse;
+					}
 				}
 			}
 
