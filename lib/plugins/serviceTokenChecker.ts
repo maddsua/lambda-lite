@@ -98,10 +98,13 @@ class ServiceTokenCheckerPlugin implements PluginGenerator {
 			this.tokenHash = new Uint8Array(hashBuffer);
 		}
 
+		const middlewareLogPlugins = props.middleware.config.loglevel?.plugins;
+		const useLogging = typeof middlewareLogPlugins === 'boolean' ? middlewareLogPlugins : this.useLogs;
+
 		return new ServiceTokenCheckerPluginImpl({
 			tokenHash: this.tokenHash,
 			fakeDelayRange: this.fakeDelayRange,
-			console: this.useLogs ? props.console : undefined
+			console: useLogging ? props.console : undefined
 		});
 	}
 }
