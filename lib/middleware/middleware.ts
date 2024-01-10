@@ -168,17 +168,14 @@ export class LambdaMiddleware {
 
 				const temp = await plugin.executeBefore(middlewareRequest);
 
-				if (temp?.modifiedRequest) {
-					middlewareRequest = temp.modifiedRequest;
-				}
-
 				if (temp?.respondWith) {
 					middlewareResponse = temp.respondWith;
 					break;
 				}
 
-				if (temp?.chainable === false) {
-					break;
+				if (temp?.modifiedRequest) {
+					middlewareRequest = temp.modifiedRequest;
+					if (temp?.chainable === false) break;
 				}
 			}
 
