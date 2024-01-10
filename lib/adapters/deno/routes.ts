@@ -1,5 +1,5 @@
 import { importFileExtensions } from './config.ts';
-import type { RouterRoutes, RouteConfig } from '../../middleware/route.types.ts';
+import type { RouterRoutes, RouteConfig } from '../../middleware/route.ts';
 
 export interface FileRouteConfig extends RouteConfig {
 	url?: string;

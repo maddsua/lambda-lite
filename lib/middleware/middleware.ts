@@ -1,6 +1,6 @@
-import type { NetworkInfo, RequestContext, RuntimeContext } from './runtime.types.ts';
-import type { MiddlewareOptions } from './options.types.ts';
-import type { RouteHandler, RouterRoutes } from './route.types.ts';
+import type { NetworkInfo } from './route.ts';
+import type { MiddlewareOptions } from './options.ts';
+import type { RouteHandler, RouterRoutes } from './route.ts';
 import { JSONResponse } from '../rest/jsonResponse.ts';
 import { ServiceConsole } from '../util/console.ts';
 import { OriginChecker } from '../accessControl/originChecker.ts';
@@ -8,7 +8,6 @@ import { RateLimiter } from '../accessControl/rateLimiter.ts';
 import { MethodChecker } from '../accessControl/methodChecker.ts';
 import { ServiceTokenChecker } from '../accessControl/serviceTokenChecker.ts';
 import { getRequestIdFromProxy, generateRequestId } from '../util/misc.ts';
-import { getRuntimeEnv } from '../util/envutils.ts';
 
 interface HandlerCtx {
 	expandPath?: boolean;
@@ -74,7 +73,7 @@ export class LambdaMiddleware {
 		}
 	}
 
-	async handler (request: Request, info: NetworkInfo, context?: RuntimeContext): Promise<Response> {
+	async handler (request: Request, info: NetworkInfo, context?: Object): Promise<Response> {
 
 		const requestID = getRequestIdFromProxy(request.headers, this.config.proxy?.requestIdHeader) || generateRequestId();
 		const clientIP = ((this.config.proxy?.forwardedIPHeader ? request.headers.get(this.config.proxy.forwardedIPHeader) : undefined)) || info.hostname;
@@ -247,13 +246,10 @@ export class LambdaMiddleware {
 					requestID
 				}, info);
 
-				const requestContext: RequestContext = {
+				const requestContext = Object.assign({}, context || {}, {
 					console,
 					requestInfo,
-					env: context?.env || getRuntimeEnv(),
-					//	this needs to be fixed at some point
-					waitUntil: context?.waitUntil || (async (promise: Promise<any>) => await promise)
-				};
+				});
 
 				const handlerResponse = await routectx.handler(request, requestContext);
 

@@ -1,6 +1,24 @@
-# lambda-lite
+# A ~~deno based~~ API server framework that tries to reinvent the wheel but better.
 
-A deno based API server framework
+### 🚨 Warning: TypeScript only
+
+This is a Deno-first package and yes, there's no tsconfig in here. Use deno-ts to get all the IDE features.
+
+It's npm package only provides TypeScript version of the library (there are no other versions lmao) so if you gonna use it with anything that is not Deno bundle it with esbuild first. And for Deno, just use http imports ffs.
+
+Oh and don't use tsc with it. You've been warned.
+
+### Supported platforms: 
+
+- Deno
+
+- Cloudflare workers
+
+- Node 18 and newer
+
+	(needs to be hooked up to the `node:http` manually. Personally I don't use node with it that's why no adapter provided, but it's dead simple to make one)
+
+## What and why
 
 You can treat it like it's Netlify functions but it runs everywhere. I was working with Functions a lot and I really like it but they can't be run separately in docker containers and with other services.
 
@@ -10,9 +28,14 @@ Yeah, other platforms have their own implementations of that concept too, but Cl
 
 ### Standalone mode
 
-#### Configuration
+In standalone mode you'd need to have a directory with handler modules, one would look like this:
 
-Set these environment vartiables to configure server behavior:
+```typescript
+//	functions/route.ts
+export const handler = () => new Response("yo");
+```
+
+Configure these environment vartiables to adjust server behavior:
 
 `LLAPP_PORT` : Port on which server should start (passed directly to Deno.serve)
 
@@ -32,17 +55,15 @@ Set these environment vartiables to configure server behavior:
 
 \* LLAPP stands for "lambda-lite app". Pun intended.
 
-#### Run
+And then just run deno with the command:
 
-Start command:
-
-```
+```bash
 deno run --allow-all https://raw.githubusercontent.com/maddsua/lambda-lite/[tag]/bootstrap.ts
 ```
 
-\* don't forget to replace `[tag]` with actual version tag
+\* don't forget to replace `[tag]` with an actual version tag
 
-### Configurable mode
+### Modular mode
 
 Create a main file using this example:
 
@@ -78,9 +99,9 @@ startServer({
 
 ```
 
-Now launch it with `deno run --allow-all main.ts`
+Now launch it with `deno run -A main.ts`
 
-\* again, don't forget to replace `[tag]` with actual version tag
+\* again, don't forget to replace `[tag]` with an actual version tag
 
 ---
 
