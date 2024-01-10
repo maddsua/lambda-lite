@@ -29,8 +29,6 @@ export interface RequestContextBase {
 export type RouteResponse = JSONResponse<object> | Response;
 export type RouteHandler<C extends object = {}> = (request: Request, context: RequestContextBase & C) => Promise<RouteResponse> | RouteResponse;
 
-export type HTTPMethod = 'CONNECT' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'POST' | 'PUT' | 'TRACE';
-
 export interface RouteConfig {
 	expand?: boolean;
 	plugins?: PluginGenerator[];
