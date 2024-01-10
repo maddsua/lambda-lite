@@ -51,29 +51,32 @@ class CorsPluginImpl implements MiddlewarePluginBase {
 
 		const requestOrigin = request.headers.get('origin');
 
-		if (this.allowedOrigins === 'all' || !this.allowedOrigins.length) {
-			this.setAllowOrigin = requestOrigin ? requestOrigin : '*';
-			return null;
+		if (this.allowedOrigins !== 'all' && this.allowedOrigins.length) {
+
+			if (!requestOrigin) {
+	
+				return {
+					respondWith: new JSONResponse({
+						error_text: 'client verification required'
+					}, { status: 403 }).toResponse()
+				};
+	
+			} else if (!this.check(requestOrigin, this.allowedOrigins)) {
+	
+				this.console?.log('Origin not allowed:', requestOrigin);
+	
+				return {
+					respondWith: new JSONResponse({
+						error_text: 'client not verified'
+					}, { status: 403 }).toResponse()
+				};
+			}
+			
+		} else {
+			this.setAllowOrigin = requestOrigin?.length ? requestOrigin : '*';
 		}
 
-		if (!requestOrigin) {
-
-			return {
-				respondWith: new JSONResponse({
-					error_text: 'client verification required'
-				}, { status: 403 }).toResponse()
-			};
-
-		} else if (!this.check(requestOrigin, this.allowedOrigins)) {
-
-			this.console?.log('Origin not allowed:', requestOrigin);
-
-			return {
-				respondWith: new JSONResponse({
-					error_text: 'client not verified'
-				}, { status: 403 }).toResponse()
-			};
-		}
+		this.setAllowOrigin = requestOrigin;
 
 		//	respond to CORS preflight
 		if (request.method == 'OPTIONS') {
@@ -98,8 +101,6 @@ class CorsPluginImpl implements MiddlewarePluginBase {
 				})
 			};
 		}
-
-		this.setAllowOrigin = requestOrigin;
 
 		return null;
 	}
