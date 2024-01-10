@@ -1,3 +1,4 @@
+import { ServiceConsole } from '../util/console.ts';
 import type { LambdaMiddleware } from './middleware.ts';
 import type { RequestInfo } from './route.ts';
 
@@ -19,15 +20,11 @@ type PluginAfterReturnType = Promise<PluginAfterReturnTypeIntm> | PluginAfterRet
 
 export interface PluginBeforeProps {
 	request: Request;
-	info: RequestInfo;
-	middleware: LambdaMiddleware;
 };
 
 export interface PluginAfterProps {
 	request: Request;
-	info: RequestInfo;
 	response: Response;
-	middleware: LambdaMiddleware;
 };
 
 export interface MiddlewarePluginBase {
@@ -36,7 +33,13 @@ export interface MiddlewarePluginBase {
 	executeAfter?: (props: PluginAfterProps) => PluginAfterReturnType;
 };
 
+export interface SpawnProps {
+	info: RequestInfo;
+	middleware: LambdaMiddleware;
+	console: ServiceConsole;
+};
+
 export interface PluginGenerator {
 	id: string;
-	spawn: () => MiddlewarePluginBase;
+	spawn: (props: SpawnProps) => MiddlewarePluginBase;
 };
