@@ -41,5 +41,5 @@ export interface SpawnProps {
 
 export interface PluginGenerator {
 	id: string;
-	spawn: (props: SpawnProps) => MiddlewarePluginBase;
+	spawn: (props: SpawnProps) => Promise<MiddlewarePluginBase> | MiddlewarePluginBase;
 };
