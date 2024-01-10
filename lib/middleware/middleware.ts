@@ -69,7 +69,6 @@ export class LambdaMiddleware {
 		const clientIP = ((this.config.proxy?.forwardedIPHeader ? request.headers.get(this.config.proxy.forwardedIPHeader) : undefined)) || info.hostname;
 
 		let requestDisplayUrl = '/';
-		let middlewareResponse: Response | null = null;
 
 		const console = new ServiceConsole(requestID);
 
@@ -77,6 +76,8 @@ export class LambdaMiddleware {
 
 			const { pathname } = new URL(request.url);
 			requestDisplayUrl = pathname;
+
+			let middlewareResponse: Response | null = null;
 
 			// find route path
 			const routePathname = pathname.slice(0, pathname.endsWith('/') ? pathname.length - 1 : pathname.length);
