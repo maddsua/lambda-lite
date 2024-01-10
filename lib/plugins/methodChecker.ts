@@ -23,7 +23,7 @@ class MethodCheckerPluginImpl implements MiddlewarePluginInstance {
 		const allowedMethods = this.allowedMethods.has(request.method);
 		if (!allowedMethods) {
 
-			this.console?.warn(`[Method checker plugin] Method not allowed (${request.method})`);
+			this.console?.warn(`[Method checker] Method not allowed (${request.method})`);
 
 			return {
 				respondWith: new JSONResponse({
