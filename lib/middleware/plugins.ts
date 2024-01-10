@@ -5,6 +5,7 @@ import type { RequestInfo } from './route.ts';
 interface PluginBeforeResult {
 	modifiedRequest?: Request;
 	overrideResponse?: Response;
+	chainable?: boolean;
 };
 
 type PluginBeforeReturnTypeIntm = PluginBeforeResult | null;
