@@ -1,5 +1,5 @@
 import { JSONResponse } from "../rest/jsonResponse.ts";
-import type { PluginGenerator, MiddlewarePluginBase, PluginBeforeProps, SpawnProps } from "../middleware/plugins.ts";
+import type { PluginGenerator, MiddlewarePluginBase, SpawnProps } from "../middleware/plugins.ts";
 import type { ServiceConsole } from "../util/console.ts";
 
 const pluginID = 'lambda_lite-plugin-service_token_checker';
@@ -32,9 +32,9 @@ class ServiceTokenCheckerPluginImpl implements MiddlewarePluginBase {
 		this.console = init.console;
 	}
 
-	async executeBefore(props: PluginBeforeProps) {
+	async executeBefore(request: Request) {
 
-		const authBearer = props.request.headers.get('authorization')?.replace(/^\s*bearer\s+/, '');
+		const authBearer = request.headers.get('authorization')?.replace(/^\s*bearer\s+/, '');
 		if (!authBearer?.length) {
 			return {
 				respondWith: new JSONResponse({

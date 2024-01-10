@@ -19,19 +19,10 @@ interface PluginAfterResult {
 type PluginAfterReturnTypeIntm = PluginAfterResult | null;
 type PluginAfterReturnType = Promise<PluginAfterReturnTypeIntm> | PluginAfterReturnTypeIntm;
 
-export interface PluginBeforeProps {
-	request: Request;
-};
-
-export interface PluginAfterProps {
-	request: Request;
-	response: Response;
-};
-
 export interface MiddlewarePluginBase {
 	id: string;
-	executeBefore?: (props: PluginBeforeProps) => PluginBeforeReturnType;
-	executeAfter?: (props: PluginAfterProps) => PluginAfterReturnType;
+	executeBefore?: (request: Request) => PluginBeforeReturnType;
+	executeAfter?: (response: Response) => PluginAfterReturnType;
 };
 
 export interface SpawnProps {

@@ -166,9 +166,7 @@ export class LambdaMiddleware {
 	
 				if (!plugin.executeBefore) continue;
 
-				const temp = await plugin.executeBefore({
-					request: middlewareRequest,
-				});
+				const temp = await plugin.executeBefore(middlewareRequest);
 
 				if (temp?.modifiedRequest) {
 					middlewareRequest = temp.modifiedRequest;
@@ -231,10 +229,7 @@ export class LambdaMiddleware {
 
 				if (!plugin.executeAfter) continue;
 
-				const temp = await plugin.executeAfter({
-					request: middlewareRequest,
-					response: middlewareResponse,
-				});
+				const temp = await plugin.executeAfter(middlewareResponse);
 
 				if (temp?.overrideResponse) {
 					if (temp.chainable === false) return temp.overrideResponse;

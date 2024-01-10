@@ -1,5 +1,5 @@
 import { JSONResponse } from "../rest/jsonResponse.ts";
-import type { PluginGenerator, MiddlewarePluginBase, PluginBeforeProps, SpawnProps } from "../middleware/plugins.ts";
+import type { PluginGenerator, MiddlewarePluginBase, SpawnProps } from "../middleware/plugins.ts";
 import type { ServiceConsole } from "../util/console.ts";
 
 const pluginID = 'lambda_lite-plugin-method_checker';
@@ -18,12 +18,12 @@ class MethodCheckerPluginImpl implements MiddlewarePluginBase {
 		this.console = init.console;
 	}
 
-	executeBefore(props: PluginBeforeProps) {
+	executeBefore(request: Request) {
 
-		const allowedMethods = this.allowedMethods.has(props.request.method);
+		const allowedMethods = this.allowedMethods.has(request.method);
 		if (!allowedMethods) {
 
-			this.console?.warn(`[Method checker plugin] Method not allowed (${props.request.method})`);
+			this.console?.warn(`[Method checker plugin] Method not allowed (${request.method})`);
 
 			return {
 				respondWith: new JSONResponse({

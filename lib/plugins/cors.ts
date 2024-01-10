@@ -1,5 +1,5 @@
 import { JSONResponse } from "../rest/jsonResponse.ts";
-import type { PluginGenerator, MiddlewarePluginBase, PluginBeforeProps, SpawnProps, PluginAfterProps } from "../middleware/plugins.ts";
+import type { PluginGenerator, MiddlewarePluginBase, SpawnProps } from "../middleware/plugins.ts";
 import type { ServiceConsole } from "../util/console.ts";
 
 const pluginID = 'lambda_lite-plugin-cors';
@@ -47,9 +47,9 @@ class CorsPluginImpl implements MiddlewarePluginBase {
 		));
 	}
 
-	executeBefore(props: PluginBeforeProps) {
+	executeBefore(request: Request) {
 
-		const requestOrigin = props.request.headers.get('origin');
+		const requestOrigin = request.headers.get('origin');
 
 		if (this.allowedOrigins === 'all' || !this.allowedOrigins.length) {
 			this.setAllowOrigin = requestOrigin ? requestOrigin : '*';
@@ -80,8 +80,8 @@ class CorsPluginImpl implements MiddlewarePluginBase {
 		return null;
 	}
 
-	executeAfter(props: PluginAfterProps) {
-		if (this.setAllowOrigin) props.response.headers.set('Access-Control-Allow-Origin', this.setAllowOrigin);
+	executeAfter(response: Response) {
+		if (this.setAllowOrigin) response.headers.set('Access-Control-Allow-Origin', this.setAllowOrigin);
 		return null;
 	}
 };
