@@ -37,7 +37,7 @@ class ServiceTokenCheckerPluginImpl implements MiddlewarePluginBase {
 		const authBearer = props.request.headers.get('authorization')?.replace(/^\s*bearer\s+/, '');
 		if (!authBearer?.length) {
 			return {
-				overrideResponse: new JSONResponse({
+				respondWith: new JSONResponse({
 					error_text: 'service access token is required'
 				}, {
 					status: 401,
@@ -60,7 +60,7 @@ class ServiceTokenCheckerPluginImpl implements MiddlewarePluginBase {
 			this.console?.error(`Invalid service token provided (${authBearer})`);
 
 			return {
-				overrideResponse: new JSONResponse({
+				respondWith: new JSONResponse({
 					error_text: 'invalid service access token'
 				}, { status: 403 }).toResponse()
 			};

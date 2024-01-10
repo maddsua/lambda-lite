@@ -26,7 +26,7 @@ class MethodCheckerPluginImpl implements MiddlewarePluginBase {
 			this.console?.warn(`[Method checker plugin] Method not allowed (${props.request.method})`);
 
 			return {
-				overrideResponse: new JSONResponse({
+				respondWith: new JSONResponse({
 					error_text: 'method not allowed'
 				}, { status: 405 }).toResponse()
 			};

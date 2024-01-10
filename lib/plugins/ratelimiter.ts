@@ -54,7 +54,7 @@ class RateLimiterPluginImpl implements MiddlewarePluginBase {
 			this.console?.log(`Too many requests (${clientActivity.total}). Wait for ${resetTime}s`);
 
 			return {
-				overrideResponse: new JSONResponse({
+				respondWith: new JSONResponse({
 					error_text: 'too many requests'
 				}, { status: 429 }).toResponse()
 			};

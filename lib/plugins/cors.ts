@@ -59,7 +59,7 @@ class CorsPluginImpl implements MiddlewarePluginBase {
 		if (!requestOrigin) {
 
 			return {
-				overrideResponse: new JSONResponse({
+				respondWith: new JSONResponse({
 					error_text: 'client verification required'
 				}, { status: 403 }).toResponse()
 			};
@@ -69,7 +69,7 @@ class CorsPluginImpl implements MiddlewarePluginBase {
 			this.console?.log('Origin not allowed:', requestOrigin);
 
 			return {
-				overrideResponse: new JSONResponse({
+				respondWith: new JSONResponse({
 					error_text: 'client not verified'
 				}, { status: 403 }).toResponse()
 			};

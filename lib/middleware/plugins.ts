@@ -4,7 +4,7 @@ import type { RequestInfo } from './route.ts';
 
 interface PluginBeforeResult {
 	modifiedRequest?: Request;
-	overrideResponse?: Response;
+	respondWith?: Response;
 	chainable?: boolean;
 };
 

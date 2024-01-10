@@ -174,8 +174,8 @@ export class LambdaMiddleware {
 					middlewareRequest = temp.modifiedRequest;
 				}
 
-				if (temp?.overrideResponse) {
-					middlewareResponse = temp.overrideResponse;
+				if (temp?.respondWith) {
+					middlewareResponse = temp.respondWith;
 					break;
 				}
 
