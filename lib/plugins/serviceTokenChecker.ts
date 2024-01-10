@@ -1,6 +1,6 @@
 import { JSONResponse } from "../rest/jsonResponse.ts";
-import { PluginGenerator, MiddlewarePluginBase, PluginBeforeProps, SpawnProps } from "../middleware/plugins.ts";
-import { ServiceConsole } from "../util/console.ts";
+import type { PluginGenerator, MiddlewarePluginBase, PluginBeforeProps, SpawnProps } from "../middleware/plugins.ts";
+import type { ServiceConsole } from "../util/console.ts";
 
 const pluginID = 'lambda_lite-plugin-service_token_checker';
 
@@ -57,7 +57,7 @@ class ServiceTokenCheckerPluginImpl implements MiddlewarePluginBase {
 				await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fakeDelayRange)));
 			}
 
-			this.console?.warn(`Invalid service token provided (${authBearer})`);
+			this.console?.error(`Invalid service token provided (${authBearer})`);
 
 			return {
 				overrideResponse: new JSONResponse({
