@@ -55,9 +55,13 @@ class MethodCheckerPlugin implements PluginGenerator {
 	}
 
 	spawn(props: SpawnProps) {
+
+		const middlewareLogPlugins = props.middleware.config.loglevel?.plugins;
+		const useLogging = typeof middlewareLogPlugins === 'boolean' ? middlewareLogPlugins : this.useLogs;
+
 		return new MethodCheckerPluginImpl({
 			allowedMethods: this.allowedMethods,
-			console: this.useLogs ? props.console : undefined
+			console: useLogging ? props.console : undefined
 		});
 	}
 }
