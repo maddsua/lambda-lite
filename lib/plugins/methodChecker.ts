@@ -13,9 +13,9 @@ class MethodCheckerPluginImpl implements MiddlewarePluginBase {
 	}
 
 	executeBefore(props: PluginBeforeProps) {
-		const allowedMethods = this.allowedMethods.has(props.middlewareRequest.method);
+		const allowedMethods = this.allowedMethods.has(props.request.method);
 		if (!allowedMethods) {
-			console.log(`Method not allowed (${props.middlewareRequest.method})`);
+			console.log(`[Method checker plugin] Method not allowed (${props.request.method})`);
 			return {
 				overrideResponse: new JSONResponse({
 					error_text: 'method not allowed'
