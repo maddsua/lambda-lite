@@ -18,13 +18,15 @@ type PluginAfterReturnTypeIntm = PluginAfterResult | null | undefined;
 type PluginAfterReturnType = Promise<PluginAfterReturnTypeIntm> | PluginAfterReturnTypeIntm;
 
 interface PluginBeforeProps {
-	request: Request;
+	middlewareRequest: Request;
+	//originalRequest: Request;
 	info: RequestInfo;
 	middleware: LambdaMiddleware;
 };
 
 interface PluginAfterProps {
-	request: Request;
+	middlewareRequest: Request;
+	//originalRequest: Request;
 	info: RequestInfo;
 	response: Response;
 	middleware: LambdaMiddleware;
