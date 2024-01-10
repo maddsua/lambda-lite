@@ -51,7 +51,7 @@ class RateLimiterPluginImpl implements MiddlewarePluginInstance {
 
 		if (clientActivity.total > this.config.requests) {
 
-			this.console?.log(`Too many requests (${clientActivity.total}). Wait for ${resetTime}s`);
+			this.console?.log(`[Rate limiter] Too many requests (${clientActivity.total}). Wait for ${resetTime}s`);
 
 			return {
 				respondWith: new JSONResponse({
