@@ -3,18 +3,15 @@ import type { MiddlewareOptions } from './options.ts';
 import type { RouteHandler, RouterRoutes } from './route.ts';
 import { JSONResponse } from '../rest/jsonResponse.ts';
 import { ServiceConsole } from '../util/console.ts';
-import { OriginChecker } from '../accessControl/originChecker.ts';
-import { RateLimiter } from '../accessControl/rateLimiter.ts';
-import { MethodChecker } from '../accessControl/methodChecker.ts';
-import { ServiceTokenChecker } from '../accessControl/serviceTokenChecker.ts';
 import { getRequestIdFromProxy, generateRequestId } from '../util/misc.ts';
+import { MiddlewarePlugins } from './plugins.ts';
 
 interface HandlerCtx {
 	expandPath?: boolean;
-	rateLimiter?: RateLimiter | null;
-	originChecker?: OriginChecker | null;
-	methodChecker?: MethodChecker;
-	serviceTokenChecker?: ServiceTokenChecker | null;
+	plugins?: {
+		before?: MiddlewarePlugins;
+		after?: MiddlewarePlugins;
+	};
 	handler: RouteHandler;
 };
 
@@ -22,19 +19,28 @@ export class LambdaMiddleware {
 
 	config: Partial<MiddlewareOptions>;
 	handlersPool: Record<string, HandlerCtx>;
-	rateLimiter?: RateLimiter;
-	originChecker?: OriginChecker;
-	serviceTokenChecker?: ServiceTokenChecker;
+	plugins?: {
+		before?: MiddlewarePlugins;
+		after?: MiddlewarePlugins;
+	};
 
 	constructor (routes: RouterRoutes, config?: Partial<MiddlewareOptions>) {
 
 		this.config = config || {};
-		this.rateLimiter = config?.rateLimit ? new RateLimiter(config.rateLimit) : undefined;
-		this.originChecker = config?.allowedOrigings?.length ? new OriginChecker(config.allowedOrigings) : undefined;
-		this.serviceTokenChecker = config?.serviceToken ? new ServiceTokenChecker(config.serviceToken) : undefined;
 
 		//	transform routes
 		this.handlersPool = {};
+
+		//	setup plugins
+		if (this.config.plugins) {
+
+			this.plugins = {
+				before: this.config?.plugins?.filter(item => item.sequernce === 'before'),
+				after: this.config?.plugins?.filter(item => item.sequernce === 'after')
+			};
+
+			delete this.config.plugins;
+		}
 
 		for (const route in routes) {
 
@@ -49,12 +55,25 @@ export class LambdaMiddleware {
 
 			const handlerCtx: HandlerCtx = {
 				handler: routeCtx.handler,
-				rateLimiter: routeCtx.ratelimit === null ? null : (Object.keys(routeCtx.ratelimit || {}).length ? new RateLimiter(routeCtx.ratelimit) : undefined),
-				originChecker: routeCtx.allowedOrigings === 'all' ? null : (routeCtx.allowedOrigings?.length ? new OriginChecker(routeCtx.allowedOrigings) : undefined),
-				expandPath: typeof routeCtx.expand === 'boolean' ? routeCtx.expand : routeExpandByUrl,
-				methodChecker: routeCtx.allowedMethods?.length ? new MethodChecker(Array.isArray(routeCtx.allowedMethods) ? routeCtx.allowedMethods : [routeCtx.allowedMethods]) : undefined,
-				serviceTokenChecker: routeCtx.serviceToken === null ? null : routeCtx.serviceToken ? new ServiceTokenChecker(routeCtx.serviceToken) : undefined
 			};
+
+			//	setup route plugins
+			if (routeCtx.plugins || this.plugins) {
+
+				const localBefore =  routeCtx.plugins?.filter(item => item.sequernce === 'before');
+				const localAfter = routeCtx.plugins?.filter(item => item.sequernce === 'after');
+
+				const localBeforeSet = new Set<string>(localBefore?.map(item => item.instance.id));
+				const localAfterSet = new Set<string>(localAfter?.map(item => item.instance.id));
+
+				const globalBefore = localBefore?.length ? this.plugins?.before?.filter(item => !localBeforeSet.has(item.instance.id)) : this.plugins?.before;
+				const globalAfter = localAfter?.length ? this.plugins?.after?.filter(item => !localAfterSet.has(item.instance.id)) : this.plugins?.after;
+
+				handlerCtx.plugins = {
+					before: (globalBefore || []).concat(localBefore || []),
+					after: (globalAfter || []).concat(localAfter || []),
+				};
+			}
 
 			const applyHandlerPath = route.replace(/\/\*?$/i, '');
 			this.handlersPool[applyHandlerPath.length ? applyHandlerPath : '/'] = handlerCtx;
@@ -148,108 +167,35 @@ export class LambdaMiddleware {
 				}
 			}
 
-			//	check request origin
-			const useOriginChecker = routectx.originChecker !== null ? (routectx.originChecker || this.originChecker) : null;
-			if (useOriginChecker) {
+			const requestInfo = Object.assign({
+				clientIP,
+				requestID
+			}, info);
 
-				if (!requestOrigin) {
-					return new JSONResponse({
-						error_text: 'client not verified'
-					}, { status: 403 }).toResponse();
+			const requestContext = Object.assign({}, context || {}, {
+				console,
+				requestInfo,
+			});
+
+			//	run "before" plugins
+			let modifiedReqest: Request | null = null;
+			if (routectx.plugins?.before) {
+
+				for (const plugin of routectx.plugins.before) {
+
+					const temp = plugin.instance.execute({
+						request,
+						info: requestInfo,
+						response: null,
+						middleware: this
+					});
+
+					if (!temp) continue;
 				}
-				else if (!useOriginChecker.check(requestOrigin)) {
-					console.log('Origin not allowed:', requestOrigin);
-					return new JSONResponse({
-						error_text: 'client not verified'
-					}, { status: 403 }).toResponse();
-				}
-
-				allowedOrigin = requestOrigin;
-			}
-			else if (requestOrigin && allowedOrigin) {
-				allowedOrigin = '*';
-			}
-
-			//	check rate limiter
-			const useRateLimiter = routectx.rateLimiter !== null ? (routectx.rateLimiter || this.rateLimiter) : null;
-			if (useRateLimiter) {
-				const rateCheck = useRateLimiter.check({ ip: clientIP });
-				if (!rateCheck.ok) {
-					console.log(`Too many requests (${rateCheck.requests}). Wait for ${rateCheck.reset}s`);
-					return new JSONResponse({
-						error_text: 'too many requests'
-					}, { status: 429 }).toResponse();
-				}
-			}
-
-			//	check service token
-			const useServiceChecker = routectx.serviceTokenChecker !== null ? (routectx.serviceTokenChecker || this.serviceTokenChecker) : null;
-			if (useServiceChecker) {
-
-				const bearerHeader = request.headers.get('x-service-token') || request.headers.get('authorization');
-				if (!bearerHeader) {
-					return new JSONResponse({
-						error_text: 'service access token is required'
-					}, {
-						status: 401,
-						headers: {
-							'WWW-Authenticate': 'Basic realm="API"'
-						}
-					}).toResponse();
-				}
-
-				const checkResult = await useServiceChecker.check(bearerHeader);
-				if (!checkResult) {
-					console.warn(`Invalid service token provided (${bearerHeader})`);
-					return new JSONResponse({
-						error_text: 'invalid service access token'
-					}, { status: 403 }).toResponse();
-				}
-			}
-
-			//	check request method
-			if (routectx.methodChecker) {
-				const methodAllowed = routectx.methodChecker.check(request.method);
-				if (!methodAllowed) {
-					console.log(`Method not allowed (${request.method})`);
-					return new JSONResponse({
-						error_text: 'method not allowed'
-					}, { status: 405 }).toResponse();
-				}
-			}
-
-			//	respond to CORS preflixgt
-			if (request.method == 'OPTIONS' && handleCORS) {
-
-				const requestedCorsHeaders = request.headers.get('Access-Control-Request-Headers');
-				const defaultCorsHeaders = 'Origin, X-Requested-With, Content-Type, Accept';
-
-				const requestedCorsMethod = request.headers.get('Access-Control-Request-Method');
-				const defaultCorsMethods = 'GET, POST, PUT, OPTIONS, DELETE';
-
-				return new JSONResponse(null, {
-					status: 204,
-					headers: {
-						'Access-Control-Allow-Methods': requestedCorsMethod || defaultCorsMethods,
-						'Access-Control-Allow-Headers': requestedCorsHeaders || defaultCorsHeaders,
-						'Access-Control-Max-Age': '3600',
-						'Access-Control-Allow-Credentials': 'true'
-					}
-				}).toResponse();
 			}
 
 			//	execute route function
 			try {
-
-				const requestInfo = Object.assign({
-					clientIP,
-					requestID
-				}, info);
-
-				const requestContext = Object.assign({}, context || {}, {
-					console,
-					requestInfo,
-				});
 
 				const handlerResponse = await routectx.handler(request, requestContext);
 
