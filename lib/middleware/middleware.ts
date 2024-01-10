@@ -173,7 +173,7 @@ export class LambdaMiddleware {
 			}
 
 			//	execute route function
-			if (!middlewareResponse) middlewareResponse = await (async () => {
+			if (!middlewareResponse) {
 
 				try {
 
@@ -191,27 +191,29 @@ export class LambdaMiddleware {
 						throw new Error('Invalid function response: ' + typeErrorReport);
 					}
 	
-					return responseObject;
-	
+					middlewareResponse = responseObject;
+
 				} catch (error) {
-	
+
 					console.error('Lambda middleware error:', (error as Error | null)?.message || error);
-	
+
 					switch (this.config.defaultResponses?.error) {
+
+						case 'log': {
+							middlewareResponse = new JSONResponse({
+								error_text: 'unhandled middleware error',
+								error_log: (error as Error | null)?.message || JSON.stringify(error)
+							}, { status: 500 }).toResponse();
+						} break;
 	
-						case 'log': return new JSONResponse({
-							error_text: 'unhandled middleware error',
-							error_log: (error as Error | null)?.message || JSON.stringify(error)
-						}, { status: 500 }).toResponse();
-	
-						default: return new JSONResponse({
-							error_text: 'unhandled middleware error'
-						}, { status: 500 }).toResponse();
+						default: { 
+							middlewareResponse = new JSONResponse({
+								error_text: 'unhandled middleware error'
+							}, { status: 500 }).toResponse();
+						} break;
 					}
 				}
-
-			})();
-
+			}
 
 			for (const plugin of runPlugins || []) {
 
