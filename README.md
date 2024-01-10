@@ -1,8 +1,10 @@
-# lambda-lite
+# A ~~deno based~~ API server framework that tries to reinvent the wheel but better.
 
-A ~~deno based~~ API server framework that tries to reinvent the wheel but better.
+### 🚨 Warning: TypeScript only
 
-Supported platforms: 
+This package only provides TypeScript version of the library (there are no other versions lmao) so if you gonna use it with anything that is not Deno bundle it with esbuild first. And for Deno, just use http imports ffs.
+
+### Supported platforms: 
 
 - Deno
 
