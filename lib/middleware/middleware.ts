@@ -80,7 +80,7 @@ export class LambdaMiddleware {
 			let middlewareResponse: Response | null = null;
 
 			// find route path
-			const routePathname = pathname.slice(0, pathname.endsWith('/') ? pathname.length - 1 : pathname.length);
+			const routePathname = pathname === '/' ? pathname : pathname.slice(0, pathname.endsWith('/') ? pathname.length - 1 : pathname.length);
 			let routectx = this.handlersPool[routePathname];
 
 			// try to find matching wildcart route path
