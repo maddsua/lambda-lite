@@ -13,10 +13,10 @@ await startServer({
 	plugins: [
 	//	methodChecker({ methods: ['GET'] }),
 	//	serviceTokenChecker({ token: 'test'}),
-		cors({ allowOrigins: 'all' }),
+	//	cors({ allowOrigins: 'all' }),
 		ratelimiter({
 			requests: 5,
-			period: 10
+			period: 25
 		})
 	]
 });
