@@ -1,6 +1,6 @@
 import type { JSONResponse } from "../rest/jsonResponse.ts";
 import type { ServiceConsole } from "../util/console.ts";
-import { MiddlewarePlugins } from "./plugins.ts";
+import { PluginGenerator } from "./plugins.ts";
 
 export interface NetworkInfo {
 	transport: 'tcp' | 'udp';
@@ -33,7 +33,7 @@ export type HTTPMethod = 'CONNECT' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'PO
 
 export interface RouteConfig {
 	expand?: boolean;
-	plugins?: MiddlewarePlugins;
+	plugins?: PluginGenerator[];
 };
 
 export interface RouteCtx extends RouteConfig {
