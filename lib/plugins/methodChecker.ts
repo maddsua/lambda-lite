@@ -40,25 +40,21 @@ type HTTPMethod = 'CONNECT' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'POST' | '
 
 interface InitParams {
 	methods: HTTPMethod[] & { 0: HTTPMethod };
-	useLogs?: boolean;
 };
 
 class MethodCheckerPlugin implements PluginGenerator {
 
 	id = pluginID;
 	allowedMethods: Set<string>;
-	useLogs?: boolean;
 
 	constructor(init: InitParams) {
 		const methodsNormalized = init.methods.map(item => item.trim().toUpperCase()).filter(item => item.length);
 		this.allowedMethods = new Set(methodsNormalized.length ? methodsNormalized : ['GET']);
-		this.useLogs = init.useLogs;
 	}
 
 	spawn(props: SpawnProps) {
 
-		const middlewareLogPlugins = props.middleware.config.loglevel?.plugins;
-		const useLogging = typeof middlewareLogPlugins === 'boolean' ? middlewareLogPlugins : this.useLogs;
+		const useLogging = props.middleware.config.loglevel?.plugins !== false;
 
 		return new MethodCheckerPluginImpl({
 			allowedMethods: this.allowedMethods,

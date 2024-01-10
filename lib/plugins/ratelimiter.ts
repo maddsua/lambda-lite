@@ -69,10 +69,6 @@ interface RateLimiterConfig {
 	requests: number;
 };
 
-interface InitParams extends RateLimiterConfig {
-	useLogs?: boolean;
-};
-
 interface ActivityEntry {
 	total: number;
 	last: number;
@@ -83,7 +79,6 @@ type ActivityMap = Map<string, ActivityEntry>;
 class RateLimiterPlugin implements PluginGenerator {
 
 	id = pluginID;
-	useLogs?: boolean;
 
 	config: RateLimiterConfig;
 	activity: ActivityMap;
@@ -93,16 +88,14 @@ class RateLimiterPlugin implements PluginGenerator {
 		requests: 25
 	};
 
-	constructor(init?: InitParams) {
+	constructor(init?: RateLimiterConfig) {
 		this.activity = new Map();
 		this.config = Object.assign({}, RateLimiterPlugin.defaultConfig, init);
-		this.useLogs = init?.useLogs;
 	}
 
 	spawn(props: SpawnProps) {
 
-		const middlewareLogPlugins = props.middleware.config.loglevel?.plugins;
-		const useLogging = typeof middlewareLogPlugins === 'boolean' ? middlewareLogPlugins : this.useLogs;
+		const useLogging = props.middleware.config.loglevel?.plugins !== false;
 
 		return new RateLimiterPluginImpl({
 			activity: this.activity,
@@ -113,4 +106,4 @@ class RateLimiterPlugin implements PluginGenerator {
 	}
 }
 
-export const ratelimiter = (init: InitParams) => new RateLimiterPlugin(init);
+export const ratelimiter = (init: RateLimiterConfig) => new RateLimiterPlugin(init);

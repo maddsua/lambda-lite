@@ -88,14 +88,12 @@ class CorsPluginImpl implements MiddlewarePluginBase {
 
 interface InitParams {
 	allowOrigins: string[] | 'all';
-	useLogs?: boolean;
 };
 
 class CorsPlugin implements PluginGenerator {
 
 	id = pluginID;
 	allowedOrigins: string[] | 'all';
-	useLogs?: boolean;
 
 	constructor(init: InitParams) {
 
@@ -120,14 +118,11 @@ class CorsPlugin implements PluginGenerator {
 		} else {
 			this.allowedOrigins = init.allowOrigins;
 		}
-
-		this.useLogs = init.useLogs;
 	}
 
 	async spawn(props: SpawnProps) {
 
-		const middlewareLogPlugins = props.middleware.config.loglevel?.plugins;
-		const useLogging = typeof middlewareLogPlugins === 'boolean' ? middlewareLogPlugins : this.useLogs;
+		const useLogging = props.middleware.config.loglevel?.plugins !== false;
 
 		return new CorsPluginImpl({
 			allowedOrigins: this.allowedOrigins,

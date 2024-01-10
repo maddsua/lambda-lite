@@ -16,7 +16,7 @@ await startServer({
 	//	cors({ allowOrigins: ['localhost'] }),
 		ratelimiter({
 			requests: 5,
-			period: 600
+			period: 10
 		})
 	]
 });

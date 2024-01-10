@@ -73,7 +73,6 @@ class ServiceTokenCheckerPluginImpl implements MiddlewarePluginBase {
 interface InitParams {
 	token: string;
 	fakeDelayRange?: number;
-	useLogs?: boolean;
 };
 
 class ServiceTokenCheckerPlugin implements PluginGenerator {
@@ -82,13 +81,11 @@ class ServiceTokenCheckerPlugin implements PluginGenerator {
 	tokenHash: Uint8Array | null;
 	token: string;
 	fakeDelayRange?: number;
-	useLogs?: boolean;
 
 	constructor(init: InitParams) {
 		this.token = init.token;
 		this.tokenHash = null;
 		this.fakeDelayRange = init.fakeDelayRange;
-		this.useLogs = init.useLogs;
 	}
 
 	async spawn(props: SpawnProps) {
@@ -98,8 +95,7 @@ class ServiceTokenCheckerPlugin implements PluginGenerator {
 			this.tokenHash = new Uint8Array(hashBuffer);
 		}
 
-		const middlewareLogPlugins = props.middleware.config.loglevel?.plugins;
-		const useLogging = typeof middlewareLogPlugins === 'boolean' ? middlewareLogPlugins : this.useLogs;
+		const useLogging = props.middleware.config.loglevel?.plugins !== false;
 
 		return new ServiceTokenCheckerPluginImpl({
 			tokenHash: this.tokenHash,
