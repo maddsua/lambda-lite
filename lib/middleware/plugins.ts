@@ -1,32 +1,42 @@
 import type { LambdaMiddleware } from './middleware.ts';
 import type { RequestInfo } from './route.ts';
 
-export interface PluginResult {
+interface PluginBeforeResult {
 	modifiedRequest?: Request;
-	response?: Response;
+	overrideResponse?: Response;
+};
+
+type PluginBeforeReturnTypeIntm = PluginBeforeResult | null | undefined;
+type PluginBeforeReturnType = Promise<PluginBeforeReturnTypeIntm> | PluginBeforeReturnTypeIntm;
+
+interface PluginAfterResult {
+	overrideResponse?: Response;
 	chainable?: boolean;
 };
 
-type PluginReturnTypeIntm = PluginResult | null | undefined;
-type PluginReturnType = Promise<PluginReturnTypeIntm> | PluginReturnTypeIntm
+type PluginAfterReturnTypeIntm = PluginAfterResult | null | undefined;
+type PluginAfterReturnType = Promise<PluginAfterReturnTypeIntm> | PluginAfterReturnTypeIntm;
 
-export type MiddlewarePluginResult = PluginResult | null | undefined;
-
-export interface PluginProps {
+interface PluginBeforeProps {
 	request: Request;
-	response: Response | null;
 	info: RequestInfo;
 	middleware: LambdaMiddleware;
 };
 
-export interface MiddlewarePlugin {
+interface PluginAfterProps {
+	request: Request;
+	info: RequestInfo;
+	response: Response;
+	middleware: LambdaMiddleware;
+};
+
+export interface MiddlewarePluginBase {
 	id: string;
-	execute: (props: PluginProps) => PluginReturnType;
+	executeBefore?: (props: PluginBeforeProps) => PluginBeforeReturnType;
+	executeAfter?: (props: PluginAfterProps) => PluginAfterReturnType;
 };
 
-export interface MiddlewarePluginSequenceItem {
-	instance: MiddlewarePlugin;
-	sequernce?: 'after' | 'before';
+export interface PluginGenerator {
+	id: string;
+	spawn: () => MiddlewarePluginBase;
 };
-
-export type MiddlewarePlugins = MiddlewarePluginSequenceItem[];
