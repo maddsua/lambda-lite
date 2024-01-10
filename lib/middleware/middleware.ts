@@ -151,26 +151,24 @@ export class LambdaMiddleware {
 			let pluginModifiedReqest: Request | null = null;
 			let pluginBeforeResponse: Response | null = null;
 
-			if (runPlugins?.length) {
 
-				for (const plugin of runPlugins) {
+			for (const plugin of runPlugins || []) {
 
-					if (!plugin.executeBefore) continue;
+				if (!plugin.executeBefore) continue;
 
-					const temp = await plugin.executeBefore({
-						request: pluginModifiedReqest || request,
-						info: requestInfo,
-						middleware: this
-					});
+				const temp = await plugin.executeBefore({
+					request: pluginModifiedReqest || request,
+					info: requestInfo,
+					middleware: this
+				});
 
-					if (temp?.modifiedRequest) {
-						pluginModifiedReqest = temp.modifiedRequest;
-					}
+				if (temp?.modifiedRequest) {
+					pluginModifiedReqest = temp.modifiedRequest;
+				}
 
-					if (temp?.overrideResponse) {
-						pluginBeforeResponse = temp.overrideResponse;
-						break;
-					}
+				if (temp?.overrideResponse) {
+					pluginBeforeResponse = temp.overrideResponse;
+					break;
 				}
 			}
 
@@ -214,23 +212,21 @@ export class LambdaMiddleware {
 
 			})();
 
-			if (runPlugins?.length) {
 
-				for (const plugin of runPlugins) {
+			for (const plugin of runPlugins || []) {
 
-					if (!plugin.executeAfter) continue;
+				if (!plugin.executeAfter) continue;
 
-					const temp = await plugin.executeAfter({
-						request: pluginModifiedReqest || request,
-						response: pluginBeforeResponse,
-						info: requestInfo,
-						middleware: this
-					});
+				const temp = await plugin.executeAfter({
+					request: pluginModifiedReqest || request,
+					response: pluginBeforeResponse,
+					info: requestInfo,
+					middleware: this
+				});
 
-					if (temp?.overrideResponse) {
-						if (temp.chainable === false) return temp.overrideResponse;
-						pluginBeforeResponse = temp.overrideResponse;
-					}
+				if (temp?.overrideResponse) {
+					if (temp.chainable === false) return temp.overrideResponse;
+					pluginBeforeResponse = temp.overrideResponse;
 				}
 			}
 
