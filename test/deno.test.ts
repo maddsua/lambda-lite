@@ -8,6 +8,6 @@ await startServer({
 	routesDir: 'test/functions',
 	healthcheckPath: '/health',
 	plugins: [
-		methodChecker({ methods: ['POST'] })
+		methodChecker({ methods: ['GET'] })
 	]
 });
