@@ -151,7 +151,11 @@ export class LambdaMiddleware {
 				requestInfo,
 			});
 
-			const runPlugins = (routectx?.plugins || this.config.plugins)?.map(item => item.spawn());
+			const runPlugins = (routectx?.plugins || this.config.plugins)?.map(item => item.spawn({
+				console,
+				info: requestInfo,
+				middleware: this
+			}));
 
 			//	run "before" plugins
 			let middlewareRequest = request;
@@ -162,8 +166,6 @@ export class LambdaMiddleware {
 
 				const temp = await plugin.executeBefore({
 					request: middlewareRequest,
-					info: requestInfo,
-					middleware: this
 				});
 
 				if (temp?.modifiedRequest) {
@@ -226,8 +228,6 @@ export class LambdaMiddleware {
 				const temp = await plugin.executeAfter({
 					request: middlewareRequest,
 					response: middlewareResponse,
-					info: requestInfo,
-					middleware: this
 				});
 
 				if (temp?.overrideResponse) {
