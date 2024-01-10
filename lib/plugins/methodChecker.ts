@@ -31,6 +31,7 @@ class MethodCheckerPluginImpl implements MiddlewarePluginBase {
 				}, { status: 405 }).toResponse()
 			};
 		}
+
 		return null;
 	}
 };
