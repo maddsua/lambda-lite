@@ -16,6 +16,10 @@
 			"types": "./cloudflare.mod.ts"
 		}
 	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/maddsua/lambda-lite"
+	},
 	"scripts": {
 		"worker:build": "esbuild test/worker.test.ts --bundle --minify --charset=utf8 --format=esm --outfile=.temp/worker.bundle.js",
 		"worker:build:dev": "esbuild test/worker.test.ts --bundle --charset=utf8 --watch --format=esm --outfile=.temp/worker.bundle.js",

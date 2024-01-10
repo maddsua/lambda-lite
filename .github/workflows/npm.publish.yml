@@ -7,9 +7,8 @@ on:
 
 jobs:
 
-  deploy-to-npm:
+  deploy_to_npm:
     runs-on: ubuntu-latest
-    needs: check_deploy_config
     steps:
     - uses: actions/checkout@v3
     - uses: actions/setup-node@v3
