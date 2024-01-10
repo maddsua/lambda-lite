@@ -1,6 +1,18 @@
 # lambda-lite
 
-A deno based API server framework
+A ~~deno based~~ API server framework
+
+Supported platforms: 
+
+- Deno
+
+- Cloudflare workers
+
+- Node 18 and newer
+
+	(needs to be hooked up to the `node:http` manually. Personally I don't use node with it that's why no adapter provided, but it's dead simple to make one)
+
+## What and why
 
 You can treat it like it's Netlify functions but it runs everywhere. I was working with Functions a lot and I really like it but they can't be run separately in docker containers and with other services.
 
