@@ -1,10 +1,10 @@
-import { cors } from "./cors.ts";
+import { originController } from "./originController.ts";
 import { ratelimiter } from "./ratelimiter.ts";
 import { serviceTokenChecker } from "./serviceTokenChecker.ts";
 import { allowMethods } from "./allowMethods.ts";
 
 export {
-	cors,
+	originController,
 	ratelimiter,
 	serviceTokenChecker,
 	allowMethods,
