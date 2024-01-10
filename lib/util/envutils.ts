@@ -1,6 +1,4 @@
 
-export type EnvBase = Record<string, string>;
-
 export const getNumber = (envVar: string | null | undefined, fallback?: number): number | undefined => {
 	if (!envVar?.length) return typeof fallback === 'number' ? fallback : undefined;
 	const temp = parseFloat(envVar);
@@ -19,25 +17,3 @@ export const getSeparatedList = (envVar: string | null | undefined, token?: stri
 };
 
 export const getCommaSeparated = (envVar: string | null | undefined): string[] | undefined => getSeparatedList(envVar);
-
-declare let process: {
-	env: EnvBase;
-};
-
-export const getRuntimeEnv = (): EnvBase => {
-
-	try {
-		
-		if (typeof Deno === 'object')
-			return Deno.env.toObject();
-		
-		if (typeof process === 'object')
-			return process.env;
-
-	} catch (_error) {
-		//	I just don't wanna do any real error handling
-		return {};
-	}
-
-	return {};
-};

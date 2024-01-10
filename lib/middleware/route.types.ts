@@ -1,10 +1,33 @@
 import type { JSONResponse } from "../rest/jsonResponse.ts";
 import type { RateLimiterConfig } from "../accessControl/rateLimiter.ts";
-import type { RequestContext } from "./runtime.types.ts";
-import type { EnvBase } from "../util/envutils.ts";
+import type { ServiceConsole } from "../util/console.ts";
+
+export interface NetworkInfo {
+	transport: 'tcp' | 'udp';
+	hostname: string;
+	port: number;
+};
+
+export interface RequestInfo extends NetworkInfo {
+	clientIP: string;
+	requestID: string;
+};
+
+export interface RequestContextBase {
+
+	/**
+	 * Request-specific console
+	 */
+	console: ServiceConsole;
+
+	/**
+	 * Request info info, duh
+	 */
+	requestInfo: RequestInfo;
+};
 
 export type RouteResponse = JSONResponse<object> | Response;
-export type RouteHandler<E extends EnvBase = {}> = (request: Request, context: RequestContext<E>) => Promise<RouteResponse> | RouteResponse;
+export type RouteHandler<C extends object = {}> = (request: Request, context: RequestContextBase & C) => Promise<RouteResponse> | RouteResponse;
 
 export type HTTPMethod = 'CONNECT' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'POST' | 'PUT' | 'TRACE';
 
