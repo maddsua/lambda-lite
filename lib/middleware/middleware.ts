@@ -7,9 +7,9 @@ import { getRequestIdFromProxy, generateRequestId } from '../util/misc.ts';
 import { MiddlewarePlugin } from './plugins.ts';
 
 interface HandlerCtx {
+	handler: RouteHandler;
 	expandPath?: boolean;
 	plugins?: MiddlewarePlugin[];
-	handler: RouteHandler;
 };
 
 export class LambdaMiddleware {
@@ -41,8 +41,11 @@ export class LambdaMiddleware {
 
 			//	setup route plugins
 			if (routeCtx.plugins || this.config.plugins) {
+
 				const handlerPluginsSet = new Set<string>(routeCtx.plugins?.map(item => item.id));
-				const applyGlobal = this.config.plugins?.filter(item => !handlerPluginsSet.has(item.id));
+				const inheritPlugins = typeof routeCtx.inheritPlugins === 'boolean' ? routeCtx.inheritPlugins : true;
+
+				const applyGlobal = inheritPlugins ? this.config.plugins?.filter(item => !handlerPluginsSet.has(item.id)) : undefined;
 				handlerCtx.plugins = (applyGlobal || []).concat(routeCtx.plugins || []);
 			}
 
@@ -151,7 +154,7 @@ export class LambdaMiddleware {
 				requestInfo,
 			});
 
-			const pluginPromises = (routectx?.plugins || this.config.plugins)?.map(item => item.spawn({
+			const pluginPromises = routectx.plugins?.map(item => item.spawn({
 				console,
 				info: requestInfo,
 				middleware: this
