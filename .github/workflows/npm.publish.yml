@@ -1,0 +1,21 @@
+name: Publish NPM Package
+
+on:
+  push:
+    branches: ['main']
+    paths: ['package.json']
+
+jobs:
+
+  deploy-to-npm:
+    runs-on: ubuntu-latest
+    needs: check_deploy_config
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 20
+        registry-url: https://registry.npmjs.org/
+    - run: npm publish --access public
+      env:
+        NODE_AUTH_TOKEN: ${{secrets.NPM_PUBLISH}}
