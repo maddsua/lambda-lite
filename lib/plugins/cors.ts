@@ -71,12 +71,12 @@ class CorsPluginImpl implements MiddlewarePluginBase {
 					}, { status: 403 }).toResponse()
 				};
 			}
+
+			this.setAllowOrigin = requestOrigin;
 			
 		} else {
 			this.setAllowOrigin = requestOrigin?.length ? requestOrigin : '*';
 		}
-
-		this.setAllowOrigin = requestOrigin;
 
 		//	respond to CORS preflight
 		if (request.method == 'OPTIONS') {
@@ -106,6 +106,7 @@ class CorsPluginImpl implements MiddlewarePluginBase {
 	}
 
 	executeAfter(response: Response) {
+		console.log('response');
 		if (this.setAllowOrigin) response.headers.set('Access-Control-Allow-Origin', this.setAllowOrigin);
 		return null;
 	}
