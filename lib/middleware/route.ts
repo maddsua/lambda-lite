@@ -32,7 +32,7 @@ export type RouteHandler<C extends object = {}> = (request: Request, context: Re
 export interface RouteConfig {
 
 	/**
-	 * Exapnd path
+	 * Exapnd path to catch subpaths too
 	 */
 	expand?: boolean;
 
