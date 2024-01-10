@@ -73,7 +73,7 @@ export class LambdaMiddleware {
 
 		const console = new ServiceConsole(requestID);
 
-		const routeResponse = await (async () => {
+		const invocationResponse = await (async () => {
 
 			const { pathname } = new URL(request.url);
 			requestDisplayUrl = pathname;
@@ -136,6 +136,7 @@ export class LambdaMiddleware {
 							error_text: 'route not found'
 						}, { status: 404 }).toResponse();
 					}
+
 				})();
 			}
 
@@ -154,30 +155,26 @@ export class LambdaMiddleware {
 			//	run "before" plugins
 			let middlewareRequest = request;
 
-			if (!middlewareResponse && runPlugins?.length) {
+			for (const plugin of runPlugins || []) {
+	
+				if (!plugin.executeBefore) continue;
 
-				for (const plugin of runPlugins) {
-	
-					if (!plugin.executeBefore) continue;
-	
-					const temp = await plugin.executeBefore({
-						middlewareRequest,
-						//originalRequest: request,
-						info: requestInfo,
-						middleware: this
-					});
-	
-					if (temp?.modifiedRequest) {
-						middlewareRequest = temp.modifiedRequest;
-					}
-	
-					if (temp?.overrideResponse) {
-						middlewareResponse = temp.overrideResponse;
-						break;
-					}
+				const temp = await plugin.executeBefore({
+					middlewareRequest,
+					//originalRequest: request,
+					info: requestInfo,
+					middleware: this
+				});
+
+				if (temp?.modifiedRequest) {
+					middlewareRequest = temp.modifiedRequest;
+				}
+
+				if (temp?.overrideResponse) {
+					middlewareResponse = temp.overrideResponse;
+					break;
 				}
 			}
-
 
 			//	execute route function
 			if (!middlewareResponse) {
@@ -222,23 +219,21 @@ export class LambdaMiddleware {
 				}
 			}
 
-			if (runPlugins?.length) {
-				for (const plugin of runPlugins) {
-	
-					if (!plugin.executeAfter) continue;
-	
-					const temp = await plugin.executeAfter({
-						middlewareRequest,
-						//originalRequest: request,
-						response: middlewareResponse,
-						info: requestInfo,
-						middleware: this
-					});
-	
-					if (temp?.overrideResponse) {
-						if (temp.chainable === false) return temp.overrideResponse;
-						middlewareResponse = temp.overrideResponse;
-					}
+			for (const plugin of runPlugins || []) {
+
+				if (!plugin.executeAfter) continue;
+
+				const temp = await plugin.executeAfter({
+					middlewareRequest,
+					//originalRequest: request,
+					response: middlewareResponse,
+					info: requestInfo,
+					middleware: this
+				});
+
+				if (temp?.overrideResponse) {
+					if (temp.chainable === false) return temp.overrideResponse;
+					middlewareResponse = temp.overrideResponse;
 				}
 			}
 
@@ -247,13 +242,13 @@ export class LambdaMiddleware {
 		})();
 
 		//	add some headers so the shit always works
-		routeResponse.headers.set('x-powered-by', 'maddsua/lambda');
-		routeResponse.headers.set('x-request-id', requestID);
+		invocationResponse.headers.set('x-powered-by', 'maddsua/lambda');
+		invocationResponse.headers.set('x-request-id', requestID);
 
 		//	log for, you know, reasons
 		if (this.config.loglevel?.requests !== false)	
-			console.log(`(${clientIP}) ${request.method} ${requestDisplayUrl} --> ${routeResponse.status}`);
+			console.log(`(${clientIP}) ${request.method} ${requestDisplayUrl} --> ${invocationResponse.status}`);
 
-		return routeResponse;
+		return invocationResponse;
 	}
 };
