@@ -71,5 +71,5 @@ export interface MiddlewareOptions {
 	/**
 	 * Middleware plugins
 	 */
-	plugins: PluginGenerator[];
+	plugins?: PluginGenerator[];
 };
