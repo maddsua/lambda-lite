@@ -45,7 +45,7 @@ class ServiceTokenCheckerPluginImpl implements MiddlewarePluginBase {
 						'WWW-Authenticate': 'Basic realm="API"'
 					}
 				}).toResponse()
-			}
+			};
 		}
 
 		const bearerHash = new Uint8Array(await crypto.subtle.digest('sha-256', new TextEncoder().encode(authBearer)));
@@ -63,7 +63,7 @@ class ServiceTokenCheckerPluginImpl implements MiddlewarePluginBase {
 				overrideResponse: new JSONResponse({
 					error_text: 'invalid service access token'
 				}, { status: 403 }).toResponse()
-			}
+			};
 		}
 
 		return null;
