@@ -63,7 +63,7 @@ class CorsPluginImpl implements MiddlewarePluginInstance {
 	
 			} else if (!this.check(requestOrigin, this.allowedOrigins)) {
 	
-				this.console?.log('Origin not allowed:', requestOrigin);
+				this.console?.log('[CORS] Origin not allowed:', requestOrigin);
 	
 				return {
 					respondWith: new JSONResponse({
@@ -106,7 +106,6 @@ class CorsPluginImpl implements MiddlewarePluginInstance {
 	}
 
 	executeAfter(response: Response) {
-		console.log('response');
 		if (this.setAllowOrigin) response.headers.set('Access-Control-Allow-Origin', this.setAllowOrigin);
 		return null;
 	}
@@ -137,7 +136,7 @@ class CorsPlugin implements MiddlewarePlugin {
 				try {
 					this.allowedOrigins.push(new URL(entry).hostname);
 				} catch (error) {
-					console.error(`Invalid origin string: "${entry}"`);
+					console.error(`[CORS] Invalid origin string: "${entry}"`);
 				}
 			}
 
