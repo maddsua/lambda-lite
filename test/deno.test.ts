@@ -1,7 +1,7 @@
 import { startServer } from "../deno.mod.ts";
 import { allowMethods } from "../lib/plugins/allowMethods.ts";
 import { serviceTokenChecker } from "../lib/plugins/serviceTokenChecker.ts";
-import { cors } from "../lib/plugins/cors.ts";
+import { originController } from "../lib/plugins/originController.ts";
 import { ratelimiter } from "../lib/plugins/ratelimiter.ts";
 
 await startServer({
@@ -13,7 +13,7 @@ await startServer({
 	plugins: [
 	//	allowMethods('GET'),
 	//	serviceTokenChecker({ token: 'test'}),
-		cors({ allowOrigins: 'all' }),
+		originController({ allowOrigins: 'all' }),
 		ratelimiter({
 			requests: 5,
 			period: 25
