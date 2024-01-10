@@ -4,7 +4,7 @@ import type { ServiceConsole } from "../util/console.ts";
 
 const pluginID = 'lambda_lite-plugin-method_checker';
 
-class MethodCheckerPluginImpl implements MiddlewarePluginInstance {
+class AllowMethodsPluginImpl implements MiddlewarePluginInstance {
 
 	id = pluginID;
 	allowedMethods: Set<string>;
@@ -42,7 +42,7 @@ interface InitParams {
 	methods: HTTPMethod[] & { 0: HTTPMethod };
 };
 
-class MethodCheckerPlugin implements MiddlewarePlugin {
+class AllowMethodsPlugin implements MiddlewarePlugin {
 
 	id = pluginID;
 	allowedMethods: Set<string>;
@@ -56,11 +56,11 @@ class MethodCheckerPlugin implements MiddlewarePlugin {
 
 		const useLogging = props.middleware.config.loglevel?.plugins !== false;
 
-		return new MethodCheckerPluginImpl({
+		return new AllowMethodsPluginImpl({
 			allowedMethods: this.allowedMethods,
 			console: useLogging ? props.console : undefined
 		});
 	}
 }
 
-export const methodChecker = (init: InitParams) => new MethodCheckerPlugin(init);
+export const allowMethods = (init: InitParams) => new AllowMethodsPlugin(init);

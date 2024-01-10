@@ -1,5 +1,5 @@
 import { startServer } from "../deno.mod.ts";
-import { methodChecker } from "../lib/plugins/methodChecker.ts";
+import { allowMethods } from "../lib/plugins/allowMethods.ts";
 import { serviceTokenChecker } from "../lib/plugins/serviceTokenChecker.ts";
 import { cors } from "../lib/plugins/cors.ts";
 import { ratelimiter } from "../lib/plugins/ratelimiter.ts";
@@ -11,7 +11,7 @@ await startServer({
 	routesDir: 'test/functions',
 	healthcheckPath: '/health',
 	plugins: [
-	//	methodChecker({ methods: ['GET'] }),
+	//	allowMethods({ methods: ['GET'] }),
 	//	serviceTokenChecker({ token: 'test'}),
 		cors({ allowOrigins: 'all' }),
 		ratelimiter({
