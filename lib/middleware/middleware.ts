@@ -151,11 +151,13 @@ export class LambdaMiddleware {
 				requestInfo,
 			});
 
-			const runPlugins = (routectx?.plugins || this.config.plugins)?.map(item => item.spawn({
+			const pluginPromises = (routectx?.plugins || this.config.plugins)?.map(item => item.spawn({
 				console,
 				info: requestInfo,
 				middleware: this
 			}));
+
+			const runPlugins = pluginPromises?.length ? await Promise.all(pluginPromises) : undefined;
 
 			//	run "before" plugins
 			let middlewareRequest = request;
