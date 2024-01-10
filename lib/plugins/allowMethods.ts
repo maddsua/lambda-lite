@@ -36,19 +36,13 @@ class AllowMethodsPluginImpl implements MiddlewarePluginInstance {
 	}
 };
 
-type HTTPMethod = 'CONNECT' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'POST' | 'PUT' | 'TRACE';
-
-interface InitParams {
-	methods: HTTPMethod[] & { 0: HTTPMethod };
-};
-
 class AllowMethodsPlugin implements MiddlewarePlugin {
 
 	id = pluginID;
 	allowedMethods: Set<string>;
 
-	constructor(init: InitParams) {
-		const methodsNormalized = init.methods.map(item => item.trim().toUpperCase()).filter(item => item.length);
+	constructor(methods: string[]) {
+		const methodsNormalized = methods.map(item => item.trim().toUpperCase()).filter(item => item.length);
 		this.allowedMethods = new Set(methodsNormalized.length ? methodsNormalized : ['GET']);
 	}
 
@@ -63,4 +57,7 @@ class AllowMethodsPlugin implements MiddlewarePlugin {
 	}
 }
 
-export const allowMethods = (init: InitParams) => new AllowMethodsPlugin(init);
+type HTTPMethod = 'CONNECT' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'POST' | 'PUT' | 'TRACE';
+type PluginInit = (HTTPMethod[] & { 0: HTTPMethod }) | HTTPMethod;
+
+export const allowMethods = (init: PluginInit) => new AllowMethodsPlugin(Array.isArray(init) ? init : [init]);
