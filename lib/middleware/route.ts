@@ -1,6 +1,6 @@
 import type { JSONResponse } from "../rest/jsonResponse.ts";
-import type { RateLimiterConfig } from "../accessControl/rateLimiter.ts";
 import type { ServiceConsole } from "../util/console.ts";
+import { MiddlewarePlugins } from "./plugins.ts";
 
 export interface NetworkInfo {
 	transport: 'tcp' | 'udp';
@@ -33,10 +33,7 @@ export type HTTPMethod = 'CONNECT' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'PO
 
 export interface RouteConfig {
 	expand?: boolean;
-	ratelimit?: RateLimiterConfig | null;
-	allowedOrigings?: string[] | 'all';
-	allowedMethods?: HTTPMethod[] | HTTPMethod;
-	serviceToken?: string | null;
+	plugins?: MiddlewarePlugins;
 };
 
 export interface RouteCtx extends RouteConfig {
