@@ -178,6 +178,10 @@ export class LambdaMiddleware {
 					middlewareResponse = temp.overrideResponse;
 					break;
 				}
+
+				if (temp?.chainable === false) {
+					break;
+				}
 			}
 
 			//	execute route function
