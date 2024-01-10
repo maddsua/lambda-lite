@@ -7,12 +7,12 @@ const pluginID = 'lambda_lite-plugin-cors';
 class CorsPluginImpl implements MiddlewarePluginBase {
 
 	id = pluginID;
-	allowedOrigins: string[];
+	allowedOrigins: string[] | 'all';
 	console?: ServiceConsole;
 	setAllowOrigin: string | null;
 
 	constructor(init: {
-		allowedOrigins: string[];
+		allowedOrigins: string[] | 'all';
 		console?: ServiceConsole;
 	}) {
 		this.allowedOrigins = init.allowedOrigins;
@@ -20,7 +20,7 @@ class CorsPluginImpl implements MiddlewarePluginBase {
 		this.console = init.console;
 	}
 
-	check(rqOrigin: string) {
+	check(rqOrigin: string, allowedOrigins: string[]) {
 
 		if (!rqOrigin) return false;
 
@@ -41,7 +41,7 @@ class CorsPluginImpl implements MiddlewarePluginBase {
 
 		const originHostname = rqOrigin.slice(hostnameStart, hostnameEnd);
 
-		return this.allowedOrigins.some(domain => (
+		return allowedOrigins.some(domain => (
 			originHostname === domain ||
 			originHostname.endsWith(`.${domain}`)
 		));
@@ -51,21 +51,28 @@ class CorsPluginImpl implements MiddlewarePluginBase {
 
 		const requestOrigin = props.request.headers.get('origin');
 
+		if (this.allowedOrigins === 'all') {
+			this.setAllowOrigin = requestOrigin ? requestOrigin : '*';
+			return null;
+		}
+
 		if (!requestOrigin) {
+
 			return {
 				overrideResponse: new JSONResponse({
 					error_text: 'client verification required'
 				}, { status: 403 }).toResponse()
-			}
-		}
+			};
 
-		else if (!this.check(requestOrigin)) {
+		} else if (!this.check(requestOrigin, this.allowedOrigins)) {
+
 			this.console?.log('Origin not allowed:', requestOrigin);
+
 			return {
 				overrideResponse: new JSONResponse({
 					error_text: 'client not verified'
 				}, { status: 403 }).toResponse()
-			}
+			};
 		}
 
 		this.setAllowOrigin = requestOrigin;
@@ -80,32 +87,37 @@ class CorsPluginImpl implements MiddlewarePluginBase {
 };
 
 interface InitParams {
-	allowOrigins: string[];
+	allowOrigins: string[] | 'all';
 	useLogs?: boolean;
 };
 
 class CorsPlugin implements PluginGenerator {
 
 	id = pluginID;
-	allowedOrigins: string[];
+	allowedOrigins: string[] | 'all';
 	useLogs?: boolean;
 
 	constructor(init: InitParams) {
 
 		this.allowedOrigins = [];
 
-		for (const entry of init.allowOrigins) {
+		if (typeof init.allowOrigins !== 'string') {
 
-			if (!entry.includes('://')) {
-				this.allowedOrigins.push(entry);
-				continue;
+			for (const entry of init.allowOrigins) {
+	
+				if (!entry.includes('://')) {
+					this.allowedOrigins.push(entry);
+					continue;
+				}
+	
+				try {
+					this.allowedOrigins.push(new URL(entry).hostname);
+				} catch (error) {
+					console.error(`Invalid origin string: "${entry}"`);
+				}
 			}
-
-			try {
-				this.allowedOrigins.push(new URL(entry).hostname);
-			} catch (error) {
-				console.error(`Invalid origin string: "${entry}"`);
-			}
+		} else {
+			this.allowedOrigins = init.allowOrigins;
 		}
 
 		this.useLogs = init.useLogs;
