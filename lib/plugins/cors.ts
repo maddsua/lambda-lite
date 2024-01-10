@@ -51,7 +51,7 @@ class CorsPluginImpl implements MiddlewarePluginBase {
 
 		const requestOrigin = props.request.headers.get('origin');
 
-		if (this.allowedOrigins === 'all') {
+		if (this.allowedOrigins === 'all' || !this.allowedOrigins.length) {
 			this.setAllowOrigin = requestOrigin ? requestOrigin : '*';
 			return null;
 		}
@@ -116,6 +116,7 @@ class CorsPlugin implements PluginGenerator {
 					console.error(`Invalid origin string: "${entry}"`);
 				}
 			}
+
 		} else {
 			this.allowedOrigins = init.allowOrigins;
 		}
