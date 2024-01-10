@@ -1,6 +1,6 @@
 # lambda-lite
 
-A ~~deno based~~ API server framework
+A ~~deno based~~ API server framework that tries to reinvent the wheel but better.
 
 Supported platforms: 
 
