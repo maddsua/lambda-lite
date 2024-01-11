@@ -54,7 +54,9 @@ class IPv4CIDRMatcher extends IPv4Matcher {
 		this.taget = parseIPv4FromString(ip);
 
 		const cidr = parseInt(ip.slice(ip.indexOf('/') + 1));
-		if (isNaN(cidr) || cidr < 0 || cidr > 32) throw new Error(`IPv4 address "${ip}" has invalid CIDR notation`);
+
+		if (isNaN(cidr) || cidr < 0 || cidr > 32)
+			throw new Error(`IPv4 address "${ip}" has invalid CIDR notation`);
 
 		const cidrMask = (BigInt(2) ** BigInt(32 - cidr)) - BigInt(1);
 		const cidrAntiMask = (BigInt(-1)) ^ cidrMask;
