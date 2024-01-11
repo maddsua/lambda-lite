@@ -4,7 +4,7 @@ import type { RouteConfig, RouteHandler } from '../../deno.mod.ts';
 
 export const config: RouteConfig = {
 	expand: true,
-	allowedMethods: ['GET', 'OPTIONS']
+	//inheritPlugins: false
 };
 
 export const handler: RouteHandler = (request, context) => {

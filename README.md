@@ -26,46 +26,7 @@ Yeah, other platforms have their own implementations of that concept too, but Cl
 
 ## Usage
 
-### Standalone mode
-
-In standalone mode you'd need to have a directory with handler modules, one would look like this:
-
-```typescript
-//	functions/route.ts
-export const handler = () => new Response("yo");
-```
-
-Configure these environment vartiables to adjust server behavior:
-
-`LLAPP_PORT` : Port on which server should start (passed directly to Deno.serve)
-
-`LLAPP_HOSTNAME` : Server host (passed directly to Deno.serve)
-
-`LLAPP_ROUTES_DIR` : Directory containing all route functions
-
-`LLAPP_HANDLE_CORS` : Whether to handle CORS automatically based on set allowed origins (true/false)
-
-`LLAPP_ALLOWED_ORIGINS` : Allowed origins (comma-separated)
-
-`LLAPP_RATELIMIT_PERIOD` : Set window period for rate limiter
-
-`LLAPP_RATELIMIT_REQUESTS` : Set allowed number or requests withing rate limiter window
-
-`LLAPP_SERVICE_TOKEN` : Set service access token
-
-\* LLAPP stands for "lambda-lite app". Pun intended.
-
-And then just run deno with the command:
-
-```bash
-deno run --allow-all https://raw.githubusercontent.com/maddsua/lambda-lite/[tag]/bootstrap.ts
-```
-
-\* don't forget to replace `[tag]` with an actual version tag
-
-### Modular mode
-
-Create a main file using this example:
+Create a main file using the example:
 
 ```typescript
 import { startServer } from 'https://raw.githubusercontent.com/maddsua/lambda-lite/[tag]/mod.ts';
@@ -74,13 +35,6 @@ startServer({
   serve: {
     port: 8080
   },
-  proxy: {
-    requestIdHeader: 'x-request-id',
-    forwardedIPHeader: 'x-envoy-external-address'
-  },
-  allowedOrigings: [
-    "example.com"
-  ]
   handlers: {
     '/post_order': {
       handler: (requect, context) => {
