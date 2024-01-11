@@ -1,4 +1,4 @@
-import { React } from 'https://raw.githubusercontent.com/maddsua/jsxml/v0.3/mod.ts';
+import { React } from "../deps.ts";
 
 export default () => <>
 	<html>
