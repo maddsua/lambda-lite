@@ -2,7 +2,7 @@ import { JSONResponse } from "../rest/jsonResponse.ts";
 import type { MiddlewarePlugin, MiddlewarePluginInstance, SpawnProps } from "../middleware/plugins.ts";
 import type { ServiceConsole } from "../util/console.ts";
 
-const pluginID = 'lambda_lite-plugin-method_checker';
+const pluginID = 'llp-ratelimiter';
 
 class RateLimiterPluginImpl implements MiddlewarePluginInstance {
 

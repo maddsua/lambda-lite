@@ -2,7 +2,7 @@ import { JSONResponse } from "../rest/jsonResponse.ts";
 import type { MiddlewarePlugin, MiddlewarePluginInstance, SpawnProps } from "../middleware/plugins.ts";
 import type { ServiceConsole } from "../util/console.ts";
 
-const pluginID = 'lambda_lite-plugin-service_token_checker';
+const pluginID = 'llp-service_auth';
 
 const uint8sEqual = (a: Uint8Array, b: Uint8Array): boolean => {
 	
@@ -15,7 +15,7 @@ const uint8sEqual = (a: Uint8Array, b: Uint8Array): boolean => {
 	return true;
 };
 
-class ServiceTokenCheckerPluginImpl implements MiddlewarePluginInstance {
+class ServiceAuthPluginImpl implements MiddlewarePluginInstance {
 
 	id = pluginID;
 	tokenHash: Uint8Array;
@@ -57,7 +57,7 @@ class ServiceTokenCheckerPluginImpl implements MiddlewarePluginInstance {
 				await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * fakeDelayRange)));
 			}
 
-			this.console?.error(`[Service token] Invalid service token provided (${authBearer})`);
+			this.console?.error(`[Service auth] Invalid service token provided (${authBearer})`);
 
 			return {
 				respondWith: new JSONResponse({
@@ -75,7 +75,7 @@ interface InitParams {
 	fakeDelayRange?: number;
 };
 
-class ServiceTokenCheckerPlugin implements MiddlewarePlugin {
+class ServiceAuthPlugin implements MiddlewarePlugin {
 
 	id = pluginID;
 	tokenHash: Uint8Array | null;
@@ -97,7 +97,7 @@ class ServiceTokenCheckerPlugin implements MiddlewarePlugin {
 
 		const useLogging = props.middleware.config.loglevel?.plugins !== false;
 
-		return new ServiceTokenCheckerPluginImpl({
+		return new ServiceAuthPluginImpl({
 			tokenHash: this.tokenHash,
 			fakeDelayRange: this.fakeDelayRange,
 			console: useLogging ? props.console : undefined
@@ -105,4 +105,4 @@ class ServiceTokenCheckerPlugin implements MiddlewarePlugin {
 	}
 }
 
-export const serviceTokenChecker = (init: InitParams) => new ServiceTokenCheckerPlugin(init);
+export const serviceAuth = (init: InitParams) => new ServiceAuthPlugin(init);

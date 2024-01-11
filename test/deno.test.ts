@@ -1,9 +1,10 @@
 import { startServer } from "../deno.mod.ts";
 import { allowMethods } from "../lib/plugins/allowMethods.ts";
-import { serviceTokenChecker } from "../lib/plugins/serviceTokenChecker.ts";
+import { serviceAuth } from "../lib/plugins/serviceAuth.ts";
 import { originController } from "../lib/plugins/originController.ts";
 import { ratelimiter } from "../lib/plugins/ratelimiter.ts";
 import { createEnv } from "../lib/util/env.ts";
+import { ipLists } from "../lib/plugins/iplists.ts";
 
 const env = createEnv({
 	port: {
@@ -21,11 +22,16 @@ await startServer({
 	healthcheckPath: '/health',
 	plugins: [
 	//	allowMethods('GET'),
-	//	serviceTokenChecker({ token: 'test'}),
+	//	serviceAuth({ token: 'test'}),
 		originController({ allowOrigins: 'all' }),
 		ratelimiter({
 			requests: 5,
 			period: 25
+		}),
+	/*	ipLists({
+			whitelist: ['127.0.0.1'],
+			blacklist: ['0.0.0.0/0']
 		})
+	*/
 	]
 });
