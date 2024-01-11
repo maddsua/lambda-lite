@@ -192,7 +192,15 @@ class IPListsPluginImpl implements MiddlewarePluginInstance {
 };
 
 interface InitParams {
+
+	/**
+	 * List of IPv4/IPv6 addresses or CIDR notations to allow access for
+	 */
 	whitelist?: string[];
+
+	/**
+	 * List of IPv4/IPv6 addresses or CIDR notations to block access for
+	 */
 	blacklist?: string[];
 };
 
