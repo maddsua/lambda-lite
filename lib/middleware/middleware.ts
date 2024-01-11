@@ -104,7 +104,7 @@ export class LambdaMiddleware {
 				}
 			}
 
-			//	go cry in the corned if it's not found
+			//	return a "not-found" response
 			if (!routectx) {
 
 				middlewareResponse = (() => {
