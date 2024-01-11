@@ -66,7 +66,6 @@ class IPv4CIDRMatcher extends IPv4Matcher {
 	match(ip: string): boolean {
 		if (!this.isIPv4(ip)) return false;
 		const checking = parseIPv4FromString(ip);
-		console.log(checking, this.taget);
 		return (checking >= this.boundLow && checking <= this.boundHigh);
 	}
 };
@@ -141,15 +140,20 @@ class IPListsPluginImpl implements MiddlewarePluginInstance {
 
 	executeBefore() {
 
-		if (this.whitelistChecker?.check(this.peerIP)) {
-			return null;
-		} else if (this.blacklistChecker?.check(this.peerIP)) {
-			return {
-				respondWith: new JSONResponse({
-					error_text: 'access denied'
-				}, { status: 511 }).toResponse()
-			}
-		}
+		const requestRejection = () => ({
+			respondWith: new JSONResponse({
+				error_text: 'access denied'
+			}, { status: 511 }).toResponse()
+		});
+
+		const isWhitelisted = this.whitelistChecker?.check(this.peerIP);
+		if (isWhitelisted) return null;
+
+		const isBlacklisted = this.blacklistChecker?.check(this.peerIP);
+		if (isBlacklisted) return requestRejection();
+
+		if (this.whitelistChecker && !isWhitelisted && !this.blacklistChecker)
+			return requestRejection();
 
 		return null;
 	}
