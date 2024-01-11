@@ -15,6 +15,6 @@ const lambda = new LambdaMiddleware({
 
 export default {
 	async fetch(request: Request, env: any, ctx: any) {
-		return workerFetchHandler({ request, env, ctx }, lambda);
+		return workerFetchHandler(request, { env }, lambda);
 	}
 }

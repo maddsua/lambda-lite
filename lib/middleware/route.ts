@@ -1,6 +1,6 @@
 import type { JSONResponse } from "../rest/jsonResponse.ts";
-import type { RateLimiterConfig } from "../accessControl/rateLimiter.ts";
 import type { ServiceConsole } from "../util/console.ts";
+import { MiddlewarePlugin } from "./plugins.ts";
 
 export interface NetworkInfo {
 	transport: 'tcp' | 'udp';
@@ -29,14 +29,22 @@ export interface RequestContextBase {
 export type RouteResponse = JSONResponse<object> | Response;
 export type RouteHandler<C extends object = {}> = (request: Request, context: RequestContextBase & C) => Promise<RouteResponse> | RouteResponse;
 
-export type HTTPMethod = 'CONNECT' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'POST' | 'PUT' | 'TRACE';
-
 export interface RouteConfig {
+
+	/**
+	 * Exapnd path to catch subpaths too
+	 */
 	expand?: boolean;
-	ratelimit?: RateLimiterConfig | null;
-	allowedOrigings?: string[] | 'all';
-	allowedMethods?: HTTPMethod[] | HTTPMethod;
-	serviceToken?: string | null;
+
+	/**
+	 * Set up route-specific plugins
+	 */
+	plugins?: MiddlewarePlugin[];
+
+	/**
+	 * Inherit global plugins
+	 */
+	inheritPlugins?: boolean;
 };
 
 export interface RouteCtx extends RouteConfig {

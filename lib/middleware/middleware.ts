@@ -3,35 +3,23 @@ import type { MiddlewareOptions } from './options.ts';
 import type { RouteHandler, RouterRoutes } from './route.ts';
 import { JSONResponse } from '../rest/jsonResponse.ts';
 import { ServiceConsole } from '../util/console.ts';
-import { OriginChecker } from '../accessControl/originChecker.ts';
-import { RateLimiter } from '../accessControl/rateLimiter.ts';
-import { MethodChecker } from '../accessControl/methodChecker.ts';
-import { ServiceTokenChecker } from '../accessControl/serviceTokenChecker.ts';
 import { getRequestIdFromProxy, generateRequestId } from '../util/misc.ts';
+import { MiddlewarePlugin } from './plugins.ts';
 
 interface HandlerCtx {
-	expandPath?: boolean;
-	rateLimiter?: RateLimiter | null;
-	originChecker?: OriginChecker | null;
-	methodChecker?: MethodChecker;
-	serviceTokenChecker?: ServiceTokenChecker | null;
 	handler: RouteHandler;
+	expandPath?: boolean;
+	plugins?: MiddlewarePlugin[];
 };
 
 export class LambdaMiddleware {
 
 	config: Partial<MiddlewareOptions>;
 	handlersPool: Record<string, HandlerCtx>;
-	rateLimiter?: RateLimiter;
-	originChecker?: OriginChecker;
-	serviceTokenChecker?: ServiceTokenChecker;
 
 	constructor (routes: RouterRoutes, config?: Partial<MiddlewareOptions>) {
 
 		this.config = config || {};
-		this.rateLimiter = config?.rateLimit ? new RateLimiter(config.rateLimit) : undefined;
-		this.originChecker = config?.allowedOrigings?.length ? new OriginChecker(config.allowedOrigings) : undefined;
-		this.serviceTokenChecker = config?.serviceToken ? new ServiceTokenChecker(config.serviceToken) : undefined;
 
 		//	transform routes
 		this.handlersPool = {};
@@ -49,12 +37,17 @@ export class LambdaMiddleware {
 
 			const handlerCtx: HandlerCtx = {
 				handler: routeCtx.handler,
-				rateLimiter: routeCtx.ratelimit === null ? null : (Object.keys(routeCtx.ratelimit || {}).length ? new RateLimiter(routeCtx.ratelimit) : undefined),
-				originChecker: routeCtx.allowedOrigings === 'all' ? null : (routeCtx.allowedOrigings?.length ? new OriginChecker(routeCtx.allowedOrigings) : undefined),
-				expandPath: typeof routeCtx.expand === 'boolean' ? routeCtx.expand : routeExpandByUrl,
-				methodChecker: routeCtx.allowedMethods?.length ? new MethodChecker(Array.isArray(routeCtx.allowedMethods) ? routeCtx.allowedMethods : [routeCtx.allowedMethods]) : undefined,
-				serviceTokenChecker: routeCtx.serviceToken === null ? null : routeCtx.serviceToken ? new ServiceTokenChecker(routeCtx.serviceToken) : undefined
 			};
+
+			//	setup route plugins
+			if (routeCtx.plugins || this.config.plugins) {
+
+				const handlerPluginsSet = new Set<string>(routeCtx.plugins?.map(item => item.id));
+				const inheritPlugins = typeof routeCtx.inheritPlugins === 'boolean' ? routeCtx.inheritPlugins : true;
+
+				const applyGlobal = inheritPlugins ? this.config.plugins?.filter(item => !handlerPluginsSet.has(item.id)) : undefined;
+				handlerCtx.plugins = (applyGlobal || []).concat(routeCtx.plugins || []);
+			}
 
 			const applyHandlerPath = route.replace(/\/\*?$/i, '');
 			this.handlersPool[applyHandlerPath.length ? applyHandlerPath : '/'] = handlerCtx;
@@ -78,20 +71,19 @@ export class LambdaMiddleware {
 		const requestID = getRequestIdFromProxy(request.headers, this.config.proxy?.requestIdHeader) || generateRequestId();
 		const clientIP = ((this.config.proxy?.forwardedIPHeader ? request.headers.get(this.config.proxy.forwardedIPHeader) : undefined)) || info.hostname;
 
-		const requestOrigin = request.headers.get('origin');
-		const handleCORS = this.config.handleCORS !== false;
-		let allowedOrigin: string | null = null;
 		let requestDisplayUrl = '/';
 
 		const console = new ServiceConsole(requestID);
 
-		const routeResponse = await (async () => {
+		const invocationResponse = await (async () => {
 
 			const { pathname } = new URL(request.url);
 			requestDisplayUrl = pathname;
 
+			let middlewareResponse: Response | null = null;
+
 			// find route path
-			const routePathname = pathname.slice(0, pathname.endsWith('/') ? pathname.length - 1 : pathname.length);
+			const routePathname = pathname === '/' ? pathname : pathname.slice(0, pathname.endsWith('/') ? pathname.length - 1 : pathname.length);
 			let routectx = this.handlersPool[routePathname];
 
 			// try to find matching wildcart route path
@@ -113,188 +105,151 @@ export class LambdaMiddleware {
 			//	go cry in the corned if it's not found
 			if (!routectx) {
 
-				if (pathname === '/') {
+				middlewareResponse = (() => {
 
-					switch (this.config.defaultResponses?.index) {
+					if (pathname === '/') {
+	
+						switch (this.config.defaultResponses?.index) {
+	
+							case 'forbidden': return new JSONResponse({
+								error_text: 'you\'re not really welcome here mate'
+							}, { status: 403 }).toResponse();
+	
+							case 'info': return new JSONResponse({
+								server: 'maddsua/lambda-lite',
+								status: 'operational'
+							}, { status: 200 }).toResponse();
+	
+							case 'teapot': return new JSONResponse({
+								error_text: 'yo bro r u lost?'
+							}, { status: 418 }).toResponse();
+						
+							default: return new JSONResponse({
+								error_text: 'route not found'
+							}, { status: 404 }).toResponse();
+						}
+					}
 
+					switch (this.config.defaultResponses?.notfound) {
+	
 						case 'forbidden': return new JSONResponse({
 							error_text: 'you\'re not really welcome here mate'
 						}, { status: 403 }).toResponse();
-
-						case 'info': return new JSONResponse({
-							server: 'maddsua/lambda-lite',
-							status: 'operational'
-						}, { status: 200 }).toResponse();
-
-						case 'teapot': return new JSONResponse({
-							error_text: '🤷‍♂️'
-						}, { status: 418 }).toResponse();
-					
+	
 						default: return new JSONResponse({
 							error_text: 'route not found'
 						}, { status: 404 }).toResponse();
 					}
-				}
 
-				switch (this.config.defaultResponses?.notfound) {
-
-					case 'forbidden': return new JSONResponse({
-						error_text: 'you\'re not really welcome here mate'
-					}, { status: 403 }).toResponse();
-
-					default: return new JSONResponse({
-						error_text: 'route not found'
-					}, { status: 404 }).toResponse();
-				}
+				})();
 			}
 
-			//	check request origin
-			const useOriginChecker = routectx.originChecker !== null ? (routectx.originChecker || this.originChecker) : null;
-			if (useOriginChecker) {
+			const requestInfo = Object.assign({
+				clientIP,
+				requestID
+			}, info);
 
-				if (!requestOrigin) {
-					return new JSONResponse({
-						error_text: 'client not verified'
-					}, { status: 403 }).toResponse();
-				}
-				else if (!useOriginChecker.check(requestOrigin)) {
-					console.log('Origin not allowed:', requestOrigin);
-					return new JSONResponse({
-						error_text: 'client not verified'
-					}, { status: 403 }).toResponse();
-				}
+			const requestContext = Object.assign({}, context || {}, {
+				console,
+				requestInfo,
+			});
 
-				allowedOrigin = requestOrigin;
-			}
-			else if (requestOrigin && allowedOrigin) {
-				allowedOrigin = '*';
-			}
+			const pluginPromises = routectx.plugins?.map(item => item.spawn({
+				console,
+				info: requestInfo,
+				middleware: this
+			}));
 
-			//	check rate limiter
-			const useRateLimiter = routectx.rateLimiter !== null ? (routectx.rateLimiter || this.rateLimiter) : null;
-			if (useRateLimiter) {
-				const rateCheck = useRateLimiter.check({ ip: clientIP });
-				if (!rateCheck.ok) {
-					console.log(`Too many requests (${rateCheck.requests}). Wait for ${rateCheck.reset}s`);
-					return new JSONResponse({
-						error_text: 'too many requests'
-					}, { status: 429 }).toResponse();
-				}
-			}
+			const runPlugins = pluginPromises?.length ? await Promise.all(pluginPromises) : [];
 
-			//	check service token
-			const useServiceChecker = routectx.serviceTokenChecker !== null ? (routectx.serviceTokenChecker || this.serviceTokenChecker) : null;
-			if (useServiceChecker) {
+			//	run "before" plugin callbacks
+			let middlewareRequest = request;
 
-				const bearerHeader = request.headers.get('x-service-token') || request.headers.get('authorization');
-				if (!bearerHeader) {
-					return new JSONResponse({
-						error_text: 'service access token is required'
-					}, {
-						status: 401,
-						headers: {
-							'WWW-Authenticate': 'Basic realm="API"'
-						}
-					}).toResponse();
+			for (const plugin of runPlugins) {
+	
+				if (!plugin.executeBefore) continue;
+
+				const temp = await plugin.executeBefore(middlewareRequest);
+
+				if (temp?.respondWith) {
+					middlewareResponse = temp.respondWith;
+					break;
 				}
 
-				const checkResult = await useServiceChecker.check(bearerHeader);
-				if (!checkResult) {
-					console.warn(`Invalid service token provided (${bearerHeader})`);
-					return new JSONResponse({
-						error_text: 'invalid service access token'
-					}, { status: 403 }).toResponse();
+				if (temp?.modifiedRequest) {
+					middlewareRequest = temp.modifiedRequest;
+					if (temp?.chainable === false) break;
 				}
-			}
-
-			//	check request method
-			if (routectx.methodChecker) {
-				const methodAllowed = routectx.methodChecker.check(request.method);
-				if (!methodAllowed) {
-					console.log(`Method not allowed (${request.method})`);
-					return new JSONResponse({
-						error_text: 'method not allowed'
-					}, { status: 405 }).toResponse();
-				}
-			}
-
-			//	respond to CORS preflixgt
-			if (request.method == 'OPTIONS' && handleCORS) {
-
-				const requestedCorsHeaders = request.headers.get('Access-Control-Request-Headers');
-				const defaultCorsHeaders = 'Origin, X-Requested-With, Content-Type, Accept';
-
-				const requestedCorsMethod = request.headers.get('Access-Control-Request-Method');
-				const defaultCorsMethods = 'GET, POST, PUT, OPTIONS, DELETE';
-
-				return new JSONResponse(null, {
-					status: 204,
-					headers: {
-						'Access-Control-Allow-Methods': requestedCorsMethod || defaultCorsMethods,
-						'Access-Control-Allow-Headers': requestedCorsHeaders || defaultCorsHeaders,
-						'Access-Control-Max-Age': '3600',
-						'Access-Control-Allow-Credentials': 'true'
-					}
-				}).toResponse();
 			}
 
 			//	execute route function
-			try {
+			if (!middlewareResponse) {
 
-				const requestInfo = Object.assign({
-					clientIP,
-					requestID
-				}, info);
+				try {
 
-				const requestContext = Object.assign({}, context || {}, {
-					console,
-					requestInfo,
-				});
+					const handlerResponse = await routectx.handler(middlewareRequest, requestContext);
+	
+					//	here we convert a non-standard response object to a standard one
+					//	all non standard should provide a "toResponse" method to do that
+					const responseObject = handlerResponse instanceof Response ? handlerResponse : handlerResponse.toResponse();
+	
+					//	and if after that it's still not a Response we just crash the request
+					if (!(responseObject instanceof Response)) {
+						const typeErrorReport = (handlerResponse && typeof handlerResponse === 'object') ?
+							`object keys ({${Object.keys(handlerResponse).join(', ')}}) don't match handler response interface` :
+							`variable of type "${typeof handlerResponse}" is not a valid handler response`;
+						throw new Error('Invalid function response: ' + typeErrorReport);
+					}
+	
+					middlewareResponse = responseObject;
 
-				const handlerResponse = await routectx.handler(request, requestContext);
+				} catch (error) {
 
-				//	here we convert a non-standard response object to a standard one
-				//	all non standard should provide a "toResponse" method to do that
-				const responseObject = handlerResponse instanceof Response ? handlerResponse : handlerResponse.toResponse();
+					console.error('Lambda middleware error:', (error as Error | null)?.message || error);
 
-				//	and if after that it's still not a Response we just crash the request
-				if (!(responseObject instanceof Response)) {
-					const typeErrorReport = (handlerResponse && typeof handlerResponse === 'object') ?
-						`object keys ({${Object.keys(handlerResponse).join(', ')}}) don't match handler response interface` :
-						`variable of type "${typeof handlerResponse}" is not a valid handler response`;
-					throw new Error('Invalid function response: ' + typeErrorReport);
-				}
+					switch (this.config.defaultResponses?.error) {
 
-				return responseObject;
-
-			} catch (error) {
-
-				console.error('Lambda middleware error:', (error as Error | null)?.message || error);
-
-				switch (this.config.defaultResponses?.error) {
-
-					case 'log': return new JSONResponse({
-						error_text: 'unhandled middleware error',
-						error_log: (error as Error | null)?.message || JSON.stringify(error)
-					}, { status: 500 }).toResponse();
-
-					default: return new JSONResponse({
-						error_text: 'unhandled middleware error'
-					}, { status: 500 }).toResponse();
+						case 'log': {
+							middlewareResponse = new JSONResponse({
+								error_text: 'unhandled middleware error',
+								error_log: (error as Error | null)?.message || JSON.stringify(error)
+							}, { status: 500 }).toResponse();
+						} break;
+	
+						default: { 
+							middlewareResponse = new JSONResponse({
+								error_text: 'unhandled middleware error'
+							}, { status: 500 }).toResponse();
+						} break;
+					}
 				}
 			}
+
+			//	run "after" plugin callbacks
+			for (const plugin of runPlugins) {
+
+				if (!plugin.executeAfter) continue;
+
+				const temp = await plugin.executeAfter(middlewareResponse);
+
+				if (temp?.overrideResponse) {
+					if (temp.chainable === false) return temp.overrideResponse;
+					middlewareResponse = temp.overrideResponse;
+				}
+			}
+
+			return middlewareResponse;
 
 		})();
 
 		//	add some headers so the shit always works
-		routeResponse.headers.set('x-powered-by', 'maddsua/lambda-lite');
-		if (allowedOrigin) routeResponse.headers.set('Access-Control-Allow-Origin', allowedOrigin);
-		routeResponse.headers.set('x-request-id', requestID);
+		invocationResponse.headers.set('x-powered-by', 'maddsua/lambda');
+		invocationResponse.headers.set('x-request-id', requestID);
 
 		//	log for, you know, reasons
 		if (this.config.loglevel?.requests !== false)	
-			console.log(`(${clientIP}) ${request.method} ${requestDisplayUrl} --> ${routeResponse.status}`);
+			console.log(`(${clientIP}) ${request.method} ${requestDisplayUrl} --> ${invocationResponse.status}`);
 
-		return routeResponse;
+		return invocationResponse;
 	}
 };
