@@ -1,19 +1,19 @@
 
 type EnvVariableValueType = 'string' | 'number' | 'boolean' | 'object';
 
-export interface TypedEnvVariableCtx {
+interface TypedEnvVariableCtx {
 	name: string;
 	type?: EnvVariableValueType;
 	optional?: true | false;
 };
 
-export type TypedEnvBase = Record<string, TypedEnvVariableCtx>;
+type EnvValueTypeToType<T extends TypedEnvVariableCtx['type']> = T extends 'string' ?
+	string : T extends 'number' ?
+	number : T extends 'boolean' ?
+	boolean : T extends 'object' ?
+	object : string;
 
-type EnvValueTypeToType<T extends TypedEnvVariableCtx['type']> = T extends 'string' ? string 
-	: T extends 'number' ? number
-	: T extends 'boolean' ? boolean
-	: T extends 'object' ? object
-	: string;
+export type TypedEnvBase = Record<string, TypedEnvVariableCtx>;
 
 type SchemaType<T extends TypedEnvBase> = {
 	[K in keyof T]: T[K]['optional'] extends true ? EnvValueTypeToType<T[K]['type']> | undefined : EnvValueTypeToType<T[K]['type']>;
