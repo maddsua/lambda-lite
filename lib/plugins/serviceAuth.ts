@@ -71,7 +71,17 @@ class ServiceAuthPluginImpl implements MiddlewarePluginInstance {
 };
 
 interface InitParams {
+
+	/**
+	 * Define service token
+	 */
 	token: string;
+
+	/**
+	 * Make a fake delay when client sends an invalid token.
+	 * This options sets range in milliseconds,
+	 * in which a fake delay would be randomly picked
+	 */
 	fakeDelayRange?: number;
 };
 

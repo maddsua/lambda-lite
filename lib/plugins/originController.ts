@@ -118,7 +118,15 @@ class CorsPluginImpl implements MiddlewarePluginInstance {
 };
 
 interface InitParams {
+
+	/**
+	 * List of allowed origins
+	 */
 	allowOrigins: string[] | 'all';
+
+	/**
+	 * Automatically respond to CORS preflight and add necessary headers
+	 */
 	handleCORS?: boolean;
 };
 

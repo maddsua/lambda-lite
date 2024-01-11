@@ -3,6 +3,10 @@ import type { RouterRoutes } from "../../middleware/route.ts";
 import { LambdaMiddleware } from '../../middleware/middleware.ts';
 
 export interface StartServerOptions extends MiddlewareOptions {
+
+	/**
+	 * Define API routes
+	 */
 	routes: RouterRoutes;
 };
 

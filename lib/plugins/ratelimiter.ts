@@ -65,7 +65,15 @@ class RateLimiterPluginImpl implements MiddlewarePluginInstance {
 };
 
 interface RateLimiterConfig {
+
+	/**
+	 * Time frame in seconds
+	 */
 	period: number;
+
+	/**
+	 * Number of requests allowed for a client in the time frame
+	 */
 	requests: number;
 };
 
