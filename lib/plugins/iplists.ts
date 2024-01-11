@@ -13,17 +13,13 @@ const parseIPv4FromString = (ipstring: string) => {
 	return ((BigInt(blocks[0]) << BigInt(24)) | (BigInt(blocks[1]) << BigInt(16)) | (BigInt(blocks[2]) << BigInt(8)) | BigInt(blocks[3]));
 };
 
+const parseIPv6FromString = (ipstring: string) => BigInt('0x' + ipstring.replace(/\:+/g, ''));
+
 abstract class IPMatcher {
 	abstract match(ip: string): boolean;
 };
 
-abstract class IPv4Matcher extends IPMatcher {
-	isIPv4(ip: string) {
-		return /^(\d{1,3}\.){3}\d{1,3}(\/\d{1,2})?$/.test(ip);
-	}
-};
-
-class IPv4DirectMatcher extends IPv4Matcher {
+class IPDirectMatcher extends IPMatcher {
 
 	ip: string;
 
@@ -33,12 +29,12 @@ class IPv4DirectMatcher extends IPv4Matcher {
 	}
 
 	match(ip: string): boolean {
-		if (ip.includes('/') || !this.isIPv4(ip)) return false;
+		if (ip.includes('/')) return false;
 		return ip === this.ip;
 	}
 };
 
-class IPv4CIDRMatcher extends IPv4Matcher {
+class IPv4CIDRMatcher extends IPMatcher {
 
 	taget: bigint;
 	boundLow: bigint;
@@ -47,7 +43,7 @@ class IPv4CIDRMatcher extends IPv4Matcher {
 	constructor(ip: string) {
 
 		if (!/^(\d{1,3}\.){3}\d{1,3}\/\d{1,2}$/.test(ip))
-			throw new Error(`"${ip}" is not an IPv4 address + CIDR`);
+			throw new Error(`"${ip}" is not a valid IPv4 address + CIDR notation`);
 
 		super();
 
@@ -66,8 +62,42 @@ class IPv4CIDRMatcher extends IPv4Matcher {
 	}
 
 	match(ip: string): boolean {
-		if (!this.isIPv4(ip)) return false;
+		if (!/^(\d{1,3}\.){3}\d{1,3}(\/\d{1,2})?$/.test(ip)) return false;
 		const checking = parseIPv4FromString(ip);
+		return (checking >= this.boundLow && checking <= this.boundHigh);
+	}
+};
+
+class IPv6CIDRMatcher extends IPMatcher {
+
+	taget: bigint;
+	boundLow: bigint;
+	boundHigh: bigint;
+
+	constructor(ip: string) {
+
+		if (!/^([a-f0-9]{1,4})?(\:[a-f0-9]{0,4}){1,7}(\/\d{1,2})?$/i.test(ip))
+			throw new Error(`"${ip}" is not a valid IPv6 address + CIDR notation`);
+
+		super();
+
+		this.taget = parseIPv6FromString(ip);
+
+		const cidr = parseInt(ip.slice(ip.indexOf('/') + 1));
+
+		if (isNaN(cidr) || cidr < 0 || cidr > 64)
+			throw new Error(`IPv6 address "${ip}" has invalid CIDR notation`);
+
+		const cidrMask = (BigInt(2) ** BigInt(64 - cidr)) - BigInt(1);
+		const cidrAntiMask = (BigInt(-1)) ^ cidrMask;
+
+		this.boundLow = this.taget & cidrAntiMask;
+		this.boundHigh = this.taget | BigInt(cidrMask);
+	}
+
+	match(ip: string): boolean {
+		if (!/^([a-f0-9]{1,4})?(\:[a-f0-9]{0,4}){1,7}$/i.test(ip)) return false;
+		const checking = parseIPv6FromString(ip);
 		return (checking >= this.boundLow && checking <= this.boundHigh);
 	}
 };
@@ -81,9 +111,9 @@ class IPChecker {
 		this.data = addresses.map(item => {
 
 			if (item.includes('/')) {
-				return new IPv4CIDRMatcher(item);
+				return item.includes(':') ? new IPv4CIDRMatcher(item) : new IPv4CIDRMatcher(item) ;
 			} else {
-				return new IPv4DirectMatcher(item);
+				return new IPDirectMatcher(item);
 			}
 		});
 	}
