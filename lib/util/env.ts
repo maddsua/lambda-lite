@@ -1,23 +1,9 @@
 
-class ExtendedEnvString {
-
-	string: string;
-
-	constructor(init: string) {
-		this.string = init;
-	}
-
-	asSeparatedList(token?: string) {
-		return this.string.split(token || ',').map(item => item.trim()).filter(item => item.length);
-	}
-
-};
-
 type EnvVariableValueType = 'string' | 'number' | 'boolean' | 'object';
 
 interface TypedEnvVariableCtx {
 	name: string;
-	type?: EnvVariableValueType | 'extended-string';
+	type?: EnvVariableValueType | 'comma-separated';
 	optional?: true | false;
 };
 
@@ -25,7 +11,7 @@ type EnvValueTypeToType<T extends TypedEnvVariableCtx['type']> = T extends 'stri
 	T extends 'number' ? number :
 	T extends 'boolean' ? boolean :
 	T extends 'object' ? object :
-	T extends 'extended-string' ? ExtendedEnvString :
+	T extends 'extended-string' ? string[] :
 	string;
 
 export type TypedEnvBase = Record<string, TypedEnvVariableCtx>;
@@ -50,8 +36,8 @@ export const createEnv = <T extends TypedEnvBase>(schema: T, env: Record<string,
 
 		try {
 
-			if (ctx.type === 'extended-string') {
-				result[key] = new ExtendedEnvString(value);
+			if (ctx.type === 'comma-separated') {
+				result[key] = value.split(',').map(item => item.trim()).filter(item => item.length);;
 			} else if (!ctx.type || ctx.type === 'string') {
 				result[key] = value;
 			} else {
