@@ -61,7 +61,6 @@ class IPv4CIDRMatcher extends IPv4Matcher {
 	match(ip: string): boolean {
 		if (!this.isIPv4(ip)) return false;
 		const checking = parseIPv4FromString(ip);
-		console.log(checking, this.taget);
 		return (checking >= this.boundLow && checking <= this.boundHigh);
 	}
 };
