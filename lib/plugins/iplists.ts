@@ -111,7 +111,7 @@ class IPChecker {
 		this.data = addresses.map(item => {
 
 			if (item.includes('/')) {
-				return item.includes(':') ? new IPv4CIDRMatcher(item) : new IPv4CIDRMatcher(item) ;
+				return item.includes(':') ? new IPv6CIDRMatcher(item) : new IPv4CIDRMatcher(item) ;
 			} else {
 				return new IPDirectMatcher(item);
 			}
