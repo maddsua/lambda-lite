@@ -28,7 +28,7 @@ class IPv4DirectMatcher extends IPv4Matcher {
 	}
 
 	match(ip: string): boolean {
-		if (!this.isIPv4(ip)) return false;
+		if (ip.includes('/') || !this.isIPv4(ip)) return false;
 		return ip === this.ip;
 	}
 }
@@ -61,6 +61,20 @@ class IPv4CIDRMatcher extends IPv4Matcher {
 	match(ip: string): boolean {
 		if (!this.isIPv4(ip)) return false;
 		const checking = parseIPv4FromString(ip);
+		console.log(checking, this.taget);
 		return (checking >= this.boundLow && checking <= this.boundHigh);
+	}
+};
+
+class IPChecker {
+
+	data: IPMatcher[];
+
+	constructor(addresses: string[]) {
+		this.data = addresses.map(item => item.includes('/') ? new IPv4CIDRMatcher(item) : new IPv4DirectMatcher(item));
+	}
+
+	check(ip: string) {
+		return this.data.some(item => item.match(ip));
 	}
 };
