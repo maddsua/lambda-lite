@@ -3,10 +3,19 @@ import { allowMethods } from "../lib/plugins/allowMethods.ts";
 import { serviceTokenChecker } from "../lib/plugins/serviceTokenChecker.ts";
 import { originController } from "../lib/plugins/originController.ts";
 import { ratelimiter } from "../lib/plugins/ratelimiter.ts";
+import { createEnv } from "../lib/util/env.ts";
+
+const env = createEnv({
+	port: {
+		name: 'PORT',
+		type: 'number',
+		optional: true
+	}
+}, Deno.env.toObject());
 
 await startServer({
 	serve: {
-		port: 8080,
+		port: env.port || 8080,
 	},
 	routesDir: 'test/functions',
 	healthcheckPath: '/health',
