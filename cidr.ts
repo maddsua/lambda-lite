@@ -18,6 +18,21 @@ abstract class IPv4Matcher extends IPMatcher {
 	}
 };
 
+class IPv4DirectMatcher extends IPv4Matcher {
+
+	ip: string;
+
+	constructor(ip: string) {
+		super();
+		this.ip = ip;
+	}
+
+	match(ip: string): boolean {
+		if (!this.isIPv4(ip)) return false;
+		return ip === this.ip;
+	}
+}
+
 class IPv4CIDRMatcher extends IPv4Matcher {
 
 	taget: bigint;
