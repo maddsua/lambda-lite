@@ -1,7 +1,7 @@
 
 const parseIPv4FromString = (ipstring: string) => {
 
-	const blocks = ipstring.replace(/[^\d\.]+/g, '').split('.').map(item => parseInt(item));
+	const blocks = ipstring.replace(/\/\d+$/, '').replace(/[^\d\.]+/g, '').split('.').map(item => parseInt(item));
 	if (blocks.length !== 4 || blocks.some(item => isNaN(item)))
 		throw new Error(`IPv4 address "${ipstring}" is not valid`);
 
@@ -61,6 +61,7 @@ class IPv4CIDRMatcher extends IPv4Matcher {
 	match(ip: string): boolean {
 		if (!this.isIPv4(ip)) return false;
 		const checking = parseIPv4FromString(ip);
+		console.log(checking, this.taget);
 		return (checking >= this.boundLow && checking <= this.boundHigh);
 	}
 };
