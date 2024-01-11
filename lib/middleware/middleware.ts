@@ -84,7 +84,9 @@ export class LambdaMiddleware {
 
 			// find route path
 			const routePathname = pathname === '/' ? pathname : pathname.slice(0, pathname.endsWith('/') ? pathname.length - 1 : pathname.length);
-			let routectx = this.handlersPool[routePathname];
+
+			//	typescript is too dumb to figure it out so it might need a bin of help here
+			let routectx = this.handlersPool[routePathname] as HandlerCtx | undefined;
 
 			// try to find matching wildcart route path
 			if (!routectx) {
@@ -154,7 +156,7 @@ export class LambdaMiddleware {
 				requestInfo,
 			});
 
-			const pluginPromises = routectx.plugins?.map(item => item.spawn({
+			const pluginPromises = routectx?.plugins?.map(item => item.spawn({
 				console,
 				info: requestInfo,
 				middleware: this
@@ -183,11 +185,14 @@ export class LambdaMiddleware {
 			}
 
 			//	execute route function
+			//	typescript is kinda confused here too
+			//	routectx won't ever be undefined here
+			//	as the middlewareResponse would be set by the 404 handler
 			if (!middlewareResponse) {
 
 				try {
 
-					const handlerResponse = await routectx.handler(middlewareRequest, requestContext);
+					const handlerResponse = await routectx!.handler(middlewareRequest, requestContext);
 	
 					//	here we convert a non-standard response object to a standard one
 					//	all non standard should provide a "toResponse" method to do that
