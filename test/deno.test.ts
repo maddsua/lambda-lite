@@ -10,6 +10,11 @@ const env = createEnv({
 		name: 'PORT',
 		type: 'number',
 		optional: true
+	},
+	emails: {
+		name: 'MAILING_LIST',
+		type: 'extended-string',
+		optional: true
 	}
 }, Deno.env.toObject());
 
