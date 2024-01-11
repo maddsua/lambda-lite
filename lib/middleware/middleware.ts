@@ -37,6 +37,7 @@ export class LambdaMiddleware {
 
 			const handlerCtx: HandlerCtx = {
 				handler: routeCtx.handler,
+				expandPath: typeof routeCtx.expand === 'boolean' ? routeCtx.expand : routeExpandByUrl
 			};
 
 			//	setup route plugins
