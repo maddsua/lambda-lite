@@ -1,30 +1,4 @@
 
-const array = new Uint8Array([192, 168, 2, 1]);
-
-type IPv4SegmentsType = [number, number, number, number];
-const ipv4ToInt = (ipv4: IPv4SegmentsType) => (BigInt(ipv4[0]) << BigInt(24)) | (BigInt(ipv4[1]) << BigInt(16)) | (BigInt(ipv4[2]) << BigInt(8)) | BigInt(ipv4[3]);
-
-const assembledValue = ipv4ToInt([2, 121, 48, 50]);
-
-const cidr = 25;
-const cidrMask = (BigInt(2) ** BigInt(32-cidr)) - BigInt(1);
-const cidrAntiMask = (BigInt(-1)) ^ cidrMask;
-
-console.log('mask:', cidrMask.toString(2));
-console.log('anti mask:', cidrAntiMask.toString(2));
-
-const ipReal = assembledValue;
-const boundLow = assembledValue & cidrAntiMask;
-const boundHigh = assembledValue | BigInt(cidrMask);
-
-console.log('low:', boundLow, (boundLow).toString(2));
-console.log('ip:', ipReal, ipReal.toString(2));
-console.log('high:', boundHigh, boundHigh.toString(2));
-
-console.log(boundHigh - ipReal);
-console.log(boundHigh - boundLow);
-console.log(ipReal - boundLow);
-
 const parseIPv4FromString = (ipstring: string) => {
 
 	const blocks = ipstring.replace(/[^\d\.]+/g, '').split('.').map(item => parseInt(item));
@@ -52,16 +26,21 @@ class IPv4CIDRMatcher extends IPv4Matcher {
 
 	constructor(ip: string) {
 
+		if (!/^(\d{1,3}\.){3}\d{1,3}\/\d{1,2}$/.test(ip))
+			throw new Error(`"${ip}" is not an IPv4 address + CIDR`);
+
 		super();
 
 		this.taget = parseIPv4FromString(ip);
 
-		const cidr = 25;
+		const cidr = parseInt(ip.slice(ip.indexOf('/') + 1));
+		if (isNaN(cidr)) throw new Error(`IPv4 address "${ip}" has invalid CIDR notation`);
+
 		const cidrMask = (BigInt(2) ** BigInt(32-cidr)) - BigInt(1);
 		const cidrAntiMask = (BigInt(-1)) ^ cidrMask;
 
-		this.boundLow = assembledValue & cidrAntiMask;
-		this.boundHigh = assembledValue | BigInt(cidrMask);
+		this.boundLow = this.taget & cidrAntiMask;
+		this.boundHigh = this.taget | BigInt(cidrMask);
 	}
 
 	match(ip: string): boolean {
