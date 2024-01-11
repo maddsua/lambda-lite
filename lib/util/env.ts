@@ -1,44 +1,44 @@
 
-export interface TypedEnvVariable {
+type EnvVariableValueType = 'string' | 'number' | 'boolean' | 'object';
+
+export interface TypedEnvVariableCtx {
 	name: string;
-	type?: 'string' | 'number' | 'boolean' | 'object';
+	type?: EnvVariableValueType;
 	optional?: true | false;
 };
 
-//export type TypedEnv<T extends Record<string, TypedEnvVariable> = {}> = Record<keyof T, TypedEnvVariable>;
+export type TypedEnvBase = Record<string, TypedEnvVariableCtx>;
 
-const schema = {
-	testVar: {
-		name: 'TESTVAR',
-		type: 'number',
-		optional: true
-	}
+type EnvValueTypeToType<T extends TypedEnvVariableCtx['type']> = T extends 'string' ? string 
+	: T extends 'number' ? number
+	: T extends 'boolean' ? boolean
+	: T extends 'object' ? object
+	: string;
+
+type SchemaType<T extends TypedEnvBase> = {
+	[K in keyof T]: T[K]['optional'] extends true ? EnvValueTypeToType<T[K]['type']> | undefined : EnvValueTypeToType<T[K]['type']>;
 };
 
-const createEnv = <T extends Record<string, TypedEnvVariable> = {}>(schema: T, env: object) => {
+export const createEnv = <T extends TypedEnvBase>(schema: T, env: Record<string, string>) => {
 
-	type Env = { [P in keyof T]: T[P]['optional'] extends true ? string | undefined : string; };
-
-	const result: { [P in keyof T]: [P]; } = {};
+	const result: Record<string, any> = {};
 
 	for (const key in schema) {
 
 		const ctx = schema[key];
-		const value = env[ctx.name as keyof typeof env];
+		const value = env[ctx.name]?.trim();
 
 		if (!value) {
 			if (ctx.optional) continue;
 			throw new Error(`[Typed Env]: Variable $${ctx.name} is not defined`);
 		}
 
-		let parsedValue: any = value;
-
-		result[key as keyof typeof result] = parsedValue;
+		try {
+			result[key] = (!ctx.type || ctx.type === 'string') ? value : JSON.parse(value);
+		} catch (_error) {
+			throw new Error(`[Typed Env]: Failed to parse variable $${ctx.name}`);
+		}
 	}
 
-	//type ResultingEnvType = { [P in keyof T]: T[P]['type']; };
-
-	return result;
+	return result as SchemaType<typeof schema>;
 };
-
-const env = createEnv(schema);
