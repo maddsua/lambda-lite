@@ -2,7 +2,7 @@ import { JSONResponse } from "../rest/jsonResponse.ts";
 import type { MiddlewarePlugin, MiddlewarePluginInstance, SpawnProps } from "../middleware/plugins.ts";
 import type { ServiceConsole } from "../util/console.ts";
 
-const pluginID = 'lambda_lite-plugin-ip_lists';
+const pluginID = 'llp-ip_lists';
 
 const parseIPv4FromString = (ipstring: string) => {
 
@@ -15,7 +15,7 @@ const parseIPv4FromString = (ipstring: string) => {
 
 abstract class IPMatcher {
 	abstract match(ip: string): boolean;
-}
+};
 
 abstract class IPv4Matcher extends IPMatcher {
 	isIPv4(ip: string) {
@@ -36,7 +36,7 @@ class IPv4DirectMatcher extends IPv4Matcher {
 		if (ip.includes('/') || !this.isIPv4(ip)) return false;
 		return ip === this.ip;
 	}
-}
+};
 
 class IPv4CIDRMatcher extends IPv4Matcher {
 
@@ -186,6 +186,6 @@ class IPListsPlugin implements MiddlewarePlugin {
 			console: useLogging ? props.console : undefined,
 		});
 	}
-}
+};
 
 export const ipLists = (init: InitParams) => new IPListsPlugin(init);
