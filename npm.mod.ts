@@ -5,7 +5,6 @@ import type { MiddlewareOptions } from "./lib/middleware/options.ts";
 import { LambdaMiddleware } from "./lib/middleware/middleware.ts";
 import * as plugins from './lib/plugins/index.ts';
 import { createEnv, type TypedEnvBase } from "./lib/util/env.ts";
-import * as envutils from './lib/util/envutils.ts';
 
 export {
 	RouteHandler,
@@ -13,7 +12,6 @@ export {
 	JSONResponse,
 	LambdaMiddleware,
 	MiddlewareOptions,
-	envutils,
 	plugins,
 	createEnv,
 	TypedEnvBase,
