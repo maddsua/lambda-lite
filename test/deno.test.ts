@@ -13,7 +13,7 @@ const env = createEnv({
 	},
 	emails: {
 		name: 'MAILING_LIST',
-		type: 'extended-string',
+		type: 'comma-separated',
 		optional: true
 	}
 }, Deno.env.toObject());
