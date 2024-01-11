@@ -71,7 +71,15 @@ class IPChecker {
 	data: IPMatcher[];
 
 	constructor(addresses: string[]) {
-		this.data = addresses.map(item => item.includes('/') ? new IPv4CIDRMatcher(item) : new IPv4DirectMatcher(item));
+
+		this.data = addresses.map(item => {
+
+			if (item.includes('/')) {
+				return new IPv4CIDRMatcher(item);
+			} else {
+				return new IPv4DirectMatcher(item);
+			}
+		});
 	}
 
 	check(ip: string) {
