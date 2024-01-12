@@ -3,6 +3,10 @@ export interface SerializableResponse {
 	toResponse(): Response;
 };
 
+export interface SerializableRequest {
+	toRequest(): Request;
+};
+
 type ResponseContentType = 'json' | 'html' | 'text';
 
 export interface TypedRouteResponse {
