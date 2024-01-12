@@ -1,9 +1,9 @@
 import type { NetworkInfo } from './route.ts';
 import type { MiddlewareOptions } from './options.ts';
-import type { RouteHandler, RouterRoutes } from './route.ts';
+import { type RouteHandler, type RouterRoutes, typedResponseMimeType } from './route.ts';
 import { JSONResponse } from '../rest/jsonResponse.ts';
 import { ServiceConsole } from '../util/console.ts';
-import { getRequestIdFromProxy, generateRequestId } from '../util/misc.ts';
+import { getRequestIdFromProxy, generateRequestId, } from '../util/misc.ts';
 import { MiddlewarePlugin } from './plugins.ts';
 
 interface HandlerCtx {
@@ -163,9 +163,15 @@ export class LambdaMiddleware {
 					} else if ('toResponse' in handlerResponse) {
 						middlewareResponse = handlerResponse.toResponse();
 					} else {
+
 						const body = handlerResponse.data ? JSON.stringify(handlerResponse.data) : null;
 						const headers = new Headers(handlerResponse.headers);
-						if (handlerResponse.data) headers.set('content-type', 'application/json');
+
+						if (handlerResponse.data) {
+							const contentType = handlerResponse.type ? typedResponseMimeType[handlerResponse.type] : typedResponseMimeType.json;
+							headers.set('content-type', contentType);
+						}
+
 						middlewareResponse = new Response(body, { headers, status: handlerResponse.status });
 					}
 
