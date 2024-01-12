@@ -1,11 +1,11 @@
 import type { SerializableResponse } from "../middleware/responses.ts";
-import type { FetchSchema } from "./typed.ts";
+import type { FetchSchema, TypedFetchResponse } from "./typed.ts";
 
 export class TypedResponse<
 	D extends object | null = null,
 	H extends Record<string, string> | undefined = undefined,
 	S extends number | undefined = undefined
-> implements SerializableResponse {
+> implements SerializableResponse, TypedFetchResponse {
 
 	data: D | null;
 	headers: H | undefined;
