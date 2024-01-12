@@ -2,7 +2,7 @@ import type { NetworkInfo } from './route.ts';
 import type { MiddlewareOptions } from './options.ts';
 import type { RouteHandler, RouterRoutes } from './route.ts';
 import { typedResponseMimeType } from './responses.ts';
-import { JSONResponse } from '../rest/jsonResponse.ts';
+import { TypedResponse } from '../rest/response.ts';
 import { ServiceConsole } from '../util/console.ts';
 import { getRequestIdFromProxy, generateRequestId, } from '../util/misc.ts';
 import { MiddlewarePlugin } from './plugins.ts';
@@ -189,14 +189,14 @@ export class LambdaMiddleware {
 					switch (this.config.defaultResponses?.error) {
 
 						case 'log': {
-							middlewareResponse = new JSONResponse({
+							middlewareResponse = new TypedResponse({
 								error_text: 'unhandled middleware error',
 								error_log: (error as Error | null)?.message || JSON.stringify(error)
 							}, { status: 500 }).toResponse();
 						} break;
 	
 						default: { 
-							middlewareResponse = new JSONResponse({
+							middlewareResponse = new TypedResponse({
 								error_text: 'unhandled middleware error'
 							}, { status: 500 }).toResponse();
 						} break;
@@ -216,20 +216,20 @@ export class LambdaMiddleware {
 	
 						switch (this.config.defaultResponses?.index) {
 	
-							case 'forbidden': return new JSONResponse({
+							case 'forbidden': return new TypedResponse({
 								error_text: 'you\'re not really welcome here mate'
 							}, { status: 403 }).toResponse();
 	
-							case 'info': return new JSONResponse({
+							case 'info': return new TypedResponse({
 								server: 'maddsua/lambda-lite',
 								status: 'operational'
 							}, { status: 200 }).toResponse();
 	
-							case 'teapot': return new JSONResponse({
+							case 'teapot': return new TypedResponse({
 								error_text: 'yo bro r u lost?'
 							}, { status: 418 }).toResponse();
 						
-							default: return new JSONResponse({
+							default: return new TypedResponse({
 								error_text: 'route not found'
 							}, { status: 404 }).toResponse();
 						}
@@ -237,11 +237,11 @@ export class LambdaMiddleware {
 
 					switch (this.config.defaultResponses?.notfound) {
 	
-						case 'forbidden': return new JSONResponse({
+						case 'forbidden': return new TypedResponse({
 							error_text: 'you\'re not really welcome here mate'
 						}, { status: 403 }).toResponse();
 	
-						default: return new JSONResponse({
+						default: return new TypedResponse({
 							error_text: 'route not found'
 						}, { status: 404 }).toResponse();
 					}
