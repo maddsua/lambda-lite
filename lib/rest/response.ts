@@ -31,3 +31,17 @@ export type InferResponseType<T extends {
 	headers?: Record<string, string>;
 	status?: number;
 }> = TypedResponse<T['data'], T['headers'], T['status']>;
+
+export const responseToTyped = async <T extends TypedResponse<any, any, any>>(response: Response) => {
+
+	interface TypedInit {
+		data: T['data'];
+		headers: T['headers'];
+		status: T['status'];
+	};
+
+	return new TypedResponse(await response.json().catch(() => null), {
+		headers: Object.fromEntries(response.headers.entries()),
+		status: response.status
+	} as TypedInit);
+};
