@@ -5,17 +5,17 @@ export class TypedResponse<
 	S extends number | undefined = undefined
 > {
 
-	data: D;
-	headers: H;
-	status: S;
+	data: D | null;
+	headers: H | undefined;
+	status: S | undefined;
 
-	constructor(data: D, init?: {
+	constructor(data?: D, init?: {
 		headers?: H;
 		status?: S;
 	}) {
-		this.data = data;
-		this.headers = init?.headers as H;
-		this.status = init?.status as S;
+		this.data = data || null;
+		this.headers = init?.headers;
+		this.status = init?.status;
 	}
 
 	toResponse(): Response {
@@ -35,13 +35,15 @@ export type InferResponseType<T extends {
 export const responseToTyped = async <T extends TypedResponse<any, any, any>>(response: Response) => {
 
 	interface TypedInit {
-		data: T['data'];
+		data: T['data'] | null;
 		headers: T['headers'];
 		status: T['status'];
 	};
 
+	const responseHeaders = Object.fromEntries(response.headers.entries());
+
 	return new TypedResponse(await response.json().catch(() => null), {
-		headers: Object.fromEntries(response.headers.entries()),
+		headers: responseHeaders,
 		status: response.status
 	} as TypedInit);
 };
