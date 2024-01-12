@@ -36,7 +36,7 @@ export const loadFunctionsFromFS = async (fromDir: string): Promise<RouterRoutes
 			const importPath = /^([A-z]\:)?[\\\/]/.test(entry) ? entry : `${Deno.cwd()}/${entry}`;
 			const importURL = `file:///` + importPath.replace(/[\\\/]+/g, '/').replace(/\/[^\/]+\/[\.]{2}\//g, '/').replace(/\/\.\//g, '/');
 
-			console.log(`%c --> Loading function %c${entry}`, 'color: blue', 'color: white');
+			console.log(`%c --> Loading function: %c${entry}`, 'color: blue', 'color: white');
 
 			const imported = await import(importURL);	
 	
