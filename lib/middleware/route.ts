@@ -2,6 +2,21 @@ import type { JSONResponse } from "../rest/jsonResponse.ts";
 import type { ServiceConsole } from "../util/console.ts";
 import { MiddlewarePlugin } from "./plugins.ts";
 
+type ResponseContentType = 'json' | 'html' | 'text';
+
+export interface TypedRouteResponse {
+	data?: object;
+	headers?: Record<string, string>;
+	status?: number;
+	type?: ResponseContentType;
+};
+
+export const typedResponseMimeType: Record<ResponseContentType, string> = {
+	json: 'application/json',
+	html: 'text/html',
+	text: 'text/plain'
+};
+
 export interface NetworkInfo {
 	transport: 'tcp' | 'udp';
 	hostname: string;
@@ -24,12 +39,6 @@ export interface RequestContextBase {
 	 * Request info info, duh
 	 */
 	requestInfo: RequestInfo;
-};
-
-export interface TypedRouteResponse {
-	data?: object;
-	headers?: Record<string, string>;
-	status?: number;
 };
 
 export type RouteResponse = TypedRouteResponse | JSONResponse<object> | Response;
