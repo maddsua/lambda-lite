@@ -77,7 +77,7 @@ class CorsPluginImpl implements MiddlewarePluginInstance {
 
 			this.setAllowOrigin = requestOrigin;
 			
-		} else {
+		} else if (requestOrigin) {
 			this.setAllowOrigin = requestOrigin?.length ? requestOrigin : '*';
 		}
 
