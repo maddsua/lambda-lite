@@ -1,8 +1,9 @@
+import type { SerializableResponse } from "../middleware/responses.ts";
 
 /**
  * Alternative Response class that automatically handles JSON serialization
  */
-export class JSONResponse<T extends object> {
+export class JSONResponse<T extends object> implements SerializableResponse {
 
 	body: string | null;
 	headers: Headers;
