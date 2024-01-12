@@ -1,9 +1,11 @@
+import type { SerializableResponse } from "../middleware/responses.ts";
+import type { FetchSchema } from "./typed.ts";
 
 export class TypedResponse<
 	D extends object | null = null,
 	H extends Record<string, string> | undefined = undefined,
 	S extends number | undefined = undefined
-> {
+> implements SerializableResponse {
 
 	data: D | null;
 	headers: H | undefined;
@@ -29,21 +31,20 @@ export class TypedResponse<
 	}
 };
 
-export type InferResponseType<T extends {
-	data: object | null;
-	headers?: Record<string, string>;
-	status?: number;
-}> = TypedResponse<T['data'], T['headers'], T['status']>;
+export type InferResponseType<T extends FetchSchema<any>> = TypedResponse<
+	T['response']['data'],
+	T['response']['headers'],
+	T['response']['status']
+> | T['response'];
 
-export const responseToTyped = async <T extends TypedResponse<any, any, any>>(response: Response) => {
+export const responseToTyped = async <T extends FetchSchema<any>> (response: Response) => {
 
 	const contentIsJSON = response.headers.get('content-type')?.toLowerCase()?.includes('json');
-	
 	const responseData = contentIsJSON ? await response.json().catch(() => null) : null;
 	if (contentIsJSON && !responseData) throw new Error('Invalid typed response: no data');
 
 	return new TypedResponse(responseData as any, {
 		headers: Object.fromEntries(response.headers.entries()),
 		status: response.status
-	}) as T;
+	}) as InferResponseType<T>;
 };
