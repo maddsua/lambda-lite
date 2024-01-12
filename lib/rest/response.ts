@@ -1,4 +1,3 @@
-import { parseFlags, serializeFlags } from "./typedFlags.ts";
 
 export class TypedResponse<
 	D extends object | null = null,
@@ -24,12 +23,7 @@ export class TypedResponse<
 		const body = this.data ? JSON.stringify(this.data) : null;
 		const headers = new Headers(this.headers);
 
-		const flags = serializeFlags({
-			non_null: !!body?.length
-		});
-
 		if (this.data) headers.set('content-type', 'application/json');
-		if (flags.length) headers.set('x-typed-rest-flags', flags);
 
 		return new Response(body, { headers, status: this.status });
 	}
@@ -43,14 +37,13 @@ export type InferResponseType<T extends {
 
 export const responseToTyped = async <T extends TypedResponse<any, any, any>>(response: Response) => {
 
-	const responseHeaders = Object.fromEntries(response.headers.entries());
-	const flags = parseFlags(response.headers.get('x-typed-rest-flags'));
-	const responseData = flags.non_null ? await response.json().catch(() => null) : null;
+	const contentIsJSON = response.headers.get('content-type')?.toLowerCase()?.includes('json');
+	
+	const responseData = contentIsJSON ? await response.json().catch(() => null) : null;
+	if (contentIsJSON && !responseData) throw new Error('Invalid typed response: no data');
 
-	if (flags.non_null && !responseData) throw new Error('Invalid typed response: no data');
-
-	return new TypedResponse(responseData, {
-		headers: responseHeaders,
+	return new TypedResponse(responseData as any, {
+		headers: Object.fromEntries(response.headers.entries()),
 		status: response.status
 	}) as T;
 };
