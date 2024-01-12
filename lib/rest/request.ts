@@ -74,5 +74,5 @@ export const requestToTyped = async <T extends TypedRequest<any, any, any>> (req
 		data: await request.json().catch(() => null),
 		headers: Object.fromEntries(request.headers.entries()),
 		query: Object.fromEntries(searchParams.entries())
-	} as TypedInit);
+	}) as T;
 };
