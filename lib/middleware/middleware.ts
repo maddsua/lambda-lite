@@ -130,16 +130,22 @@ export class LambdaMiddleware {
 	
 				if (!plugin.executeBefore) continue;
 
-				const temp = await plugin.executeBefore(pluginModifiedRequest || request);
+				try {
 
-				if (temp?.respondWith) {
-					middlewareResponse = temp.respondWith;
-					break;
-				}
-
-				if (temp?.modifiedRequest) {
-					pluginModifiedRequest = temp.modifiedRequest;
-					if (temp?.chainable === false) break;
+					const temp = await plugin.executeBefore(pluginModifiedRequest || request);
+	
+					if (temp?.respondWith) {
+						middlewareResponse = temp.respondWith;
+						break;
+					}
+	
+					if (temp?.modifiedRequest) {
+						pluginModifiedRequest = temp.modifiedRequest;
+						if (temp?.chainable === false) break;
+					}
+					
+				} catch (error) {
+					console.error(`[Plugin error (${plugin.id})]:`, (error as Error | null)?.message || error);
 				}
 			}
 
@@ -231,11 +237,17 @@ export class LambdaMiddleware {
 
 				if (!plugin.executeAfter) continue;
 
-				const temp = await plugin.executeAfter(middlewareResponse);
+				try {
 
-				if (temp?.overrideResponse) {
-					if (temp.chainable === false) return temp.overrideResponse;
-					middlewareResponse = temp.overrideResponse;
+					const temp = await plugin.executeAfter(middlewareResponse);
+
+					if (temp?.overrideResponse) {
+						if (temp.chainable === false) return temp.overrideResponse;
+						middlewareResponse = temp.overrideResponse;
+					}
+
+				} catch (error) {
+					console.error(`[Plugin error (${plugin.id})]:`, (error as Error | null)?.message || error);
 				}
 			}
 
