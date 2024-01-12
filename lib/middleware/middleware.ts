@@ -145,7 +145,7 @@ export class LambdaMiddleware {
 					}
 					
 				} catch (error) {
-					console.error(`[Plugin error (${plugin.id})]:`, (error as Error | null)?.message || error);
+					console.error(`[Plugin error (${plugin.id})] In "before" callback:`, (error as Error | null)?.message || error);
 				}
 			}
 
@@ -247,7 +247,7 @@ export class LambdaMiddleware {
 					}
 
 				} catch (error) {
-					console.error(`[Plugin error (${plugin.id})]:`, (error as Error | null)?.message || error);
+					console.error(`[Plugin error (${plugin.id})] In "after" callback:`, (error as Error | null)?.message || error);
 				}
 			}
 
