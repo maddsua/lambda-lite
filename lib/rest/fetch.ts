@@ -17,6 +17,7 @@ export class TypedFetchAgent <T extends FetchSchema<any>> {
 		const response = await fetch(this.url, {
 			method: this.request.data ? 'POST' : 'GET',
 			headers: this.request.headers,
+			body: this.request.data ? JSON.stringify(this.request.data) : undefined
 		});
 
 		return await unwrapResponse<T>(response);
