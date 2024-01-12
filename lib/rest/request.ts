@@ -60,11 +60,11 @@ export const unwrapRequest = async <T extends FetchSchema<any>> (request: Reques
 	};
 
 	const contentIsJSON = request.headers.get('content-type')?.toLowerCase()?.includes('json');
-	const responseData = contentIsJSON ? await request.json().catch(() => null) : null;
-	if (contentIsJSON && !responseData) throw new Error('Invalid typed request: no data');
+	const requestData = contentIsJSON ? await request.json().catch(() => null) : null;
+	if (contentIsJSON && !requestData) throw new Error('Invalid typed request: no data');
 
 	return {
-		data: responseData,
+		data: requestData,
 		headers: Object.fromEntries(request.headers.entries()),
 		query: Object.fromEntries(searchParams.entries())
 	};
