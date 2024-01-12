@@ -1,6 +1,7 @@
 import { RouteHandler } from "../../deno.mod.ts";
 import { FetchSchema } from "../../lib/rest/typed.ts";
 import { InferResponseType, TypedResponse } from "../../lib/rest/response.ts";
+import { requestToTyped } from "../../lib/rest/request.ts";
 
 export type Schema = FetchSchema<{
 	request: {
@@ -21,7 +22,9 @@ export type Schema = FetchSchema<{
 	}
 }>;
 
-export const handler: RouteHandler = (rq, ctx): InferResponseType<Schema> => {
+export const handler: RouteHandler = async (rq, ctx): Promise<InferResponseType<Schema>> => {
+
+	const request = await requestToTyped<Schema>(rq);
 
 	return new TypedResponse({
 		success: true,
