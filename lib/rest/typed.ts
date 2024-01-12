@@ -1,6 +1,6 @@
 
 export interface TypedFetchRequest {
-	data?: object;
+	data?: object | null;
 	headers?: Record<string, string>;
 	query?: Record<string, string>;
 };
