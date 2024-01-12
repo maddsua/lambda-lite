@@ -1,14 +1,24 @@
+import { TypedFetchRequest } from "../../deno.mod.ts";
+import { unwrapResponse } from "./response.ts";
 import { FetchSchema } from "./typed.ts";
 
 export class TypedFetchAgent <T extends FetchSchema<any>> {
 
-	request: T['request'];
+	request: TypedFetchRequest;
+	url: string | URL;
 
 	constructor(init: T['request'] & { url: string | URL }) {
 		this.request = init;
+		this.url = init.url;
 	}
 
-	async fetch(): Promise<T['response']> {
-		return {};
+	async fetch() {
+
+		const response = await fetch(this.url, {
+			method: this.request.data ? 'POST' : 'GET',
+			headers: this.request.headers,
+		});
+
+		return await unwrapResponse<T>(response);
 	}
 };
