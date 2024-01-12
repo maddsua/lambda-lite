@@ -1,4 +1,3 @@
-import type { JSONResponse } from "../rest/jsonResponse.ts";
 import type { ServiceConsole } from "../util/console.ts";
 import type { MiddlewarePlugin } from "./plugins.ts";
 import type { SerializableResponse, TypedRouteResponse } from "./responses.ts";
