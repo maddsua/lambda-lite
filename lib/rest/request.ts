@@ -1,9 +1,12 @@
 
+import type { FetchSchema } from "./typed.ts";
+import type { SerializableRequest } from "../middleware/responses.ts";
+
 export class TypedRequest<
 	D extends object | null | undefined = undefined,
 	H extends Record<string, string> | undefined = undefined,
 	Q extends Record<string, string> | undefined = undefined,
-> {
+> implements SerializableRequest {
 
 	url: string | URL;
 	headers: H;
@@ -47,19 +50,13 @@ export class TypedRequest<
 	}
 };
 
-export type InferRequestType<T extends {
-	data?: object | null;
-	headers?: Record<string, string>;
-	query?: Record<string, string>;
-}> = TypedRequest<T['data'], T['headers'], T['query']>;
+export type InferRequestType<T extends FetchSchema<any>> = TypedRequest<
+	T['request']['data'],
+	T['request']['headers'],
+	T['request']['query']
+>;
 
-export const requestToTyped = async <T extends TypedRequest<any, any, any>> (request: Request) => {
-
-	interface TypedInit {
-		data: T['data'];
-		headers: T['headers'];
-		query: T['query'];
-	};
+export const requestToTyped = async <T extends FetchSchema<any>> (request: Request) => {
 
 	const { searchParams } = new URL(request.url);
 
@@ -67,12 +64,16 @@ export const requestToTyped = async <T extends TypedRequest<any, any, any>> (req
 		return new TypedRequest(request.url, {
 			headers: Object.fromEntries(request.headers.entries()),
 			query: Object.fromEntries(searchParams.entries()),
-		} as TypedInit);
+		}) as InferRequestType<T>;
 	}
 
+	const contentIsJSON = request.headers.get('content-type')?.toLowerCase()?.includes('json');
+	const responseData = contentIsJSON ? await request.json().catch(() => null) : null;
+	if (contentIsJSON && !responseData) throw new Error('Invalid typed request: no data');
+
 	return new TypedRequest(request.url, {
-		data: await request.json().catch(() => null),
+		data: responseData,
 		headers: Object.fromEntries(request.headers.entries()),
 		query: Object.fromEntries(searchParams.entries())
-	}) as T;
+	}) as InferRequestType<T>;
 };
