@@ -157,20 +157,17 @@ export class LambdaMiddleware {
 				try {
 
 					const handlerResponse = await routectx.handler(pluginModifiedRequest || request, requestContext);
-	
-					//	here we convert a non-standard response object to a standard one
-					//	all non standard should provide a "toResponse" method to do that
-					const responseObject = handlerResponse instanceof Response ? handlerResponse : handlerResponse.toResponse();
-	
-					//	and if after that it's still not a Response we just crash the request
-					if (!(responseObject instanceof Response)) {
-						const typeErrorReport = (handlerResponse && typeof handlerResponse === 'object') ?
-							`object keys ({${Object.keys(handlerResponse).join(', ')}}) don't match handler response interface` :
-							`variable of type "${typeof handlerResponse}" is not a valid handler response`;
-						throw new Error('Invalid function response: ' + typeErrorReport);
+
+					if (handlerResponse instanceof Response) {
+						middlewareResponse = handlerResponse;
+					} else if ('toResponse' in handlerResponse) {
+						middlewareResponse = handlerResponse.toResponse();
+					} else {
+						const body = handlerResponse.data ? JSON.stringify(handlerResponse.data) : null;
+						const headers = new Headers(handlerResponse.headers);
+						if (handlerResponse.data) headers.set('content-type', 'application/json');
+						middlewareResponse = new Response(body, { headers, status: handlerResponse.status });
 					}
-	
-					middlewareResponse = responseObject;
 
 				} catch (error) {
 
