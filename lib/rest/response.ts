@@ -49,15 +49,3 @@ export type InferResponseType<T extends FetchSchema<any>> = TypedResponse<
 	T['response']['headers'],
 	T['response']['status']
 > | T['response'];
-
-export const responseToTyped = async <T extends FetchSchema<any>> (response: Response) => {
-
-	const contentIsJSON = response.headers.get('content-type')?.toLowerCase()?.includes('json');
-	const responseData = contentIsJSON ? await response.json().catch(() => null) : null;
-	if (contentIsJSON && !responseData) throw new Error('Invalid typed response: no data');
-
-	return new TypedResponse(responseData as any, {
-		headers: Object.fromEntries(response.headers.entries()),
-		status: response.status
-	}) as InferResponseType<T>;
-};
