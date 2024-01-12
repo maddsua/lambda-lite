@@ -1,6 +1,7 @@
 import type { NetworkInfo } from './route.ts';
 import type { MiddlewareOptions } from './options.ts';
-import { type RouteHandler, type RouterRoutes, typedResponseMimeType } from './route.ts';
+import type { RouteHandler, RouterRoutes } from './route.ts';
+import { typedResponseMimeType } from './responses.ts';
 import { JSONResponse } from '../rest/jsonResponse.ts';
 import { ServiceConsole } from '../util/console.ts';
 import { getRequestIdFromProxy, generateRequestId, } from '../util/misc.ts';
