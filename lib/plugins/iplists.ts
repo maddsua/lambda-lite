@@ -1,4 +1,4 @@
-import { JSONResponse } from "../rest/jsonResponse.ts";
+import { TypedResponse } from "../rest/response.ts";
 import type { MiddlewarePlugin, MiddlewarePluginInstance, SpawnProps } from "../middleware/plugins.ts";
 import type { ServiceConsole } from "../util/console.ts";
 
@@ -173,7 +173,7 @@ class IPListsPluginImpl implements MiddlewarePluginInstance {
 	executeBefore() {
 
 		const requestRejection = () => ({
-			respondWith: new JSONResponse({
+			respondWith: new TypedResponse({
 				error_text: 'access denied'
 			}, { status: 511 }).toResponse()
 		});
