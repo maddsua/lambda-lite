@@ -32,20 +32,12 @@ export class TypedRequest<
 			requestUrl.searchParams.set(key, this.query[key]);
 		}
 
-		if (this.data) {
-
-			const requestHeader: Record<string, string> = this.headers || {};
-			if (this.data) requestHeader['content-type'] = 'application/json';
-
-			return new Request(requestUrl, {
-				method: 'POST',
-				headers: requestHeader,
-				body: JSON.stringify(this.data)
-			});
-		}
-
 		return new Request(requestUrl, {
-			headers: this.headers,
+			method: this.data ? 'POST' : 'GET',
+			headers: this.data ? Object.assign({
+				'content-type': 'application/json'
+			}, this.headers || {}) : this.headers,
+			body: this.data ? JSON.stringify(this.data) : null
 		});
 	}
 };
