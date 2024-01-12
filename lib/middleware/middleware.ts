@@ -149,6 +149,9 @@ export class LambdaMiddleware {
 				}
 			}
 
+			//	so the logic here is that if we successfully matched a route
+			//	and none of the plugins decicded to return request early
+			//	we are ok to call route handler and process it's result
 			if (routectx && !middlewareResponse) {
 
 				try {
@@ -190,8 +193,11 @@ export class LambdaMiddleware {
 					}
 				}
 
-			//	handle 404 cases
-			//	the logic looks sketchy but it's alright. trust me I'm an engineer.
+			//	but if we didn't have a route we'll get to this point
+			//	where we handle 404 cases
+			//	can't use just "else" here as it would override possible plugin response if a 404 occured.
+			//	so we only check for absence of "middlewareResponse",
+			//	which would indicate 404 and no plugin response
 			} else if (!middlewareResponse) {
 
 				middlewareResponse = (() => {
