@@ -2,6 +2,7 @@ import { RouteHandler } from "../../lib/middleware/route.ts";
 import { FetchSchema } from "../../lib/rest/typed.ts";
 import { InferResponseType, TypedResponse } from "../../lib/rest/response.ts";
 import { unwrapRequest } from "../../lib/rest/request.ts";
+import { TypedFetchAgent } from "../../lib/rest/fetch.ts";
 
 export type Schema = FetchSchema<{
 	request: {
