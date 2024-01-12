@@ -26,7 +26,13 @@ export interface RequestContextBase {
 	requestInfo: RequestInfo;
 };
 
-export type RouteResponse = JSONResponse<object> | Response;
+export interface TypedRouteResponse {
+	data?: object;
+	headers?: Record<string, string>;
+	status?: number;
+};
+
+export type RouteResponse = TypedRouteResponse | JSONResponse<object> | Response;
 export type RouteHandler<C extends object = {}> = (request: Request, context: RequestContextBase & C) => Promise<RouteResponse> | RouteResponse;
 
 export interface RouteConfig {
