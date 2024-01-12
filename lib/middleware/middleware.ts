@@ -157,6 +157,10 @@ export class LambdaMiddleware {
 				try {
 
 					const handlerResponse = await routectx.handler(pluginModifiedRequest || request, requestContext);
+					const responseValueType = typeof handlerResponse;
+
+					if (responseValueType !== 'object')
+						throw new Error(`Invalid handler response: unexpected return type ${responseValueType}`);
 
 					if (handlerResponse instanceof Response) {
 						middlewareResponse = handlerResponse;
@@ -165,11 +169,13 @@ export class LambdaMiddleware {
 					} else {
 
 						const body = handlerResponse.data ? JSON.stringify(handlerResponse.data) : null;
-						const headers = new Headers(handlerResponse.headers);
+						const headers = new Headers(handlerResponse?.headers);
 
-						if (handlerResponse.data) {
-							const contentType = handlerResponse.type ? typedResponseMimeType[handlerResponse.type] : typedResponseMimeType.json;
+						if (handlerResponse.data && handlerResponse.type) {
+							const contentType = typedResponseMimeType[handlerResponse.type] || typedResponseMimeType.json;
 							headers.set('content-type', contentType);
+						} else if (handlerResponse.data) {
+							headers.set('content-type', typedResponseMimeType.json);
 						}
 
 						middlewareResponse = new Response(body, { headers, status: handlerResponse.status });
