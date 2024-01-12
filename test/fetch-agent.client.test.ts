@@ -4,7 +4,7 @@ import { Schema } from "./functions/typedapi.ts";
 const response = await new TypedFetchAgent<Schema>({
 	url: 'http://localhost:8080/typedapi',
 	data: {
-		id: 'tset'
+		id: 'test id'
 	},
 	headers: {
 		'x-captcha': 'test'
