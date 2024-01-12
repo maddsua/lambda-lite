@@ -43,12 +43,6 @@ export type InferResponseType<T extends {
 
 export const responseToTyped = async <T extends TypedResponse<any, any, any>>(response: Response) => {
 
-	interface TypedInit {
-		data: T['data'] | null;
-		headers: T['headers'];
-		status: T['status'];
-	};
-
 	const responseHeaders = Object.fromEntries(response.headers.entries());
 	const flags = parseFlags(response.headers.get('x-typed-rest-flags'));
 	const responseData = flags.non_null ? await response.json().catch(() => null) : null;
@@ -58,5 +52,5 @@ export const responseToTyped = async <T extends TypedResponse<any, any, any>>(re
 	return new TypedResponse(responseData, {
 		headers: responseHeaders,
 		status: response.status
-	} as TypedInit);
+	}) as T;
 };
