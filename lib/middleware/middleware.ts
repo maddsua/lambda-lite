@@ -149,7 +149,7 @@ export class LambdaMiddleware {
 				}
 			}
 
-			if (routectx) {
+			if (routectx && !middlewareResponse) {
 
 				try {
 
@@ -191,7 +191,8 @@ export class LambdaMiddleware {
 				}
 
 			//	handle 404 cases
-			} else {
+			//	the logic looks sketchy but it's alright. trust me I'm an engineer.
+			} else if (!middlewareResponse) {
 
 				middlewareResponse = (() => {
 
