@@ -21,7 +21,7 @@ await startServer({
 	routesDir: 'test/functions',
 	healthcheckPath: '/health',
 	plugins: [
-	//	allowMethods('GET'),
+		allowMethods('GET'),
 	//	serviceAuth({ token: 'test'}),
 		originController({ allowOrigins: 'all' }),
 		ratelimiter({

@@ -37,6 +37,7 @@ export class LambdaMiddleware {
 
 			const handlerCtx: HandlerCtx = {
 				handler: routeCtx.handler,
+				expandPath: typeof routeCtx.expand === 'boolean' ? routeCtx.expand : routeExpandByUrl
 			};
 
 			//	setup route plugins
@@ -104,8 +105,100 @@ export class LambdaMiddleware {
 				}
 			}
 
-			//	go cry in the corned if it's not found
-			if (!routectx) {
+			const requestInfo = Object.assign({
+				clientIP,
+				requestID
+			}, info);
+
+			const requestContext = Object.assign({}, context || {}, {
+				console,
+				requestInfo,
+			});
+
+			const pluginPromises = routectx?.plugins?.map(item => item.spawn({
+				console,
+				info: requestInfo,
+				middleware: this
+			}));
+
+			const runPlugins = pluginPromises?.length ? await Promise.all(pluginPromises) : [];
+
+			//	run "before" plugin callbacks
+			let pluginModifiedRequest: Request | null = null;
+
+			for (const plugin of runPlugins) {
+	
+				if (!plugin.executeBefore) continue;
+
+				try {
+
+					const temp = await plugin.executeBefore(pluginModifiedRequest || request);
+	
+					if (temp?.respondWith) {
+						middlewareResponse = temp.respondWith;
+						break;
+					}
+	
+					if (temp?.modifiedRequest) {
+						pluginModifiedRequest = temp.modifiedRequest;
+						if (temp?.chainable === false) break;
+					}
+					
+				} catch (error) {
+					console.error(`[Plugin error (${plugin.id})] In "before" callback:`, (error as Error | null)?.message || error);
+				}
+			}
+
+			//	so the logic here is that if we successfully matched a route
+			//	and none of the plugins decicded to return request early
+			//	we are ok to call route handler and process it's result
+			if (routectx && !middlewareResponse) {
+
+				try {
+
+					const handlerResponse = await routectx.handler(pluginModifiedRequest || request, requestContext);
+	
+					//	here we convert a non-standard response object to a standard one
+					//	all non standard should provide a "toResponse" method to do that
+					const responseObject = handlerResponse instanceof Response ? handlerResponse : handlerResponse.toResponse();
+	
+					//	and if after that it's still not a Response we just crash the request
+					if (!(responseObject instanceof Response)) {
+						const typeErrorReport = (handlerResponse && typeof handlerResponse === 'object') ?
+							`object keys ({${Object.keys(handlerResponse).join(', ')}}) don't match handler response interface` :
+							`variable of type "${typeof handlerResponse}" is not a valid handler response`;
+						throw new Error('Invalid function response: ' + typeErrorReport);
+					}
+	
+					middlewareResponse = responseObject;
+
+				} catch (error) {
+
+					console.error('Lambda middleware error:', (error as Error | null)?.message || error);
+
+					switch (this.config.defaultResponses?.error) {
+
+						case 'log': {
+							middlewareResponse = new JSONResponse({
+								error_text: 'unhandled middleware error',
+								error_log: (error as Error | null)?.message || JSON.stringify(error)
+							}, { status: 500 }).toResponse();
+						} break;
+	
+						default: { 
+							middlewareResponse = new JSONResponse({
+								error_text: 'unhandled middleware error'
+							}, { status: 500 }).toResponse();
+						} break;
+					}
+				}
+
+			//	but if we didn't have a route we'll get to this point
+			//	where we handle 404 cases
+			//	can't use just "else" here as it would override possible plugin response if a 404 occured.
+			//	so we only check for absence of "middlewareResponse",
+			//	which would indicate 404 and no plugin response
+			} else if (!middlewareResponse) {
 
 				middlewareResponse = (() => {
 
@@ -146,100 +239,22 @@ export class LambdaMiddleware {
 				})();
 			}
 
-			const requestInfo = Object.assign({
-				clientIP,
-				requestID
-			}, info);
-
-			const requestContext = Object.assign({}, context || {}, {
-				console,
-				requestInfo,
-			});
-
-			const pluginPromises = routectx?.plugins?.map(item => item.spawn({
-				console,
-				info: requestInfo,
-				middleware: this
-			}));
-
-			const runPlugins = pluginPromises?.length ? await Promise.all(pluginPromises) : [];
-
-			//	run "before" plugin callbacks
-			let middlewareRequest = request;
-
-			for (const plugin of runPlugins) {
-	
-				if (!plugin.executeBefore) continue;
-
-				const temp = await plugin.executeBefore(middlewareRequest);
-
-				if (temp?.respondWith) {
-					middlewareResponse = temp.respondWith;
-					break;
-				}
-
-				if (temp?.modifiedRequest) {
-					middlewareRequest = temp.modifiedRequest;
-					if (temp?.chainable === false) break;
-				}
-			}
-
-			//	execute route function
-			//	typescript is kinda confused here too
-			//	routectx won't ever be undefined here
-			//	as the middlewareResponse would be set by the 404 handler
-			if (!middlewareResponse) {
-
-				try {
-
-					const handlerResponse = await routectx!.handler(middlewareRequest, requestContext);
-	
-					//	here we convert a non-standard response object to a standard one
-					//	all non standard should provide a "toResponse" method to do that
-					const responseObject = handlerResponse instanceof Response ? handlerResponse : handlerResponse.toResponse();
-	
-					//	and if after that it's still not a Response we just crash the request
-					if (!(responseObject instanceof Response)) {
-						const typeErrorReport = (handlerResponse && typeof handlerResponse === 'object') ?
-							`object keys ({${Object.keys(handlerResponse).join(', ')}}) don't match handler response interface` :
-							`variable of type "${typeof handlerResponse}" is not a valid handler response`;
-						throw new Error('Invalid function response: ' + typeErrorReport);
-					}
-	
-					middlewareResponse = responseObject;
-
-				} catch (error) {
-
-					console.error('Lambda middleware error:', (error as Error | null)?.message || error);
-
-					switch (this.config.defaultResponses?.error) {
-
-						case 'log': {
-							middlewareResponse = new JSONResponse({
-								error_text: 'unhandled middleware error',
-								error_log: (error as Error | null)?.message || JSON.stringify(error)
-							}, { status: 500 }).toResponse();
-						} break;
-	
-						default: { 
-							middlewareResponse = new JSONResponse({
-								error_text: 'unhandled middleware error'
-							}, { status: 500 }).toResponse();
-						} break;
-					}
-				}
-			}
-
 			//	run "after" plugin callbacks
 			for (const plugin of runPlugins) {
 
 				if (!plugin.executeAfter) continue;
 
-				const temp = await plugin.executeAfter(middlewareResponse);
+				try {
 
-				if (temp?.overrideResponse) {
-					if (temp.chainable === false) return temp.overrideResponse;
-					middlewareResponse = temp.overrideResponse;
+					const temp = await plugin.executeAfter(middlewareResponse);
+
+					if (temp?.overrideResponse) {
+						if (temp.chainable === false) return temp.overrideResponse;
+						middlewareResponse = temp.overrideResponse;
+					}
+
+				} catch (error) {
+					console.error(`[Plugin error (${plugin.id})] In "after" callback:`, (error as Error | null)?.message || error);
 				}
 			}
 

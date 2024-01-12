@@ -3,7 +3,7 @@ import Component from './index.tsx';
 import type { RouteConfig, RouteHandler } from '../../deno.mod.ts';
 
 export const config: RouteConfig = {
-	expand: true,
+	//expand: true,
 	//inheritPlugins: false
 };
 
