@@ -2,7 +2,7 @@ import { RouteHandler } from "../../deno.mod.ts";
 import { FetchSchema } from "../../lib/rest/typed.ts";
 import { InferResponseType, TypedResponse } from "../../lib/rest/response.ts";
 
-type Schema = FetchSchema<{
+export type Schema = FetchSchema<{
 	request: {
 		id: string;
 		headers: {
