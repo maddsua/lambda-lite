@@ -124,13 +124,13 @@ export class LambdaMiddleware {
 			const runPlugins = pluginPromises?.length ? await Promise.all(pluginPromises) : [];
 
 			//	run "before" plugin callbacks
-			let middlewareRequest = request;
+			let pluginModifiedRequest: Request | null = null;
 
 			for (const plugin of runPlugins) {
 	
 				if (!plugin.executeBefore) continue;
 
-				const temp = await plugin.executeBefore(middlewareRequest);
+				const temp = await plugin.executeBefore(pluginModifiedRequest || request);
 
 				if (temp?.respondWith) {
 					middlewareResponse = temp.respondWith;
@@ -138,7 +138,7 @@ export class LambdaMiddleware {
 				}
 
 				if (temp?.modifiedRequest) {
-					middlewareRequest = temp.modifiedRequest;
+					pluginModifiedRequest = temp.modifiedRequest;
 					if (temp?.chainable === false) break;
 				}
 			}
@@ -147,7 +147,7 @@ export class LambdaMiddleware {
 
 				try {
 
-					const handlerResponse = await routectx!.handler(middlewareRequest, requestContext);
+					const handlerResponse = await routectx.handler(pluginModifiedRequest || request, requestContext);
 	
 					//	here we convert a non-standard response object to a standard one
 					//	all non standard should provide a "toResponse" method to do that
@@ -183,8 +183,9 @@ export class LambdaMiddleware {
 						} break;
 					}
 				}
-			}
-			else {
+
+			//	handle 404 cases
+			} else {
 
 				middlewareResponse = (() => {
 
