@@ -105,48 +105,6 @@ export class LambdaMiddleware {
 				}
 			}
 
-			//	return a "not-found" response
-			if (!routectx) {
-
-				middlewareResponse = (() => {
-
-					if (pathname === '/') {
-	
-						switch (this.config.defaultResponses?.index) {
-	
-							case 'forbidden': return new JSONResponse({
-								error_text: 'you\'re not really welcome here mate'
-							}, { status: 403 }).toResponse();
-	
-							case 'info': return new JSONResponse({
-								server: 'maddsua/lambda-lite',
-								status: 'operational'
-							}, { status: 200 }).toResponse();
-	
-							case 'teapot': return new JSONResponse({
-								error_text: 'yo bro r u lost?'
-							}, { status: 418 }).toResponse();
-						
-							default: return new JSONResponse({
-								error_text: 'route not found'
-							}, { status: 404 }).toResponse();
-						}
-					}
-
-					switch (this.config.defaultResponses?.notfound) {
-	
-						case 'forbidden': return new JSONResponse({
-							error_text: 'you\'re not really welcome here mate'
-						}, { status: 403 }).toResponse();
-	
-						default: return new JSONResponse({
-							error_text: 'route not found'
-						}, { status: 404 }).toResponse();
-					}
-
-				})();
-			}
-
 			const requestInfo = Object.assign({
 				clientIP,
 				requestID
@@ -185,11 +143,7 @@ export class LambdaMiddleware {
 				}
 			}
 
-			//	execute route function
-			//	typescript is kinda confused here too
-			//	routectx won't ever be undefined here
-			//	as the middlewareResponse would be set by the 404 handler
-			if (!middlewareResponse) {
+			if (routectx) {
 
 				try {
 
@@ -229,6 +183,46 @@ export class LambdaMiddleware {
 						} break;
 					}
 				}
+			}
+			else {
+
+				middlewareResponse = (() => {
+
+					if (pathname === '/') {
+	
+						switch (this.config.defaultResponses?.index) {
+	
+							case 'forbidden': return new JSONResponse({
+								error_text: 'you\'re not really welcome here mate'
+							}, { status: 403 }).toResponse();
+	
+							case 'info': return new JSONResponse({
+								server: 'maddsua/lambda-lite',
+								status: 'operational'
+							}, { status: 200 }).toResponse();
+	
+							case 'teapot': return new JSONResponse({
+								error_text: 'yo bro r u lost?'
+							}, { status: 418 }).toResponse();
+						
+							default: return new JSONResponse({
+								error_text: 'route not found'
+							}, { status: 404 }).toResponse();
+						}
+					}
+
+					switch (this.config.defaultResponses?.notfound) {
+	
+						case 'forbidden': return new JSONResponse({
+							error_text: 'you\'re not really welcome here mate'
+						}, { status: 403 }).toResponse();
+	
+						default: return new JSONResponse({
+							error_text: 'route not found'
+						}, { status: 404 }).toResponse();
+					}
+
+				})();
 			}
 
 			//	run "after" plugin callbacks
