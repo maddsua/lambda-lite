@@ -1,6 +1,6 @@
-import type { NetworkInfo } from './route.ts';
+import type { NetworkInfo } from './router.ts';
 import type { MiddlewareOptions } from './options.ts';
-import type { RouteHandler, RouterRoutes } from './route.ts';
+import type { RouteHandler, RouterRoutes } from './router.ts';
 import { typedResponseMimeType } from './responses.ts';
 import { TypedResponse } from '../rest/response.ts';
 import { ServiceConsole } from '../util/console.ts';

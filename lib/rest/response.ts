@@ -11,7 +11,7 @@ export class TypedResponse<
 	headers: H | undefined;
 	status: S | undefined;
 
-	constructor(data?: D, init?: {
+	constructor(data: D, init?: {
 		headers?: H;
 		status?: S;
 	}) {

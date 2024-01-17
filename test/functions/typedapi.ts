@@ -1,8 +1,8 @@
-import { RouteHandler } from "../../lib/middleware/route.ts";
+import { RouteHandler } from "../../lib/middleware/router.ts";
 import { FetchSchema } from "../../lib/rest/typed.ts";
 import { InferResponse, TypedResponse } from "../../lib/rest/response.ts";
 import { unwrapRequest } from "../../lib/rest/request.ts";
-import { RouteConfig } from "../../lib/middleware/route.ts";
+import { RouteConfig } from "../../lib/middleware/router.ts";
 
 export const config: RouteConfig = {
 	inheritPlugins: false

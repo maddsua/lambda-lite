@@ -1,5 +1,5 @@
 import type { MiddlewareOptions } from "../../middleware/options.ts";
-import type { RouterRoutes } from "../../middleware/route.ts";
+import type { RouterRoutes } from "../../middleware/router.ts";
 import { LambdaMiddleware} from '../../middleware/middleware.ts';
 import { defaultConfig } from './config.ts';
 import { loadFunctionsFromFS } from './routes.ts';

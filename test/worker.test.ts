@@ -1,13 +1,11 @@
 import { LambdaMiddleware } from "../lib/middleware/middleware.ts";
 import { workerFetchHandler } from "../lib/adapters/cloudflare/worker.ts";
 
-const routes = {
+const lambda = new LambdaMiddleware({
 	'/*': {
-		handler: () => new Response('yo whassup homie')
+		handler: () => new Response('yo whasup homie')
 	}
-};
-
-const lambda = new LambdaMiddleware(routes, {
+}, {
 	healthcheckPath: '/health',
 	loglevel: {
 		//	don't need those on cloudflare lmao
