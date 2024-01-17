@@ -27,29 +27,29 @@ export class TypedRequest<
 	toRequest() {
 
 		let requestURL = this.url;
+
+		const assembleSearchQuery = (params?: URLSearchParams) => {
+
+			if (!params) params = new URLSearchParams();
+
+			for (const key in this.query) {
+				params.set(key, this.query[key]);
+			}
+
+			return params;
+		};
 		
 		if (typeof requestURL === 'string') {
 
 			const searchStarts = requestURL.indexOf('?');
-			const requestSearch = new URLSearchParams();
-
-			//	look, I'm not moving this shit out of here
-			//	yes, I'm repeating myself by doing this,
-			//	but just leaving it here makes more sense then
-			//	breaking down the url object regardless of what it is and reassembling it later
-			for (const key in this.query) {
-				requestSearch.set(key, this.query[key]);
-			}
-
+			const requestSearch = assembleSearchQuery();
+			
 			if (requestSearch.size) {
 				requestURL += searchStarts === -1 ? '?' : '&' + requestSearch.toString();
 			}
 
 		} else {
-
-			for (const key in this.query) {
-				requestURL.searchParams.set(key, this.query[key]);
-			}
+			assembleSearchQuery(requestURL.searchParams);
 		}
 
 		return new Request(requestURL, {
