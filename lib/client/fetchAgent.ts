@@ -28,8 +28,12 @@ export class TypedFetchAgent <T extends RouterSchema<Record<string, FetchSchema<
 				query: opts?.query
 			}).toRequest();
 		
-			const response = await fetch(request);
-			return await unwrapResponse(response);
+			try {
+				const response = await fetch(request);
+				return await unwrapResponse(response);
+			} catch (error) {
+				throw new Error(`Failed to query "${this.cfg.endpoint} : ${prop}": ${(error as Error | null)?.message || error}`);
+			}
 		};
 
 		this.query = new Proxy({}, {
