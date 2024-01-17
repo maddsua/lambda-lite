@@ -118,11 +118,6 @@ export class LambdaMiddleware {
 				requestID
 			}, info);
 
-			const requestContext = Object.assign({}, context || {}, {
-				console,
-				requestInfo,
-			});
-
 			const pluginPromises = routectx?.plugins?.map(item => item.spawn({
 				console,
 				info: requestInfo,
@@ -161,6 +156,11 @@ export class LambdaMiddleware {
 			//	and none of the plugins decicded to return request early
 			//	we are ok to call route handler and process it's result
 			if (routectx && !middlewareResponse) {
+
+				const requestContext = Object.assign({}, context || {}, {
+					console,
+					requestInfo,
+				});
 
 				try {
 
