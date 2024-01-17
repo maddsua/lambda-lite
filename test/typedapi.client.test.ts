@@ -8,7 +8,7 @@ const agent = new TypedFetchAgent<RouterType>({
 
 const { data } = await agent.query.action();
 
-console.log(data?.message);
+console.log(data.message);
 
 /*agent.query.mutation({
 	data: {
