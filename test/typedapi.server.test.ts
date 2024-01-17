@@ -1,4 +1,4 @@
-import { ServerRouter, RouterSchema } from "../lib/middleware/typedRouter.ts";
+import type { ServerRouter, RouterSchema } from "../lib/middleware/typedRouter.ts";
 import { TypedResponse } from "../lib/typedrest/response.ts";
 import { startServer } from "../lib/adapters/deno/server.ts";
 import { unwrapRequest } from "../lib/typedrest/request.ts";
