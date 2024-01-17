@@ -51,8 +51,12 @@ export class LambdaMiddleware {
 				handlerCtx.plugins = (applyGlobal || []).concat(routeCtx.plugins || []);
 			}
 
-			const applyHandlerPath = route.replace(/\/\*?$/i, '');
-			this.handlersPool[applyHandlerPath.length ? applyHandlerPath : '/'] = handlerCtx;
+			let applyHandlerPath = route.replace(/\/\*?$/i, '');
+
+			if (!applyHandlerPath.length || !applyHandlerPath.startsWith('/'))
+				applyHandlerPath = `/${applyHandlerPath}`;
+
+			this.handlersPool[applyHandlerPath] = handlerCtx;
 		}
 
 		//	setup healthcheck path
