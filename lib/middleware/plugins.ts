@@ -1,4 +1,4 @@
-import { ServiceConsole } from '../util/console.ts';
+import type { ServiceConsole } from '../util/console.ts';
 import type { LambdaMiddleware } from './middleware.ts';
 import type { RequestInfo } from './router.ts';
 

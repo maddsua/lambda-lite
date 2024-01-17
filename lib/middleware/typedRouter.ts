@@ -1,5 +1,5 @@
-import { InferResponse } from "../rest/response.ts";
-import { RequestContextBase, RouteConfig } from "./router.ts";
+import type { InferResponse } from "../typedrest/response.ts";
+import type { RequestContextBase, RouteConfig } from "./router.ts";
 
 export interface TypedFetchRequest {
 	data?: object | null;

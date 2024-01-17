@@ -1,6 +1,6 @@
-import { unwrapResponse } from "../rest/response.ts";
-import { FetchSchema } from "../middleware/typedRouter.ts";
-import { TypedRequest } from "../rest/request.ts";
+import { unwrapResponse } from "../typedrest/response.ts";
+import type { FetchSchema } from "../middleware/typedRouter.ts";
+import { TypedRequest } from "../typedrest/request.ts";
 
 export const typedFetch = async <T extends FetchSchema<any>>(init: T['request'] & { url: string | URL }) => {
 

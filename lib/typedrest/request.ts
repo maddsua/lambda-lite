@@ -1,6 +1,6 @@
 
-import type { FetchSchema, TypedFetchRequest } from "./typed.ts";
-import type { SerializableRequest } from "../middleware/responses.ts";
+import type { FetchSchema, TypedFetchRequest } from "../middleware/typedRouter.ts";
+import type { SerializableRequest } from "../middleware/router.ts";
 
 export class TypedRequest<
 	D extends object | null | undefined = undefined,

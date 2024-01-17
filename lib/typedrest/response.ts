@@ -1,5 +1,5 @@
-import type { SerializableResponse } from "../middleware/responses.ts";
-import type { FetchSchema, TypedFetchResponse } from "./typed.ts";
+import type { SerializableResponse } from "../middleware/router.ts";
+import type { FetchSchema, TypedFetchResponse } from "../middleware/typedRouter.ts";
 
 export class TypedResponse<
 	D extends object | null = null,

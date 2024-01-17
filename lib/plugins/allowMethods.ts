@@ -1,4 +1,4 @@
-import { TypedResponse } from "../rest/response.ts";
+import { TypedResponse } from "../typedrest/response.ts";
 import type { MiddlewarePlugin, MiddlewarePluginInstance, SpawnProps } from "../middleware/plugins.ts";
 import type { ServiceConsole } from "../util/console.ts";
 

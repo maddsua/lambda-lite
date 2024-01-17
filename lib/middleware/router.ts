@@ -1,6 +1,6 @@
 import type { ServiceConsole } from "../util/console.ts";
 import type { MiddlewarePlugin } from "./plugins.ts";
-import type { SerializableResponse, TypedRouteResponse } from "./responses.ts";
+
 
 export interface NetworkInfo {
 	transport: 'tcp' | 'udp';
@@ -12,6 +12,7 @@ export interface RequestInfo extends NetworkInfo {
 	clientIP: string;
 	requestID: string;
 };
+
 
 export interface RequestContextBase {
 
@@ -26,8 +27,34 @@ export interface RequestContextBase {
 	requestInfo: RequestInfo;
 };
 
+
+export interface SerializableResponse {
+	toResponse(): Response;
+};
+
+export interface SerializableRequest {
+	toRequest(): Request;
+};
+
+type ResponseContentType = 'json' | 'html' | 'text';
+
+export interface TypedRouteResponse {
+	data?: object;
+	headers?: Record<string, string>;
+	status?: number;
+	type?: ResponseContentType;
+};
+
+export const typedResponseMimeType: Record<ResponseContentType, string> = {
+	json: 'application/json',
+	html: 'text/html',
+	text: 'text/plain'
+};
+
+
 export type RouteResponse = TypedRouteResponse | SerializableResponse | Response;
 export type RouteHandler<C extends object = {}> = (request: Request, context: RequestContextBase & C) => Promise<RouteResponse> | RouteResponse;
+
 
 export interface RouteConfig {
 

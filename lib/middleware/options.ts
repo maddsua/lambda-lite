@@ -1,4 +1,4 @@
-import { MiddlewarePlugin } from "./plugins.ts";
+import type { MiddlewarePlugin } from "./plugins.ts";
 
 export interface MiddlewareOptions {
 

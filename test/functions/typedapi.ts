@@ -1,7 +1,7 @@
 import { RouteHandler } from "../../lib/middleware/router.ts";
 import { FetchSchema } from "../../lib/middleware/typedRouter.ts";
-import { InferResponse, TypedResponse } from "../../lib/rest/response.ts";
-import { unwrapRequest } from "../../lib/rest/request.ts";
+import { InferResponse, TypedResponse } from "../../lib/typedrest/response.ts";
+import { unwrapRequest } from "../../lib/typedrest/request.ts";
 import { RouteConfig } from "../../lib/middleware/router.ts";
 
 export const config: RouteConfig = {
