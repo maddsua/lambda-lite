@@ -5,7 +5,6 @@ import { TypedResponse } from "../lib/typedrest/response.ts";
 
 type RouterType = TypedRouter<{
 	'/*': {
-		request: {},
 		response: {
 			data: {
 				message: string;

@@ -14,10 +14,10 @@ export interface TypedFetchResponse {
 };
 
 export type FetchSchema<T extends {
-	request: TypedFetchRequest;
+	request?: TypedFetchRequest;
 	response: TypedFetchResponse;
 }> = {
-	request: T['request'];
+	request?: T['request'];
 	response: T['response'];
 };
 
