@@ -1,6 +1,7 @@
-import { InferResponse } from "../../cloudflare.mod.ts";
+import type { InferResponse } from "../typedrest/response.ts";
 import type { FetchSchema, TypedRequestInit, RouterSchema } from "../middleware/typedRouter.ts";
-import { InferRequest } from "../typedrest/request.ts";
+import { InferRequest, TypedRequest,  } from "../typedrest/request.ts";
+import { unwrapResponse } from "../typedrest/response.ts";
 
 interface AgentConfig {
 	endpoint: string;
@@ -20,7 +21,16 @@ export class TypedFetchAgent <T extends RouterSchema<Record<string, FetchSchema<
 		this.cfg = init;
 
 		const queryHandler = (_: never, prop: string) => async (opts?: TypedRequestInit) => {
-			console.log(prop, opts);
+
+			const request = new TypedRequest(this.cfg.endpoint + prop, {
+				headers: opts?.headers,
+				data: opts?.data,
+				query: opts?.query
+			}).toRequest();
+		
+			const response = await fetch(request);
+		
+			return await unwrapResponse(response);
 		};
 
 		this.query = new Proxy({}, {
