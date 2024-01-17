@@ -46,5 +46,8 @@ await startServer({
 	serve: {
 		port: 8080,
 	},
-	routes
+	routes,
+	loglevel: {
+		requests: false
+	}
 });
