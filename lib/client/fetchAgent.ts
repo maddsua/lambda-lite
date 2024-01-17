@@ -1,17 +1,17 @@
-import type { FetchSchema, TypedFetchRequest } from "../middleware/typedRouter.ts";
-
-export type InferRouter<T extends Record<string, FetchSchema<any>>> = {
-	[K in keyof T]: T[K] extends FetchSchema<any> ? T[K]['request'] : T[K];
-};
+import type { FetchSchema, TypedFetchRequest, RouterSchema } from "../middleware/typedRouter.ts";
 
 interface AgentConfig {
 	endpoint: string;
 };
 
-export class TypedFetchAgent<T extends FetchSchema<any>> {
+type QueryResult <T extends FetchSchema<any>> = Promise<T['response']>;
+type QueryAction <T extends FetchSchema<any>> = T['request'] extends never ? () => QueryResult<T> : (opts: T['request']) => QueryResult<T>;
+type RouterQueries <T extends RouterSchema<any>> = { [K in keyof T]: QueryAction<T[K]> };
+
+export class TypedFetchAgent <T extends RouterSchema<Record<string, FetchSchema<any>>>> {
 
 	cfg: AgentConfig;
-	query: T;
+	query: RouterQueries<T>;
 
 	constructor(init: AgentConfig) {
 
@@ -26,7 +26,7 @@ export class TypedFetchAgent<T extends FetchSchema<any>> {
 				};
 			},
 
-		}) as T;
+		}) as RouterQueries<T>;
 	}
 
 };
