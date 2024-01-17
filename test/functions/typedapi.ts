@@ -1,5 +1,5 @@
 import { RouteHandler } from "../../lib/middleware/router.ts";
-import { FetchSchema } from "../../lib/rest/typed.ts";
+import { FetchSchema } from "../../lib/middleware/typedRouter.ts";
 import { InferResponse, TypedResponse } from "../../lib/rest/response.ts";
 import { unwrapRequest } from "../../lib/rest/request.ts";
 import { RouteConfig } from "../../lib/middleware/router.ts";
