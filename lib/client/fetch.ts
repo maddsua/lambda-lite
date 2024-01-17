@@ -6,7 +6,8 @@ export const typedFetch = async <T extends FetchSchema<any>>(init: T['request'] 
 
 	const request = new TypedRequest(init.url, {
 		headers: init.headers,
-		data: init.data
+		data: init.data,
+		query: init.query
 	}).toRequest();
 
 	const response = await fetch(request);
