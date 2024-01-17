@@ -3,13 +3,15 @@ import { TypedFetchAgent } from "../lib/client/fetchAgent.ts";
 import { RouterType } from "./typedapi.server.test.ts";
 
 const agent = new TypedFetchAgent<RouterType>({
-	endpoint: '/api'
+	endpoint: 'http://localhost:8080/'
 });
 
-agent.query.action();
+const { data } = await agent.query.action();
 
-agent.query.mutation({
+console.log(data?.message);
+
+/*agent.query.mutation({
 	data: {
 		id: 'tt'
 	}
-});
+});*/
