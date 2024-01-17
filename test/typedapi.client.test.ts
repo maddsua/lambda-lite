@@ -10,8 +10,10 @@ const { data } = await agent.query.action();
 
 console.log(data.message);
 
-/*agent.query.mutation({
+const response2 = await agent.query.mutation({
 	data: {
-		id: 'tt'
+		id: 'test'
 	}
-});*/
+});
+
+console.log(response2.status);
