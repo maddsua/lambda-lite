@@ -51,4 +51,4 @@ export interface RouteCtx extends RouteConfig {
 	handler: RouteHandler;
 };
 
-export type RouterRoutes = Record<`/${string}`, RouteCtx>;
+export type RouterRoutes = Record<string, RouteCtx>;
