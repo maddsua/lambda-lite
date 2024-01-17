@@ -5,6 +5,7 @@ import type { FetchSchema, TypedRequestInit, TypedResponseInit } from "./lib/mid
 import { TypedResponse, unwrapResponse, type InferResponse } from "./lib/typedrest/response.ts";
 import { TypedRequest, unwrapRequest, type InferRequest } from "./lib/typedrest/request.ts";
 import { typedFetch } from "./lib/client/fetch.ts";
+import { TypedFetchAgent } from "./lib/client/fetchAgent.ts";
 import * as plugins from './lib/plugins/index.ts';
 import { createEnv, type TypedEnv } from "./lib/util/env.ts";
 
@@ -29,6 +30,7 @@ export {
 	unwrapResponse,
 
 	typedFetch,
+	TypedFetchAgent,
 
 	createEnv,
 	TypedEnv,
