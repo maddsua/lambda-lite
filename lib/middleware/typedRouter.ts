@@ -14,14 +14,19 @@ export interface TypedResponseInit {
 };
 
 export type FetchSchema<T extends {
-	request?: TypedRequestInit;
+	request: TypedRequestInit;
 	response: TypedResponseInit;
 }> = {
-	request?: T['request'];
+	request: T['request'];
 	response: T['response'];
 };
 
-export type RouterSchema <T extends Record<string, FetchSchema<any>>> = T;
+export type RouterSchema <T extends Record<string, Partial<FetchSchema<any>>>> = {
+	[K in keyof T]: {
+		request: T[K]['request'] extends object ? T[K]['request'] : { data: null };
+		response: T[K]['response'] extends object ? T[K]['response'] : { data: null };
+	}
+};
 
 type TypedRouteCtx <T extends FetchSchema<any>, C extends object = {}> = RouteConfig & {
 	handler: (request: Request, context: RequestContextBase & C) => InferResponse<T> | Promise<InferResponse<T>>;
