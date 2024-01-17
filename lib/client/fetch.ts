@@ -1,5 +1,5 @@
 import { unwrapResponse } from "../rest/response.ts";
-import { FetchSchema } from "../rest/typed.ts";
+import { FetchSchema } from "../middleware/typedRouter.ts";
 import { TypedRequest } from "../rest/request.ts";
 
 export const typedFetch = async <T extends FetchSchema<any>>(init: T['request'] & { url: string | URL }) => {
