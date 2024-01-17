@@ -1,4 +1,4 @@
-import { typedFetch } from "../lib/rest/fetch.ts";
+import { typedFetch } from "../lib/client/fetch.ts";
 import { Schema } from "./functions/typedapi.ts";
 
 const response = await typedFetch<Schema>({
