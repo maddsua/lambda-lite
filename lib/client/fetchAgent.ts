@@ -21,7 +21,11 @@ export class TypedFetchAgent <T extends RouterSchema<Record<string, FetchSchema<
 
 		const queryHandler = (_: never, prop: string) => async (opts?: TypedRequestInit) => {
 
-			const request = new TypedRequest(this.cfg.endpoint + prop, {
+			const { endpoint } = this.cfg;
+			const requestEndpoint = endpoint.endsWith('/') ? endpoint.slice(0, -1) : endpoint;
+			const requestPath = prop.slice(prop.startsWith('/') ? 1 : 0, prop.endsWith('/') ? -1 : undefined);
+
+			const request = new TypedRequest(`${requestEndpoint}/${requestPath}`, {
 				headers: opts?.headers,
 				data: opts?.data,
 				query: opts?.query
