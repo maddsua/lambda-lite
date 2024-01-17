@@ -38,7 +38,7 @@ export class TypedRequest<
 
 			return params;
 		};
-		
+
 		if (typeof requestURL === 'string') {
 
 			const searchStarts = requestURL.indexOf('?');
