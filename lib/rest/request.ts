@@ -26,13 +26,33 @@ export class TypedRequest<
 
 	toRequest() {
 
-		const requestUrl = this.url instanceof URL ? this.url : new URL(this.url);
+		let requestURL = this.url;
+		
+		if (typeof requestURL === 'string') {
 
-		for (const key in this.query) {
-			requestUrl.searchParams.set(key, this.query[key]);
+			const searchStarts = requestURL.indexOf('?');
+			const requestSearch = new URLSearchParams();
+
+			//	look, I'm not moving this shit out of here
+			//	yes, I'm repeating myself by doing this,
+			//	but just leaving it here makes more sense then
+			//	breaking down the url object regardless of what it is and reassembling it later
+			for (const key in this.query) {
+				requestSearch.set(key, this.query[key]);
+			}
+
+			if (requestSearch.size) {
+				requestURL += searchStarts === -1 ? '?' : '&' + requestSearch.toString();
+			}
+
+		} else {
+
+			for (const key in this.query) {
+				requestURL.searchParams.set(key, this.query[key]);
+			}
 		}
 
-		return new Request(requestUrl, {
+		return new Request(requestURL, {
 			method: this.data ? 'POST' : 'GET',
 			headers: this.data ? Object.assign({
 				'content-type': 'application/json'
