@@ -14,8 +14,8 @@ export interface TypedResponseInit {
 };
 
 export type FetchSchema<T extends {
-	request: TypedRequestInit;
-	response: TypedResponseInit;
+	request: TypedRequestInit | undefined;
+	response: TypedResponseInit | undefined;
 }> = {
 	request: T['request'];
 	response: T['response'];
@@ -23,8 +23,8 @@ export type FetchSchema<T extends {
 
 export type RouterSchema <T extends Record<string, Partial<FetchSchema<any>>>> = {
 	[K in keyof T]: {
-		request: T[K]['request'] extends object ? T[K]['request'] : { data: null };
-		response: T[K]['response'] extends object ? T[K]['response'] : { data: null };
+		request: T[K]['request'] extends object ? T[K]['request'] : undefined;
+		response: T[K]['response'] extends object ? T[K]['response'] : undefined;
 	}
 };
 
