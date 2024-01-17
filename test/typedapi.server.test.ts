@@ -1,6 +1,7 @@
 import { ServerRouter, RouterSchema } from "../lib/middleware/typedRouter.ts";
 import { TypedResponse } from "../lib/typedrest/response.ts";
 import { startServer } from "../lib/adapters/deno/server.ts";
+import { unwrapRequest } from "../lib/typedrest/request.ts";
 
 export type RouterType = RouterSchema<{
 	'action': {
@@ -29,9 +30,15 @@ const routes: ServerRouter<RouterType> = {
 		})
 	},
 	mutation: {
-		handler: () => ({
-			status: 200
-		})
+		handler: async (request) => {
+
+			const rq = await unwrapRequest<RouterType['mutation']>(request);
+
+			console.log(rq.data)
+			return {
+				status: 200
+			}
+		}
 	}
 };
 
