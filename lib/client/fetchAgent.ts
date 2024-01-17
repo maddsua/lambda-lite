@@ -29,7 +29,6 @@ export class TypedFetchAgent <T extends RouterSchema<Record<string, FetchSchema<
 			}).toRequest();
 		
 			const response = await fetch(request);
-		
 			return await unwrapResponse(response);
 		};
 
