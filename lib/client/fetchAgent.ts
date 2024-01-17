@@ -45,5 +45,4 @@ export class TypedFetchAgent <T extends RouterSchema<Record<string, FetchSchema<
 		}) as RouterQueries<T>;
 
 	}
-
 };
