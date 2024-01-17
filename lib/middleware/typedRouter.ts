@@ -1,21 +1,21 @@
 import type { InferResponse } from "../typedrest/response.ts";
 import type { RequestContextBase, RouteConfig } from "./router.ts";
 
-export interface TypedFetchRequest {
+export interface TypedRequestInit {
 	data?: object | null;
 	headers?: Record<string, string>;
 	query?: Record<string, string>;
 };
 
-export interface TypedFetchResponse {
+export interface TypedResponseInit {
 	data: object | null;
 	headers?: Record<string, string>;
 	status?: number;
 };
 
 export type FetchSchema<T extends {
-	request?: TypedFetchRequest;
-	response: TypedFetchResponse;
+	request?: TypedRequestInit;
+	response: TypedResponseInit;
 }> = {
 	request?: T['request'];
 	response: T['response'];

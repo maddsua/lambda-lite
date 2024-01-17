@@ -1,4 +1,4 @@
-import type { FetchSchema, TypedFetchRequest, RouterSchema } from "../middleware/typedRouter.ts";
+import type { FetchSchema, TypedRequestInit, RouterSchema } from "../middleware/typedRouter.ts";
 
 interface AgentConfig {
 	endpoint: string;

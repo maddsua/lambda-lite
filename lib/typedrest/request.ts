@@ -1,12 +1,12 @@
 
-import type { FetchSchema, TypedFetchRequest } from "../middleware/typedRouter.ts";
+import type { FetchSchema, TypedRequestInit } from "../middleware/typedRouter.ts";
 import type { SerializableRequest } from "../middleware/router.ts";
 
 export class TypedRequest<
 	D extends object | null | undefined = undefined,
 	H extends Record<string, string> | undefined = undefined,
 	Q extends Record<string, string> | undefined = undefined,
-> implements SerializableRequest, TypedFetchRequest {
+> implements SerializableRequest, TypedRequestInit {
 
 	url: string | URL;
 	headers: H;

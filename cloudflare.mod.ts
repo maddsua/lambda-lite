@@ -1,7 +1,7 @@
 import { LambdaMiddleware } from "./lib/middleware/middleware.ts";
 import type { MiddlewareOptions } from "./lib/middleware/options.ts";
 import type { RouteConfig, RouteHandler } from "./lib/middleware/router.ts";
-import type { FetchSchema, TypedFetchRequest, TypedFetchResponse } from "./lib/middleware/typedRouter.ts";
+import type { FetchSchema, TypedRequestInit, TypedResponseInit } from "./lib/middleware/typedRouter.ts";
 import { TypedResponse, unwrapResponse, type InferResponse } from "./lib/typedrest/response.ts";
 import { TypedRequest, unwrapRequest, type InferRequest } from "./lib/typedrest/request.ts";
 import { typedFetch } from "./lib/client/fetch.ts";
@@ -18,8 +18,8 @@ export {
 	RouteConfig,
 
 	FetchSchema,
-	TypedFetchRequest,
-	TypedFetchResponse,
+	TypedRequestInit,
+	TypedResponseInit,
 
 	TypedRequest,
 	InferRequest,

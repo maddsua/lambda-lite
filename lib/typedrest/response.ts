@@ -1,11 +1,11 @@
 import type { SerializableResponse } from "../middleware/router.ts";
-import type { FetchSchema, TypedFetchResponse } from "../middleware/typedRouter.ts";
+import type { FetchSchema, TypedResponseInit } from "../middleware/typedRouter.ts";
 
 export class TypedResponse<
 	D extends object | null = null,
 	H extends Record<string, string> | undefined = undefined,
 	S extends number | undefined = undefined
-> implements SerializableResponse, TypedFetchResponse {
+> implements SerializableResponse, TypedResponseInit {
 
 	data: D | null;
 	headers: H | undefined;
