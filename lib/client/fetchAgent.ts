@@ -18,16 +18,13 @@ export class TypedFetchAgent <T extends RouterSchema<Record<string, FetchSchema<
 	constructor(init: AgentConfig) {
 
 		this.cfg = init;
-		  
+
+		const queryHandler = (_: never, prop: string) => async (opts?: TypedRequestInit) => {
+			console.log(prop, opts);
+		};
+
 		this.query = new Proxy({}, {
-
-			get(_: never, prop: string) {
-				console.log(prop)
-				return {
-					"ass": true
-				};
-			},
-
+			get: queryHandler
 		}) as RouterQueries<T>;
 	}
 
