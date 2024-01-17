@@ -1,4 +1,3 @@
-import type { InferResponse } from "../typedrest/response.ts";
 import type { FetchSchema, TypedRequestInit, RouterSchema } from "../middleware/typedRouter.ts";
 import { InferRequest, TypedRequest,  } from "../typedrest/request.ts";
 import { unwrapResponse } from "../typedrest/response.ts";
@@ -7,9 +6,9 @@ interface AgentConfig {
 	endpoint: string;
 };
 
-type QueryReponse <T extends FetchSchema<any>> = Promise<InferResponse<T>>;
+type QueryReponse <T extends FetchSchema<any>> = Promise<T['response']>;
 type QueryAction <T extends FetchSchema<any>> = T['request'] extends object ? (opts: InferRequest<T>) => QueryReponse<T> : () => QueryReponse<T>;
-type RouterQueries <T extends RouterSchema<any>> = { [K in keyof T]: QueryAction<T[K]> };
+type RouterQueries <T extends RouterSchema<Record<string, FetchSchema<any>>>> = { [K in keyof T]: QueryAction<T[K]> };
 
 export class TypedFetchAgent <T extends RouterSchema<Record<string, FetchSchema<any>>>> {
 
