@@ -6,6 +6,7 @@ import { TypedResponse } from '../rest/response.ts';
 import { ServiceConsole } from '../util/console.ts';
 import { getRequestIdFromProxy, generateRequestId, } from '../util/misc.ts';
 import { MiddlewarePlugin } from './plugins.ts';
+import { ServerRouter } from './typedRouter.ts';
 
 interface HandlerCtx {
 	handler: RouteHandler;
@@ -13,12 +14,14 @@ interface HandlerCtx {
 	plugins?: MiddlewarePlugin[];
 };
 
+type TypedServerRouter = ServerRouter<any, any>;
+
 export class LambdaMiddleware {
 
 	config: Partial<MiddlewareOptions>;
 	handlersPool: Record<string, HandlerCtx>;
 
-	constructor (routes: RouterRoutes, config?: Partial<MiddlewareOptions>) {
+	constructor (routes: RouterRoutes | TypedServerRouter, config?: Partial<MiddlewareOptions>) {
 
 		this.config = config || {};
 
