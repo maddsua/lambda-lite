@@ -27,6 +27,6 @@ type TypedRouteCtx <T extends FetchSchema<any>, C extends object = {}> = RouteCo
 	handler: (request: Request, context: RequestContextBase & C) => InferResponse<T> | Promise<InferResponse<T>>;
 };
 
-export type ServerRouter <T extends TypedRouter<any>, C extends object = {}> = {
+export type ServerRouter <T extends TypedRouter<Record<string, FetchSchema<any>>>, C extends object = {}> = {
 	[K in keyof T]: TypedRouteCtx<T[K], C>;
 };
