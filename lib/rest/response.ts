@@ -44,7 +44,7 @@ export const unwrapResponse = async <T extends FetchSchema<any>> (response: Resp
 	};
 };
 
-export type InferResponseType<T extends FetchSchema<any>> = TypedResponse<
+export type InferResponse<T extends FetchSchema<any>> = TypedResponse<
 	T['response']['data'],
 	T['response']['headers'],
 	T['response']['status']
