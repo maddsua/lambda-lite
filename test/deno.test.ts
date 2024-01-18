@@ -1,4 +1,4 @@
-import { startServer } from "../deno.mod.ts";
+import { startDenoServer } from "../adapters.mod.ts";
 import { createEnv } from "../lib.mod.ts";
 import {
 	allowMethods,
@@ -16,7 +16,7 @@ const env = createEnv({
 	}
 }, Deno.env.toObject());
 
-await startServer({
+await startDenoServer({
 	serve: {
 		port: env.port || 8080,
 	},
