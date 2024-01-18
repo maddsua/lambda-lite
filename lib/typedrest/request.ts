@@ -62,12 +62,6 @@ export class TypedRequest<
 	}
 };
 
-export type InferRequest<T extends FetchSchema<any>> = TypedRequest<
-	T['request']['data'],
-	T['request']['headers'],
-	T['request']['query']
-> | T['request'];
-
 export const unwrapRequest = async <T extends FetchSchema<any>> (request: Request): Promise<T['request']> => {
 
 	const { searchParams } = new URL(request.url);
