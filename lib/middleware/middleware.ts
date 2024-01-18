@@ -79,7 +79,7 @@ export class LambdaMiddleware {
 		return rqHeaders.get(header);
 	}
 
-	async handler (request: Request, info: NetworkInfo, context?: Object): Promise<Response> {
+	async handler (request: Request, info: NetworkInfo, context?: object): Promise<Response> {
 
 		const requestID = getRequestIdFromProxy(request.headers, this.config.proxy?.requestIdHeader) || generateRequestId();
 		const clientIP = this.getProxyRemoteIP(request.headers) || info.remoteAddr.hostname;
@@ -118,7 +118,7 @@ export class LambdaMiddleware {
 			}
 
 			const requestInfo = Object.assign({
-				id: requestID,
+				requestID,
 				clientIP
 			}, info);
 
@@ -162,10 +162,11 @@ export class LambdaMiddleware {
 			//	we are ok to call route handler and process it's result
 			if (routectx && !middlewareResponse) {
 
-				const requestContext = Object.assign({}, context || {}, {
-					console,
-					requestInfo,
-				});
+				const requestContext = Object.assign(context || {}, {
+					requestID,
+					clientIP,
+					console
+				}, info);
 
 				try {
 
