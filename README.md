@@ -35,7 +35,7 @@ startServer({
   serve: {
     port: 8080
   },
-  handlers: {
+  routes: {
     '/post_order': {
       handler: (requect, context) => {
         // do whatever
