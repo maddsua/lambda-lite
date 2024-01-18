@@ -108,7 +108,7 @@ class RateLimiterPlugin implements MiddlewarePlugin {
 		return new RateLimiterPluginImpl({
 			activity: this.activity,
 			config: this.config,
-			clientIP: props.info.clientIP,
+			clientIP: props.clientIP,
 			console: useLogging ? props.console : undefined
 		});
 	}
