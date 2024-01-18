@@ -1,8 +1,9 @@
-name: Run type checks
+name: Run type checks on lib
 
 on:
   push:
     branches: ['main']
+    paths: ['lib/**']
   pull_request:
   workflow_call:
 
@@ -11,7 +12,7 @@ permissions:
 
 jobs:
 
-  deno_check:
+  deno_check_lib:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
