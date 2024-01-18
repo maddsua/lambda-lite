@@ -11,7 +11,7 @@ export interface ServerOptions extends MiddlewareOptions {
 	serve?: Deno.ServeOptions | Deno.ServeTlsOptions;
 
 	/**
-	 * Define function handlers here if not using FS module loading
+	 * Define function handlers if FS module loading is not in use
 	 */
 	routes?: BasicRouter | TypedRouter<any>;
 

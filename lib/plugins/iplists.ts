@@ -222,7 +222,7 @@ class IPListsPlugin implements MiddlewarePlugin {
 		return new IPListsPluginImpl({
 			whitelistChecker: this.whitelistChecker,
 			blacklistChecker: this.blacklistChecker,
-			peerIP: props.info.clientIP,
+			peerIP: props.clientIP,
 			console: useLogging ? props.console : undefined,
 		});
 	}

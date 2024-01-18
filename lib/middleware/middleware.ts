@@ -1,5 +1,6 @@
 import type { BasicRouter, TypedRouter } from './router.ts';
-import type { NetworkInfo, Handler } from '../routes/handlers.ts';
+import type { Handler } from '../routes/handlers.ts';
+import type { NetworkInfo } from './context.ts';
 import type { MiddlewareOptions } from './options.ts';
 import type { MiddlewarePlugin } from './plugins.ts';
 import { TypedResponse } from '../restapi/typedResponse.ts';
@@ -79,7 +80,7 @@ export class LambdaMiddleware {
 		return rqHeaders.get(header);
 	}
 
-	async handler (request: Request, info: NetworkInfo, context?: Object): Promise<Response> {
+	async handler (request: Request, info: NetworkInfo, invokContext?: object): Promise<Response> {
 
 		const requestID = getRequestIdFromProxy(request.headers, this.config.proxy?.requestIdHeader) || generateRequestId();
 		const clientIP = this.getProxyRemoteIP(request.headers) || info.remoteAddr.hostname;
@@ -117,17 +118,17 @@ export class LambdaMiddleware {
 				}
 			}
 
-			const requestInfo = Object.assign({
+			const requestContext = Object.assign(invokContext || {}, {
+				requestID,
 				clientIP,
-				requestID
+				console
 			}, info);
 
-			const pluginPromises = routectx?.plugins?.map(item => item.spawn({
-				console,
-				info: requestInfo,
+			const pluginProps = Object.assign({
 				middleware: this
-			}));
+			}, requestContext);
 
+			const pluginPromises = routectx?.plugins?.map(item => item.spawn(pluginProps));
 			const runPlugins = pluginPromises?.length ? await Promise.all(pluginPromises) : [];
 
 			//	run "before" plugin callbacks
@@ -160,11 +161,6 @@ export class LambdaMiddleware {
 			//	and none of the plugins decicded to return request early
 			//	we are ok to call route handler and process it's result
 			if (routectx && !middlewareResponse) {
-
-				const requestContext = Object.assign({}, context || {}, {
-					console,
-					requestInfo,
-				});
 
 				try {
 

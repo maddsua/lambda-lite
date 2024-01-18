@@ -1,6 +1,6 @@
 import type { ServiceConsole } from '../util/console.ts';
 import type { LambdaMiddleware } from './middleware.ts';
-import type { RequestInfo } from '../routes/handlers.ts';
+import { LambdaContext } from './context.ts';
 
 interface PluginBeforeResult {
 	modifiedRequest?: Request;
@@ -25,10 +25,8 @@ export interface MiddlewarePluginInstance {
 	executeAfter?: (response: Response) => PluginAfterReturnType;
 };
 
-export interface SpawnProps {
-	info: RequestInfo;
+export interface SpawnProps extends LambdaContext {
 	middleware: LambdaMiddleware;
-	console: ServiceConsole;
 };
 
 export interface MiddlewarePlugin {
