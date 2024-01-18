@@ -1,4 +1,4 @@
-import type { NetworkInfo, BasicHandler, BasicRouter, TypedRouter } from './router.ts';
+import type { NetworkInfo, Handler, BasicRouter, TypedRouter } from './router.ts';
 import type { MiddlewareOptions } from './options.ts';
 import type { MiddlewarePlugin } from './plugins.ts';
 import { typedResponseMimeType } from '../api/rest.ts';
@@ -7,7 +7,7 @@ import { ServiceConsole } from '../util/console.ts';
 import { getRequestIdFromProxy, generateRequestId, } from '../util/misc.ts';
 
 interface HandlerCtx {
-	handler: BasicHandler;
+	handler: Handler;
 	expandPath?: boolean;
 	plugins?: MiddlewarePlugin[];
 };

@@ -1,6 +1,6 @@
-import { BasicHandler } from "../../deno.mod.ts";
+import { Handler } from "../../lib/middleware/router.ts";
 
-export const handler: BasicHandler = () => ({
+export const handler: Handler = () => ({
 	data: {
 		success: true,
 		purpose: 'imitates a REST API',

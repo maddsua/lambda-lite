@@ -22,7 +22,7 @@ export interface RequestInfo extends NetworkInfo {
 };
 
 
-export interface RequestContextBase {
+export interface LambdaContext {
 
 	/**
 	 * Request-specific console
@@ -37,7 +37,7 @@ export interface RequestContextBase {
 
 
 type RouteResponse = TypedRouteResponse | SerializableResponse | Response;
-export type BasicHandler<C extends object = {}> = (request: LambdaRequest<any>, context: RequestContextBase & C) => Promise<RouteResponse> | RouteResponse;
+export type Handler<C extends object = {}> = (request: LambdaRequest<any>, context: LambdaContext & C) => Promise<RouteResponse> | RouteResponse;
 
 
 export interface RouteConfig {
@@ -60,7 +60,7 @@ export interface RouteConfig {
 
 export type BasicRouter = {
 	[index: string]: RouteConfig & {
-		handler: BasicHandler;
+		handler: Handler;
 	};
 };
 
@@ -86,7 +86,7 @@ export type RouterSchema <T extends Record<string, Partial<FetchSchema<any>>>> =
 	}
 };
 
-export type TypedHandler<T extends FetchSchema<any>, C extends object = {}> = (request: LambdaRequest<T>, context: RequestContextBase & C) => InferResponse<T> | Promise<InferResponse<T>>;
+export type TypedHandler<T extends FetchSchema<any>, C extends object = {}> = (request: LambdaRequest<T>, context: LambdaContext & C) => InferResponse<T> | Promise<InferResponse<T>>;
 
 export type TypedRouter <T extends RouterSchema<Record<string, FetchSchema<any>>>, C extends object = {}> = {
 	[K in keyof T]: RouteConfig & {

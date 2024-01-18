@@ -1,6 +1,6 @@
 import { LambdaMiddleware } from "./lib/middleware/middleware.ts";
 import type { MiddlewareOptions } from "./lib/middleware/options.ts";
-import type { RouteConfig, BasicHandler } from "./lib/middleware/router.ts";
+import type { RouteConfig, Handler } from "./lib/middleware/router.ts";
 import type { FetchSchema, TypedRequestInit, TypedResponseInit } from "./lib/middleware/typedRouter.ts";
 import { TypedResponse, type InferResponse } from "./lib/typedrest/response.ts";
 import { TypedRequest, unwrapRequest } from "./lib/typedrest/request.ts";
@@ -15,7 +15,7 @@ export {
 	LambdaMiddleware,
 	MiddlewareOptions,
 
-	BasicHandler,
+	Handler,
 	RouteConfig,
 
 	FetchSchema,
