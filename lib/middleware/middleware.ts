@@ -1,9 +1,8 @@
-import type { NetworkInfo, RouteHandler, RouterRoutes } from './router.ts';
+import type { NetworkInfo, RouteHandler, BasicRouter, TypedRouter } from './router.ts';
 import type { MiddlewareOptions } from './options.ts';
 import type { MiddlewarePlugin } from './plugins.ts';
-import type { ServerRouter } from './typedRouter.ts';
-import { typedResponseMimeType } from './router.ts';
-import { TypedResponse } from '../typedrest/response.ts';
+import { typedResponseMimeType } from '../api/rest.ts';
+import { LambdaRequest, TypedResponse } from '../api/rest.ts';
 import { ServiceConsole } from '../util/console.ts';
 import { getRequestIdFromProxy, generateRequestId, } from '../util/misc.ts';
 
@@ -13,14 +12,12 @@ interface HandlerCtx {
 	plugins?: MiddlewarePlugin[];
 };
 
-type TypedServerRouter = ServerRouter<any, any>;
-
 export class LambdaMiddleware {
 
 	config: Partial<MiddlewareOptions>;
 	handlersPool: Record<string, HandlerCtx>;
 
-	constructor (routes: RouterRoutes | TypedServerRouter, config?: Partial<MiddlewareOptions>) {
+	constructor (routes: BasicRouter | TypedRouter<any, any>, config?: Partial<MiddlewareOptions>) {
 
 		this.config = config || {};
 
@@ -163,7 +160,8 @@ export class LambdaMiddleware {
 
 				try {
 
-					const handlerResponse = await routectx.handler(pluginModifiedRequest || request, requestContext);
+					const dispatchRequest = new LambdaRequest(pluginModifiedRequest || request);
+					const handlerResponse = await routectx.handler(dispatchRequest, requestContext);
 					const responseValueType = typeof handlerResponse;
 
 					if (responseValueType !== 'object')

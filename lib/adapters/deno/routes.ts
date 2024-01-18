@@ -1,11 +1,11 @@
 import { importFileExtensions } from './config.ts';
-import type { RouterRoutes, RouteConfig } from '../../middleware/router.ts';
+import type { BasicRouter, RouteConfig } from '../../middleware/router.ts';
 
 export interface FileRouteConfig extends RouteConfig {
 	url?: string;
 };
 
-export const loadFunctionsFromFS = async (fromDir: string): Promise<RouterRoutes> => {
+export const loadFunctionsFromFS = async (fromDir: string): Promise<BasicRouter> => {
 
 	console.log(`\n%c Indexing functions in ${fromDir}...\n`, 'background-color: green; color: black');
 
@@ -27,7 +27,7 @@ export const loadFunctionsFromFS = async (fromDir: string): Promise<RouterRoutes
 	const importEntries = allEntries.filter(item => importFileExtensions.some(ext => item.endsWith(`.${ext}`)));
 	if (!importEntries.length) throw new Error(`Failed to load route functions: no modules found in "${fromDir}"`);
 
-	const routes: RouterRoutes = {};
+	const routes: BasicRouter = {};
 
 	for (const entry of importEntries) {
 

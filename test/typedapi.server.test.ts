@@ -1,7 +1,6 @@
-import type { ServerRouter, RouterSchema } from "../lib/middleware/typedRouter.ts";
-import { TypedResponse } from "../lib/typedrest/response.ts";
+import type { TypedRouter, RouterSchema } from "../lib/middleware/router.ts";
+import { TypedResponse } from "../cloudflare.mod.ts";
 import { startServer } from "../lib/adapters/deno/server.ts";
-import { unwrapRequest } from "../lib/typedrest/request.ts";
 
 export type RouterType = RouterSchema<{
 	'action': {
@@ -23,7 +22,7 @@ export type RouterType = RouterSchema<{
 	}
 }>;
 
-const routes: ServerRouter<RouterType> = {
+const routes: TypedRouter<RouterType> = {
 	'action': {
 		handler: () => new TypedResponse({
 			message: 'test'
@@ -32,9 +31,10 @@ const routes: ServerRouter<RouterType> = {
 	mutation: {
 		handler: async (request) => {
 
-			const rq = await unwrapRequest<RouterType['mutation']>(request);
+			const uwr = await request.unwrap();
 
-			console.log(rq.data)
+			console.log(uwr.data);
+
 			return {
 				status: 200
 			}

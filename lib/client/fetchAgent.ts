@@ -1,5 +1,5 @@
-import type { FetchSchema, TypedRequestInit, RouterSchema } from "../middleware/typedRouter.ts";
-import type { TypedRequest } from "../typedrest/request.ts";
+import type { FetchSchema, RouterSchema } from "../middleware/router.ts";
+import { TypedRequest, type TypedRequestInit } from "../api/rest.ts";
 import { typedFetch } from "./fetch.ts";
 
 interface AgentConfig {

@@ -1,7 +1,7 @@
-import { RouteHandler } from "../../lib/middleware/router.ts";
-import { FetchSchema } from "../../lib/middleware/typedRouter.ts";
-import { InferResponse, TypedResponse } from "../../lib/typedrest/response.ts";
-import { unwrapRequest } from "../../lib/typedrest/request.ts";
+import type { RouteHandler, TypedRouteHandler } from "../../lib/middleware/router.ts";
+import type { FetchSchema } from "../../lib/middleware/router.ts";
+import type { InferResponse } from "../../lib/middleware/router.ts";
+import { TypedResponse } from "../../lib/api/rest.ts";
 import { RouteConfig } from "../../lib/middleware/router.ts";
 
 export const config: RouteConfig = {
@@ -29,9 +29,9 @@ export type Schema = FetchSchema<{
 	}
 }>;
 
-export const handler: RouteHandler = async (rq, ctx): Promise<InferResponse<Schema>> => {
+export const handler: TypedRouteHandler<Schema> = async (request, ctx): Promise<InferResponse<Schema>> => {
 
-	const { data, headers } = await unwrapRequest<Schema>(rq);
+	const { data, headers } = await request.unwrap();
 
 	console.log('Received data:', data);
 

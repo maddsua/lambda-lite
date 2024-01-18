@@ -1,5 +1,13 @@
 import type { ServiceConsole } from "../util/console.ts";
 import type { MiddlewarePlugin } from "./plugins.ts";
+import type {
+	LambdaRequest,
+	SerializableResponse,
+	TypedRouteResponse,
+	TypedRequestInit,
+	TypedResponseInit,
+TypedResponse
+} from "../api/rest.ts";
 
 
 export interface NetworkInfo {
@@ -28,32 +36,8 @@ export interface RequestContextBase {
 };
 
 
-export interface SerializableResponse {
-	toResponse(): Response;
-};
-
-export interface SerializableRequest {
-	toRequest(): Request;
-};
-
-type ResponseContentType = 'json' | 'html' | 'text';
-
-export interface TypedRouteResponse {
-	data?: object;
-	headers?: Record<string, string>;
-	status?: number;
-	type?: ResponseContentType;
-};
-
-export const typedResponseMimeType: Record<ResponseContentType, string> = {
-	json: 'application/json',
-	html: 'text/html',
-	text: 'text/plain'
-};
-
-
 export type RouteResponse = TypedRouteResponse | SerializableResponse | Response;
-export type RouteHandler<C extends object = {}> = (request: Request, context: RequestContextBase & C) => Promise<RouteResponse> | RouteResponse;
+export type RouteHandler<C extends object = {}> = (request: LambdaRequest<any>, context: RequestContextBase & C) => Promise<RouteResponse> | RouteResponse;
 
 
 export interface RouteConfig {
@@ -74,8 +58,38 @@ export interface RouteConfig {
 	inheritPlugins?: boolean;
 };
 
-export interface RouteCtx extends RouteConfig {
-	handler: RouteHandler;
+export type BasicRouter = {
+	[index: string]: RouteConfig & {
+		handler: RouteHandler;
+	};
 };
 
-export type RouterRoutes = Record<string, RouteCtx>;
+
+export type FetchSchema<T extends {
+	request: TypedRequestInit | undefined;
+	response: TypedResponseInit | undefined;
+}> = {
+	request: T['request'];
+	response: T['response'];
+};
+
+export type InferResponse<T extends FetchSchema<any>> = TypedResponse<
+	T['response']['data'],
+	T['response']['headers'],
+	T['response']['status']
+> | T['response'];
+
+export type RouterSchema <T extends Record<string, Partial<FetchSchema<any>>>> = {
+	[K in keyof T]: {
+		request: T[K]['request'] extends object ? T[K]['request'] : undefined;
+		response: T[K]['response'] extends object ? T[K]['response'] : undefined;
+	}
+};
+
+export type TypedRouteHandler<T extends FetchSchema<any>, C extends object = {}> = (request: LambdaRequest<T>, context: RequestContextBase & C) => InferResponse<T> | Promise<InferResponse<T>>;
+
+export type TypedRouter <T extends RouterSchema<Record<string, FetchSchema<any>>>, C extends object = {}> = {
+	[K in keyof T]: RouteConfig & {
+		handler: TypedRouteHandler<T[K], C>;
+	};
+};
