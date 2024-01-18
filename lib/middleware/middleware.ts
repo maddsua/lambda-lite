@@ -1,5 +1,6 @@
 import type { BasicRouter, TypedRouter } from './router.ts';
-import type { NetworkInfo, Handler } from '../routes/handlers.ts';
+import type { Handler } from '../routes/handlers.ts';
+import type { NetworkInfo } from './context.ts';
 import type { MiddlewareOptions } from './options.ts';
 import type { MiddlewarePlugin } from './plugins.ts';
 import { TypedResponse } from '../restapi/typedResponse.ts';
@@ -117,16 +118,15 @@ export class LambdaMiddleware {
 				}
 			}
 
-			const requestInfo = Object.assign({
+			const requestContext = Object.assign(invokContext || {}, {
 				requestID,
-				clientIP
+				clientIP,
+				console
 			}, info);
 
-			const pluginProps = {
-				console,
-				info: requestInfo,
+			const pluginProps = Object.assign({
 				middleware: this
-			};
+			}, requestContext);
 
 			const pluginPromises = routectx?.plugins?.map(item => item.spawn(pluginProps));
 			const runPlugins = pluginPromises?.length ? await Promise.all(pluginPromises) : [];
@@ -161,12 +161,6 @@ export class LambdaMiddleware {
 			//	and none of the plugins decicded to return request early
 			//	we are ok to call route handler and process it's result
 			if (routectx && !middlewareResponse) {
-
-				const requestContext = Object.assign(invokContext || {}, {
-					requestID,
-					clientIP,
-					console
-				}, info);
 
 				try {
 
