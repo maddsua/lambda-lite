@@ -1,5 +1,5 @@
 
-import { TypedFetchAgent } from "../lib/client/fetchAgent.ts";
+import { TypedFetchAgent } from "../lib.mod.ts";
 import type { RouterType } from "./typedapi.server.test.ts";
 
 const agent = new TypedFetchAgent<RouterType>({
