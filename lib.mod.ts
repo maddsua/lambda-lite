@@ -7,7 +7,6 @@ import type { FetchSchema } from "./lib/routes/schema.ts";
 import { LambdaMiddleware } from "./lib/middleware/middleware.ts";
 import { typedFetch } from "./lib/client/fetch.ts";
 import { TypedFetchAgent } from "./lib/client/fetchAgent.ts";
-import * as plugins from './lib/plugins/index.ts';
 import { createEnv, type TypedEnv } from "./lib/util/env.ts";
 
 export {
@@ -31,6 +30,4 @@ export {
 
 	createEnv,
 	TypedEnv,
-
-	plugins,
 }
