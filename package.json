@@ -1,6 +1,6 @@
 {
 	"name": "lambda-lite",
-	"version": "2.0.0-a2",
+	"version": "2.0.0-b1",
 	"type": "module",
 	"exports": {
 		".": {
