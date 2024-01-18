@@ -33,8 +33,7 @@ export class TypedFetchAgent <T extends RouterSchema<Record<string, FetchSchema<
 
 			try {
 
-				return await typedFetch({
-					url: `${requestEndpoint}/${requestPath}`,
+				return await typedFetch(`${requestEndpoint}/${requestPath}`, {
 					headers: opts?.headers,
 					data: opts?.data,
 					query: opts?.query
