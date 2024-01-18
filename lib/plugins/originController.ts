@@ -15,12 +15,12 @@ class CorsPluginImpl implements MiddlewarePluginInstance {
 	constructor(init: {
 		allowedOrigins: string[] | 'all';
 		console?: ServiceConsole;
-		handleCORS: boolean;
+		handleCORS?: boolean;
 	}) {
 		this.allowedOrigins = init.allowedOrigins;
 		this.setAllowOrigin = null;
 		this.console = init.console;
-		this.handleCORS = init.handleCORS;
+		this.handleCORS = typeof init.handleCORS === 'boolean' ? init.handleCORS : true;
 	}
 
 	check(rqOrigin: string, allowedOrigins: string[]) {
