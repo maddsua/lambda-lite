@@ -1,10 +1,12 @@
-import type { NetworkInfo, Handler, BasicRouter, TypedRouter } from './router.ts';
+import type { BasicRouter, TypedRouter } from './router.ts';
+import type { NetworkInfo, Handler } from '../routes/handlers.ts';
 import type { MiddlewareOptions } from './options.ts';
 import type { MiddlewarePlugin } from './plugins.ts';
 import { typedResponseMimeType } from '../api/rest.ts';
-import { LambdaRequest, TypedResponse } from '../api/rest.ts';
+import { TypedResponse } from '../api/rest.ts';
 import { ServiceConsole } from '../util/console.ts';
-import { getRequestIdFromProxy, generateRequestId, } from '../util/misc.ts';
+import { getRequestIdFromProxy, generateRequestId } from '../util/misc.ts';
+import { LambdaRequest } from './handler.ts';
 
 interface HandlerCtx {
 	handler: Handler;
