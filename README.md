@@ -14,7 +14,7 @@ Oh and don't use tsc with it. You've been warned.
 
 - Cloudflare Workers ✅
 
-- Node 18 and newer
+- NodeJS 😱
 
 	Look, I honestly don't care about node. If you do, nobody stops you from wasting a few hours of your time making typescript work in both environments. But if you just wanna make it work, you can reuse code from Cloudflare adapter and hook it up to `node:http` instead of exporting that stuff.
 
