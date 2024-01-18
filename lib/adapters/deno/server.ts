@@ -4,7 +4,7 @@ import { LambdaMiddleware} from '../../middleware/middleware.ts';
 import { defaultConfig } from './config.ts';
 import { loadFunctionsFromFS } from './routes.ts';
 
-export interface StartServerOptions extends MiddlewareOptions {
+export interface ServerOptions extends MiddlewareOptions {
 
 	/**
 	 * Basic http server options (passed directory to Deno.serve call)
@@ -22,7 +22,7 @@ export interface StartServerOptions extends MiddlewareOptions {
 	routesDir?: string;
 };
 
-export const startServer = async (opts?: StartServerOptions) => {
+export const startServer = async (opts?: ServerOptions) => {
 
 	const searchDir = opts?.routesDir || defaultConfig.routesDir;
 	const routes = opts?.routes || await loadFunctionsFromFS(searchDir);
