@@ -1,6 +1,6 @@
 import type { MiddlewareOptions } from "../../middleware/options.ts";
 import type { BasicRouter } from "../../middleware/router.ts";
-import type { NetworkInfo } from "../../routes/handlers.ts";
+import type { NetworkInfo } from "../../middleware/context.ts";
 import { LambdaMiddleware } from '../../middleware/middleware.ts';
 
 export interface WorkerStartOptions extends MiddlewareOptions {
