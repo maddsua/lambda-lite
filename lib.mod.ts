@@ -1,5 +1,5 @@
 import type { MiddlewareOptions } from "./lib/middleware/options.ts";
-import type { RouteConfig } from "./lib/middleware/router.ts";
+import type { RouteConfig, BasicRouter, TypedRouter } from "./lib/middleware/router.ts";
 import type { Handler, TypedHandler } from "./lib/routes/handlers.ts";
 import { TypedRequest, type TypedRequestInit } from "./lib/restapi/typedRequest.ts";
 import { TypedResponse, type TypedResponseInit } from "./lib/restapi/typedResponse.ts";
@@ -17,6 +17,8 @@ export {
 	Handler,
 	TypedHandler,
 	RouteConfig,
+	BasicRouter,
+	TypedRouter,
 
 	FetchSchema,
 	TypedRequestInit,
