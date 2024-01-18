@@ -1,13 +1,13 @@
 import Component from './index.tsx';
 
-import type { RouteConfig, RouteHandler } from '../../deno.mod.ts';
+import type { RouteConfig, BasicHandler } from '../../deno.mod.ts';
 
 export const config: RouteConfig = {
 	//expand: true,
 	//inheritPlugins: false
 };
 
-export const handler: RouteHandler = (request, context) => {
+export const handler: BasicHandler = (request, context) => {
 	const htmlcontent = Component().render();
 	return new Response(htmlcontent, {
 		headers: {

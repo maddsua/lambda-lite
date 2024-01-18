@@ -36,8 +36,8 @@ export interface RequestContextBase {
 };
 
 
-export type RouteResponse = TypedRouteResponse | SerializableResponse | Response;
-export type RouteHandler<C extends object = {}> = (request: LambdaRequest<any>, context: RequestContextBase & C) => Promise<RouteResponse> | RouteResponse;
+type RouteResponse = TypedRouteResponse | SerializableResponse | Response;
+export type BasicHandler<C extends object = {}> = (request: LambdaRequest<any>, context: RequestContextBase & C) => Promise<RouteResponse> | RouteResponse;
 
 
 export interface RouteConfig {
@@ -60,7 +60,7 @@ export interface RouteConfig {
 
 export type BasicRouter = {
 	[index: string]: RouteConfig & {
-		handler: RouteHandler;
+		handler: BasicHandler;
 	};
 };
 
@@ -86,10 +86,10 @@ export type RouterSchema <T extends Record<string, Partial<FetchSchema<any>>>> =
 	}
 };
 
-export type TypedRouteHandler<T extends FetchSchema<any>, C extends object = {}> = (request: LambdaRequest<T>, context: RequestContextBase & C) => InferResponse<T> | Promise<InferResponse<T>>;
+export type TypedHandler<T extends FetchSchema<any>, C extends object = {}> = (request: LambdaRequest<T>, context: RequestContextBase & C) => InferResponse<T> | Promise<InferResponse<T>>;
 
 export type TypedRouter <T extends RouterSchema<Record<string, FetchSchema<any>>>, C extends object = {}> = {
 	[K in keyof T]: RouteConfig & {
-		handler: TypedRouteHandler<T[K], C>;
+		handler: TypedHandler<T[K], C>;
 	};
 };

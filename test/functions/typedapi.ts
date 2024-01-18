@@ -1,4 +1,4 @@
-import type { RouteHandler, TypedRouteHandler } from "../../lib/middleware/router.ts";
+import type { BasicHandler, TypedHandler } from "../../lib/middleware/router.ts";
 import type { FetchSchema } from "../../lib/middleware/router.ts";
 import type { InferResponse } from "../../lib/middleware/router.ts";
 import { TypedResponse } from "../../lib/api/rest.ts";
@@ -29,7 +29,7 @@ export type Schema = FetchSchema<{
 	}
 }>;
 
-export const handler: TypedRouteHandler<Schema> = async (request, ctx): Promise<InferResponse<Schema>> => {
+export const handler: TypedHandler<Schema> = async (request, ctx): Promise<InferResponse<Schema>> => {
 
 	const { data, headers } = await request.unwrap();
 

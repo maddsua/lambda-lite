@@ -1,4 +1,4 @@
-import type { RouteConfig, RouteHandler } from "./lib/middleware/router.ts";
+import type { RouteConfig, BasicHandler } from "./lib/middleware/router.ts";
 import { startServer } from "./lib/adapters/deno/server.ts";
 import { createEnv, type TypedEnv } from "./lib/util/env.ts";
 import type { FetchSchema, TypedRequestInit, TypedResponseInit } from "./lib/middleware/typedRouter.ts";
@@ -10,7 +10,7 @@ import * as plugins from './lib/plugins/index.ts';
 
 export {
 
-	RouteHandler,
+	BasicHandler,
 	RouteConfig,
 
 	FetchSchema,
