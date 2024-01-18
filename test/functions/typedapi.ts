@@ -1,6 +1,5 @@
-import type { Handler, TypedHandler } from "../../lib/middleware/router.ts";
-import type { FetchSchema } from "../../lib/middleware/router.ts";
-import type { InferResponse } from "../../lib/middleware/router.ts";
+import type { TypedHandler } from "../../lib/routes/handlers.ts";
+import type { FetchSchema, InferResponse } from "../../lib/routes/schema.ts";
 import { TypedResponse } from "../../lib/api/rest.ts";
 import { RouteConfig } from "../../lib/middleware/router.ts";
 
