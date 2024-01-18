@@ -13,12 +13,7 @@ export interface NetworkInfo {
 	remoteAddr: NetworkPeerInfo;
 };
 
-export interface RequestInfo extends NetworkInfo {
-	clientIP: string;
-	id: string;
-};
-
-export interface LambdaContext {
+export interface LambdaContext extends NetworkInfo {
 
 	/**
 	 * Request-specific console
@@ -26,9 +21,14 @@ export interface LambdaContext {
 	console: ServiceConsole;
 
 	/**
-	 * Request info info, duh
+	 * Client's "real" IP
 	 */
-	requestInfo: RequestInfo;
+	clientIP: string;
+
+	/**
+	 * Request unique ID
+	 */
+	requestID: string;
 };
 
 type RouteResponse = TypedRouteResponse | SerializableResponse | Response;
