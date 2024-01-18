@@ -1,4 +1,4 @@
-import { FetchSchema } from "../../cloudflare.mod.ts";
+import { FetchSchema } from "../middleware/router.ts";
 
 export interface SerializableResponse {
 	toResponse(): Response;
