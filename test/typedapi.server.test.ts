@@ -1,4 +1,5 @@
-import type { TypedRouter, RouterSchema } from "../lib/middleware/router.ts";
+import type { TypedRouter } from "../lib/middleware/router.ts";
+import type { RouterSchema } from "../lib/routes/schema.ts";
 import { TypedResponse } from "../cloudflare.mod.ts";
 import { startServer } from "../lib/adapters/deno/server.ts";
 
