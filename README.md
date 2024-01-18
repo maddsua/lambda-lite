@@ -16,7 +16,7 @@ Oh and don't use tsc with it. You've been warned.
 
 - Node 18 and newer
 
-	(needs to be hooked up to the `node:http` manually. Personally I don't use node with it that's why no adapter provided, but it's dead simple to make one)
+	Look, I honestly don't care about node. If you do, nobody stops you from wasting a few hours of your time making typescript work in both environments. But if you just wanna make it work, you can reuse code from Cloudflare adapter and hook it up to `node:http` instead of exporting that stuff.
 
 ## What and why
 
