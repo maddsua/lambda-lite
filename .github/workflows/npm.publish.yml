@@ -7,6 +7,9 @@ on:
 
 jobs:
 
+  deno_type_check:
+    uses: ./.github/workflows/deno.check.yml
+
   deploy_to_npm:
     runs-on: ubuntu-latest
     steps:
