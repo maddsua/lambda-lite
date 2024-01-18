@@ -3,17 +3,20 @@ import type { ServiceConsole } from "../util/console.ts";
 import type { SerializableResponse, TypedRouteResponse } from "../middleware/response.ts";
 import type { LambdaRequest } from "../middleware/request.ts";
 
-export interface NetworkInfo {
+interface NetworkPeerInfo {
 	transport: 'tcp' | 'udp';
 	hostname: string;
 	port: number;
+};
+
+export interface NetworkInfo {
+	remoteAddr: NetworkPeerInfo;
 };
 
 export interface RequestInfo extends NetworkInfo {
 	clientIP: string;
 	requestID: string;
 };
-
 
 export interface LambdaContext {
 
@@ -27,7 +30,6 @@ export interface LambdaContext {
 	 */
 	requestInfo: RequestInfo;
 };
-
 
 type RouteResponse = TypedRouteResponse | SerializableResponse | Response;
 export type Handler<C extends object = {}> = (request: LambdaRequest<any>, context: LambdaContext & C) => Promise<RouteResponse> | RouteResponse;
