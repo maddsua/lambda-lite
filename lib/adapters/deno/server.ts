@@ -28,9 +28,9 @@ export const startServer = async (opts?: ServerOptions) => {
 	const middleware = new LambdaMiddleware(routes, opts);
 
 	if (!opts?.serve) {
-		Deno.serve((request, info) => middleware.handler(request, info.remoteAddr));
+		Deno.serve((request, info) => middleware.handler(request, info));
 		return;
 	}
 
-	Deno.serve(opts.serve, (request, info) => middleware.handler(request, info.remoteAddr));
+	Deno.serve(opts.serve, (request, info) => middleware.handler(request, info));
 };
