@@ -118,16 +118,17 @@ export class LambdaMiddleware {
 			}
 
 			const requestInfo = Object.assign({
-				clientIP,
-				requestID
+				id: requestID,
+				clientIP
 			}, info);
 
-			const pluginPromises = routectx?.plugins?.map(item => item.spawn({
+			const pluginProps = {
 				console,
 				info: requestInfo,
 				middleware: this
-			}));
+			};
 
+			const pluginPromises = routectx?.plugins?.map(item => item.spawn(pluginProps));
 			const runPlugins = pluginPromises?.length ? await Promise.all(pluginPromises) : [];
 
 			//	run "before" plugin callbacks

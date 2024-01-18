@@ -15,7 +15,7 @@ export interface NetworkInfo {
 
 export interface RequestInfo extends NetworkInfo {
 	clientIP: string;
-	requestID: string;
+	id: string;
 };
 
 export interface LambdaContext {
