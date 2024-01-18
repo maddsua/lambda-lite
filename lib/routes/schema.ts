@@ -1,15 +1,15 @@
 import type { TypedRequestInit } from "../restapi/typedRequest.ts";
 import type { TypedResponseInit, TypedResponse } from "../restapi/typedResponse.ts";
 
-export type FetchSchema <T extends Partial<{
-	request: TypedRequestInit | undefined;
-	response: TypedResponseInit | undefined;
-}>> = {
+export type FetchSchema<T extends {
+	request?: TypedRequestInit;
+	response?: TypedResponseInit;
+}> = {
 	request: T['request'] extends object ? T['request'] : undefined;
 	response: T['response'] extends object ? T['response'] : undefined;
 };
 
-export type InferResponse <T extends FetchSchema<any>> = TypedResponse<
+export type InferResponse<T extends FetchSchema<any>> = TypedResponse<
 	T['response']['data'],
 	T['response']['headers'],
 	T['response']['status']
