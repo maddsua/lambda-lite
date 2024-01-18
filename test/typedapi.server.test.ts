@@ -4,7 +4,7 @@ import { TypedResponse } from "../cloudflare.mod.ts";
 import { startServer } from "../lib/adapters/deno/server.ts";
 
 export type RouterType = RouterSchema<{
-	'action': {
+	action: {
 		response: {
 			data: {
 				message: string;
@@ -24,7 +24,7 @@ export type RouterType = RouterSchema<{
 }>;
 
 const routes: TypedRouter<RouterType> = {
-	'action': {
+	action: {
 		handler: () => new TypedResponse({
 			message: 'test'
 		})
