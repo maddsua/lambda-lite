@@ -1,6 +1,7 @@
 import Component from './index.tsx';
 
-import type { RouteConfig, Handler } from '../../deno.mod.ts';
+import type { RouteConfig } from '../../lib/middleware/router.ts';
+import type { Handler } from '../../lib/routes/handlers.ts';
 
 export const config: RouteConfig = {
 	//expand: true,
