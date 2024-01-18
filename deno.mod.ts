@@ -1,6 +1,6 @@
-import { startServer, type StartServerOptions } from "./lib/adapters/deno/server.ts";
+import { startServer, type ServerOptions } from "./lib/adapters/deno/server.ts";
 
 export {
 	startServer,
-	StartServerOptions,
+	ServerOptions,
 }
