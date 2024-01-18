@@ -1,4 +1,4 @@
-import { FetchSchema, InferResponse } from "../routes/schema.ts";
+import type { FetchSchema, InferResponse } from "../routes/schema.ts";
 import type { ServiceConsole } from "../util/console.ts";
 import type { SerializableResponse, TypedRouteResponse } from "../middleware/response.ts";
 import type { LambdaRequest } from "../middleware/request.ts";
