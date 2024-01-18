@@ -73,10 +73,16 @@ export class LambdaMiddleware {
 		}
 	}
 
+	getProxyRemoteIP (rqHeaders: Headers) {
+		const header = this.config.proxy?.forwardedIPHeader;
+		if (!header?.length) return null;
+		return rqHeaders.get(header);
+	}
+
 	async handler (request: Request, info: NetworkInfo, context?: Object): Promise<Response> {
 
 		const requestID = getRequestIdFromProxy(request.headers, this.config.proxy?.requestIdHeader) || generateRequestId();
-		const clientIP = ((this.config.proxy?.forwardedIPHeader ? request.headers.get(this.config.proxy.forwardedIPHeader) : undefined)) || info.hostname;
+		const clientIP = this.getProxyRemoteIP(request.headers) || info.remoteAddr.hostname;
 
 		let requestDisplayUrl = '/';
 
