@@ -1,13 +1,15 @@
-import type { NetworkInfo } from './route.ts';
+import type { BasicRouter, TypedRouter } from './router.ts';
+import type { NetworkInfo, Handler } from '../routes/handlers.ts';
 import type { MiddlewareOptions } from './options.ts';
-import type { RouteHandler, RouterRoutes } from './route.ts';
-import { JSONResponse } from '../rest/jsonResponse.ts';
+import type { MiddlewarePlugin } from './plugins.ts';
+import { TypedResponse } from '../restapi/typedResponse.ts';
 import { ServiceConsole } from '../util/console.ts';
 import { getRequestIdFromProxy, generateRequestId } from '../util/misc.ts';
-import { MiddlewarePlugin } from './plugins.ts';
+import { LambdaRequest } from './request.ts';
+import { getResponseType } from './response.ts';
 
 interface HandlerCtx {
-	handler: RouteHandler;
+	handler: Handler;
 	expandPath?: boolean;
 	plugins?: MiddlewarePlugin[];
 };
@@ -17,7 +19,7 @@ export class LambdaMiddleware {
 	config: Partial<MiddlewareOptions>;
 	handlersPool: Record<string, HandlerCtx>;
 
-	constructor (routes: RouterRoutes, config?: Partial<MiddlewareOptions>) {
+	constructor (routes: BasicRouter | TypedRouter<any, any>, config?: Partial<MiddlewareOptions>) {
 
 		this.config = config || {};
 
@@ -50,8 +52,12 @@ export class LambdaMiddleware {
 				handlerCtx.plugins = (applyGlobal || []).concat(routeCtx.plugins || []);
 			}
 
-			const applyHandlerPath = route.replace(/\/\*?$/i, '');
-			this.handlersPool[applyHandlerPath.length ? applyHandlerPath : '/'] = handlerCtx;
+			let applyHandlerPath = route.replace(/\/\*?$/i, '');
+
+			if (!applyHandlerPath.length || !applyHandlerPath.startsWith('/'))
+				applyHandlerPath = `/${applyHandlerPath}`;
+
+			this.handlersPool[applyHandlerPath] = handlerCtx;
 		}
 
 		//	setup healthcheck path
@@ -110,11 +116,6 @@ export class LambdaMiddleware {
 				requestID
 			}, info);
 
-			const requestContext = Object.assign({}, context || {}, {
-				console,
-				requestInfo,
-			});
-
 			const pluginPromises = routectx?.plugins?.map(item => item.spawn({
 				console,
 				info: requestInfo,
@@ -154,23 +155,38 @@ export class LambdaMiddleware {
 			//	we are ok to call route handler and process it's result
 			if (routectx && !middlewareResponse) {
 
+				const requestContext = Object.assign({}, context || {}, {
+					console,
+					requestInfo,
+				});
+
 				try {
 
-					const handlerResponse = await routectx.handler(pluginModifiedRequest || request, requestContext);
-	
-					//	here we convert a non-standard response object to a standard one
-					//	all non standard should provide a "toResponse" method to do that
-					const responseObject = handlerResponse instanceof Response ? handlerResponse : handlerResponse.toResponse();
-	
-					//	and if after that it's still not a Response we just crash the request
-					if (!(responseObject instanceof Response)) {
-						const typeErrorReport = (handlerResponse && typeof handlerResponse === 'object') ?
-							`object keys ({${Object.keys(handlerResponse).join(', ')}}) don't match handler response interface` :
-							`variable of type "${typeof handlerResponse}" is not a valid handler response`;
-						throw new Error('Invalid function response: ' + typeErrorReport);
+					const dispatchRequest = new LambdaRequest(pluginModifiedRequest || request);
+					const handlerResponse = await routectx.handler(dispatchRequest, requestContext);
+					const responseValueType = typeof handlerResponse;
+
+					if (responseValueType !== 'object')
+						throw new Error(`Invalid handler response: unexpected return type ${responseValueType}`);
+
+					if (handlerResponse instanceof Response) {
+						middlewareResponse = handlerResponse;
+					} else if ('toResponse' in handlerResponse) {
+						middlewareResponse = handlerResponse.toResponse();
+					} else {
+
+						const responseBody = handlerResponse.data ? JSON.stringify(handlerResponse.data) : null;
+						const responseHeaders = new Headers(handlerResponse?.headers);
+
+						if (handlerResponse.data) {
+							responseHeaders.set('content-type', getResponseType(handlerResponse.type));
+						}
+
+						middlewareResponse = new Response(responseBody, {
+							headers: responseHeaders,
+							status: handlerResponse.status
+						});
 					}
-	
-					middlewareResponse = responseObject;
 
 				} catch (error) {
 
@@ -179,14 +195,14 @@ export class LambdaMiddleware {
 					switch (this.config.defaultResponses?.error) {
 
 						case 'log': {
-							middlewareResponse = new JSONResponse({
+							middlewareResponse = new TypedResponse({
 								error_text: 'unhandled middleware error',
 								error_log: (error as Error | null)?.message || JSON.stringify(error)
 							}, { status: 500 }).toResponse();
 						} break;
 	
 						default: { 
-							middlewareResponse = new JSONResponse({
+							middlewareResponse = new TypedResponse({
 								error_text: 'unhandled middleware error'
 							}, { status: 500 }).toResponse();
 						} break;
@@ -206,20 +222,20 @@ export class LambdaMiddleware {
 	
 						switch (this.config.defaultResponses?.index) {
 	
-							case 'forbidden': return new JSONResponse({
+							case 'forbidden': return new TypedResponse({
 								error_text: 'you\'re not really welcome here mate'
 							}, { status: 403 }).toResponse();
 	
-							case 'info': return new JSONResponse({
+							case 'info': return new TypedResponse({
 								server: 'maddsua/lambda-lite',
 								status: 'operational'
 							}, { status: 200 }).toResponse();
 	
-							case 'teapot': return new JSONResponse({
+							case 'teapot': return new TypedResponse({
 								error_text: 'yo bro r u lost?'
 							}, { status: 418 }).toResponse();
 						
-							default: return new JSONResponse({
+							default: return new TypedResponse({
 								error_text: 'route not found'
 							}, { status: 404 }).toResponse();
 						}
@@ -227,11 +243,11 @@ export class LambdaMiddleware {
 
 					switch (this.config.defaultResponses?.notfound) {
 	
-						case 'forbidden': return new JSONResponse({
+						case 'forbidden': return new TypedResponse({
 							error_text: 'you\'re not really welcome here mate'
 						}, { status: 403 }).toResponse();
 	
-						default: return new JSONResponse({
+						default: return new TypedResponse({
 							error_text: 'route not found'
 						}, { status: 404 }).toResponse();
 					}

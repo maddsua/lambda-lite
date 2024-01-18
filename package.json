@@ -4,8 +4,8 @@
 	"type": "module",
 	"exports": {
 		".": {
-			"default": "./npm.mod.ts",
-			"types": "./npm.mod.ts"
+			"default": "./lib.mod.ts",
+			"types": "./lib.mod.ts"
 		},
 		"./deno": {
 			"default": "./deno.mod.ts",

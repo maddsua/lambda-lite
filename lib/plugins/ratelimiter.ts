@@ -1,4 +1,4 @@
-import { JSONResponse } from "../rest/jsonResponse.ts";
+import { TypedResponse } from "../restapi/typedResponse.ts";
 import type { MiddlewarePlugin, MiddlewarePluginInstance, SpawnProps } from "../middleware/plugins.ts";
 import type { ServiceConsole } from "../util/console.ts";
 
@@ -54,7 +54,7 @@ class RateLimiterPluginImpl implements MiddlewarePluginInstance {
 			this.console?.log(`[Rate limiter] Too many requests (${clientActivity.total}). Wait for ${resetTime}s`);
 
 			return {
-				respondWith: new JSONResponse({
+				respondWith: new TypedResponse({
 					error_text: 'too many requests'
 				}, { status: 429 }).toResponse()
 			};

@@ -1,4 +1,4 @@
-import { JSONResponse } from "../rest/jsonResponse.ts";
+import { TypedResponse } from "../restapi/typedResponse.ts";
 import type { MiddlewarePlugin, MiddlewarePluginInstance, SpawnProps } from "../middleware/plugins.ts";
 import type { ServiceConsole } from "../util/console.ts";
 
@@ -37,7 +37,7 @@ class ServiceAuthPluginImpl implements MiddlewarePluginInstance {
 		const authBearer = request.headers.get('authorization')?.replace(/^\s*bearer\s+/, '');
 		if (!authBearer?.length) {
 			return {
-				respondWith: new JSONResponse({
+				respondWith: new TypedResponse({
 					error_text: 'service access token is required'
 				}, {
 					status: 401,
@@ -60,7 +60,7 @@ class ServiceAuthPluginImpl implements MiddlewarePluginInstance {
 			this.console?.error(`[Service auth] Invalid service token provided (${authBearer})`);
 
 			return {
-				respondWith: new JSONResponse({
+				respondWith: new TypedResponse({
 					error_text: 'invalid service access token'
 				}, { status: 403 }).toResponse()
 			};

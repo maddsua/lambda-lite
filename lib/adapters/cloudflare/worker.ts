@@ -1,5 +1,5 @@
 import type { MiddlewareOptions } from "../../middleware/options.ts";
-import type { RouterRoutes } from "../../middleware/route.ts";
+import type { BasicRouter } from "../../middleware/router.ts";
 import { LambdaMiddleware } from '../../middleware/middleware.ts';
 
 export interface StartServerOptions extends MiddlewareOptions {
@@ -7,7 +7,7 @@ export interface StartServerOptions extends MiddlewareOptions {
 	/**
 	 * Define API routes
 	 */
-	routes: RouterRoutes;
+	routes: BasicRouter;
 };
 
 export const workerFetchHandler = async (request: Request, ctx: object, middleware: LambdaMiddleware) => {

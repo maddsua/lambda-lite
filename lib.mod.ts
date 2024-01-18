@@ -10,8 +10,6 @@ import { TypedFetchAgent } from "./lib/client/fetchAgent.ts";
 import * as plugins from './lib/plugins/index.ts';
 import { createEnv, type TypedEnv } from "./lib/util/env.ts";
 
-import { startServer, type StartServerOptions } from "./lib/adapters/deno/server.ts";
-
 export {
 
 	LambdaMiddleware,
@@ -35,7 +33,4 @@ export {
 	TypedEnv,
 
 	plugins,
-
-	startServer,
-	StartServerOptions
 }

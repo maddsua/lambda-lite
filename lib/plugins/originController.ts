@@ -1,4 +1,4 @@
-import { JSONResponse } from "../rest/jsonResponse.ts";
+import { TypedResponse } from "../restapi/typedResponse.ts";
 import type { MiddlewarePlugin, MiddlewarePluginInstance, SpawnProps } from "../middleware/plugins.ts";
 import type { ServiceConsole } from "../util/console.ts";
 
@@ -59,7 +59,7 @@ class CorsPluginImpl implements MiddlewarePluginInstance {
 			if (!requestOrigin) {
 	
 				return {
-					respondWith: new JSONResponse({
+					respondWith: new TypedResponse({
 						error_text: 'client verification required'
 					}, { status: 403 }).toResponse()
 				};
@@ -69,7 +69,7 @@ class CorsPluginImpl implements MiddlewarePluginInstance {
 				this.console?.log('[CORS] Origin not allowed:', requestOrigin);
 	
 				return {
-					respondWith: new JSONResponse({
+					respondWith: new TypedResponse({
 						error_text: 'client not verified'
 					}, { status: 403 }).toResponse()
 				};

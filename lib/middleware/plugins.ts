@@ -1,6 +1,6 @@
-import { ServiceConsole } from '../util/console.ts';
+import type { ServiceConsole } from '../util/console.ts';
 import type { LambdaMiddleware } from './middleware.ts';
-import type { RequestInfo } from './route.ts';
+import type { RequestInfo } from '../routes/handlers.ts';
 
 interface PluginBeforeResult {
 	modifiedRequest?: Request;

@@ -1,4 +1,4 @@
-import { JSONResponse } from "../rest/jsonResponse.ts";
+import { TypedResponse } from "../restapi/typedResponse.ts";
 import type { MiddlewarePlugin, MiddlewarePluginInstance, SpawnProps } from "../middleware/plugins.ts";
 import type { ServiceConsole } from "../util/console.ts";
 
@@ -26,7 +26,7 @@ class AllowMethodsPluginImpl implements MiddlewarePluginInstance {
 			this.console?.warn(`[Method checker] Method not allowed (${request.method})`);
 
 			return {
-				respondWith: new JSONResponse({
+				respondWith: new TypedResponse({
 					error_text: 'method not allowed'
 				}, { status: 405 }).toResponse()
 			};
