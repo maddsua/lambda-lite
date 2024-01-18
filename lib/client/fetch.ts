@@ -14,15 +14,20 @@ const unwrapResponse = async <T extends FetchSchema<any>> (response: Response): 
 	};
 };
 
-export const typedFetch = async <T extends FetchSchema<any>>(init: T['request'] & { url: string | URL }) => {
+type TypedFetchType = <T extends FetchSchema<any>> (
+	url: string | URL,
+	...args: (T['request'] extends object ? [T['request']] : [undefined?])
+) => Promise<T['response']>;
 
-	const request = new TypedRequest(init.url, {
-		headers: init.headers,
-		data: init.data,
-		query: init.query
+export const typedFetch: TypedFetchType = async (url, init?) => {
+
+	const request = new TypedRequest(url, {
+		headers: init?.headers,
+		data: init?.data,
+		query: init?.query
 	}).toRequest();
 
 	const response = await fetch(request);
 
-	return await unwrapResponse<T>(response);
+	return await unwrapResponse(response);
 };
