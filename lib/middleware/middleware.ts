@@ -2,11 +2,11 @@ import type { BasicRouter, TypedRouter } from './router.ts';
 import type { NetworkInfo, Handler } from '../routes/handlers.ts';
 import type { MiddlewareOptions } from './options.ts';
 import type { MiddlewarePlugin } from './plugins.ts';
-import { typedResponseMimeType } from '../api/rest.ts';
 import { TypedResponse } from '../api/rest.ts';
 import { ServiceConsole } from '../util/console.ts';
 import { getRequestIdFromProxy, generateRequestId } from '../util/misc.ts';
 import { LambdaRequest } from './handler.ts';
+import { getResponseType } from '../restapi/datatype.ts';
 
 interface HandlerCtx {
 	handler: Handler;
@@ -175,17 +175,17 @@ export class LambdaMiddleware {
 						middlewareResponse = handlerResponse.toResponse();
 					} else {
 
-						const body = handlerResponse.data ? JSON.stringify(handlerResponse.data) : null;
-						const headers = new Headers(handlerResponse?.headers);
+						const responseBody = handlerResponse.data ? JSON.stringify(handlerResponse.data) : null;
+						const responseHeaders = new Headers(handlerResponse?.headers);
 
-						if (handlerResponse.data && handlerResponse.type) {
-							const contentType = typedResponseMimeType[handlerResponse.type] || typedResponseMimeType.json;
-							headers.set('content-type', contentType);
-						} else if (handlerResponse.data) {
-							headers.set('content-type', typedResponseMimeType.json);
+						if (handlerResponse.data) {
+							responseHeaders.set('content-type', getResponseType(handlerResponse.type));
 						}
 
-						middlewareResponse = new Response(body, { headers, status: handlerResponse.status });
+						middlewareResponse = new Response(responseBody, {
+							headers: responseHeaders,
+							status: handlerResponse.status
+						});
 					}
 
 				} catch (error) {
