@@ -1,7 +1,6 @@
-import type { TypedRouter } from "../lib/middleware/router.ts";
+import { TypedRouter, TypedResponse } from "../lib.mod.ts";
 import type { RouterSchema } from "../lib/routes/schema.ts";
-import { TypedResponse } from "../lib/restapi/typedResponse.ts";
-import { startServer } from "../lib/adapters/deno/server.ts";
+import { startDenoServer } from "../adapters.mod.ts";
 
 export type RouterType = RouterSchema<{
 	action: {
@@ -43,7 +42,7 @@ const routes: TypedRouter<RouterType> = {
 	}
 };
 
-await startServer({
+await startDenoServer({
 	serve: {
 		port: 8080,
 	},

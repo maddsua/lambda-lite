@@ -1,10 +1,9 @@
 import type { MiddlewareOptions } from "../../middleware/options.ts";
-import type { BasicRouter } from "../../middleware/router.ts";
-import { LambdaMiddleware} from '../../middleware/middleware.ts';
-import { defaultConfig } from './config.ts';
+import type { BasicRouter, TypedRouter } from "../../middleware/router.ts";
+import { LambdaMiddleware } from '../../middleware/middleware.ts';
 import { loadFunctionsFromFS } from './routes.ts';
 
-export interface StartServerOptions extends MiddlewareOptions {
+export interface ServerOptions extends MiddlewareOptions {
 
 	/**
 	 * Basic http server options (passed directory to Deno.serve call)
@@ -14,7 +13,7 @@ export interface StartServerOptions extends MiddlewareOptions {
 	/**
 	 * Define function handlers here if not using FS module loading
 	 */
-	routes?: BasicRouter;
+	routes?: BasicRouter | TypedRouter<any>;
 
 	/**
 	 * Path to the directory containing handler functions
@@ -22,9 +21,9 @@ export interface StartServerOptions extends MiddlewareOptions {
 	routesDir?: string;
 };
 
-export const startServer = async (opts?: StartServerOptions) => {
+export const startServer = async (opts?: ServerOptions) => {
 
-	const searchDir = opts?.routesDir || defaultConfig.routesDir;
+	const searchDir = opts?.routesDir || './functions';
 	const routes = opts?.routes || await loadFunctionsFromFS(searchDir);
 	const middleware = new LambdaMiddleware(routes, opts);
 

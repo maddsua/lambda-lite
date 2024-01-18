@@ -1,19 +1,19 @@
 {
 	"name": "lambda-lite",
-	"version": "2.0.0-b1",
+	"version": "2.0.0-b2",
 	"type": "module",
 	"exports": {
 		".": {
 			"default": "./lib.mod.ts",
 			"types": "./lib.mod.ts"
 		},
-		"./deno": {
-			"default": "./deno.mod.ts",
-			"types": "./deno.mod.ts"
+		"./plugins": {
+			"default": "./plugins.mod.ts",
+			"types": "./plugins.mod.ts"
 		},
-		"./cloudflare": {
-			"default": "./cloudflare.mod.ts",
-			"types": "./cloudflare.mod.ts"
+		"./adapters": {
+			"default": "./adapters.mod.ts",
+			"types": "./adapters.mod.ts"
 		}
 	},
 	"repository": {

@@ -1,10 +1,12 @@
-import { startServer } from "../deno.mod.ts";
-import { allowMethods } from "../lib/plugins/allowMethods.ts";
-import { serviceAuth } from "../lib/plugins/serviceAuth.ts";
-import { originController } from "../lib/plugins/originController.ts";
-import { ratelimiter } from "../lib/plugins/ratelimiter.ts";
-import { createEnv } from "../lib/util/env.ts";
-import { ipLists } from "../lib/plugins/iplists.ts";
+import { startDenoServer } from "../adapters.mod.ts";
+import { createEnv } from "../lib.mod.ts";
+import {
+	allowMethods,
+	serviceAuth,
+	originController,
+	ratelimiter,
+	ipLists
+} from "../plugins.mod.ts";
 
 const env = createEnv({
 	port: {
@@ -14,7 +16,7 @@ const env = createEnv({
 	}
 }, Deno.env.toObject());
 
-await startServer({
+await startDenoServer({
 	serve: {
 		port: env.port || 8080,
 	},

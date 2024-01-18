@@ -2,7 +2,7 @@ import type { MiddlewareOptions } from "../../middleware/options.ts";
 import type { BasicRouter } from "../../middleware/router.ts";
 import { LambdaMiddleware } from '../../middleware/middleware.ts';
 
-export interface StartServerOptions extends MiddlewareOptions {
+export interface WorkerStartOptions extends MiddlewareOptions {
 
 	/**
 	 * Define API routes
