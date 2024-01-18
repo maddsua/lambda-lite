@@ -1,7 +1,10 @@
-import type { TypedHandler } from "../../lib/routes/handlers.ts";
-import type { FetchSchema, InferResponse } from "../../lib/routes/schema.ts";
-import { TypedResponse } from "../../lib/restapi/typedResponse.ts";
-import { RouteConfig } from "../../lib/middleware/router.ts";
+import {
+	type TypedHandler,
+	type FetchSchema,
+	type InferResponse,
+	type RouteConfig,
+	TypedResponse
+} from "../../lib.mod.ts";
 
 export const config: RouteConfig = {
 	inheritPlugins: false
