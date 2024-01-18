@@ -1,5 +1,5 @@
-import type { FetchSchema } from "../middleware/router.ts";
-import { TypedRequest } from "../api/rest.ts";
+import type { FetchSchema } from "../routes/schema.ts";
+import { TypedRequest } from "../restapi/typedRequest.ts";
 
 const unwrapResponse = async <T extends FetchSchema<any>> (response: Response): Promise<T['response']> => {
 

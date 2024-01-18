@@ -1,4 +1,5 @@
-import type { TypedRequestInit, TypedResponse, TypedResponseInit } from "../api/rest.ts";
+import type { TypedRequestInit } from "../restapi/typedRequest.ts";
+import type { TypedResponseInit, TypedResponse } from "../restapi/typedResponse.ts";
 
 export type FetchSchema<T extends {
 	request: TypedRequestInit | undefined;

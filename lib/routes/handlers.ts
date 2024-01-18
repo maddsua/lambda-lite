@@ -1,6 +1,7 @@
 import { FetchSchema, InferResponse } from "../routes/schema.ts";
 import type { ServiceConsole } from "../util/console.ts";
-import type { TypedRouteResponse, SerializableResponse, LambdaRequest } from "../api/rest.ts";
+import type { SerializableResponse, TypedRouteResponse } from "../middleware/response.ts";
+import type { LambdaRequest } from "../middleware/request.ts";
 
 export interface NetworkInfo {
 	transport: 'tcp' | 'udp';

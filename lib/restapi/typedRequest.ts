@@ -1,37 +1,9 @@
-
-export interface SerializableResponse {
-	toResponse(): Response;
-};
-
-export interface SerializableRequest {
-	toRequest(): Request;
-};
-
-type ResponseContentType = 'json' | 'html' | 'text';
-
-export interface TypedRouteResponse {
-	data?: object;
-	headers?: Record<string, string>;
-	status?: number;
-	type?: ResponseContentType;
-};
-
-export const typedResponseMimeType: Record<ResponseContentType, string> = {
-	json: 'application/json',
-	html: 'text/html',
-	text: 'text/plain'
-};
+import type { SerializableRequest } from "../middleware/response.ts";
 
 export interface TypedRequestInit {
 	data?: object | null;
 	headers?: Record<string, string>;
 	query?: Record<string, string>;
-};
-
-export interface TypedResponseInit {
-	data: object | null;
-	headers?: Record<string, string>;
-	status?: number;
 };
 
 export class TypedRequest<
@@ -91,35 +63,5 @@ export class TypedRequest<
 			}, this.headers || {}) : this.headers,
 			body: this.data ? JSON.stringify(this.data) : null
 		});
-	}
-};
-
-export class TypedResponse<
-	D extends object | null = null,
-	H extends Record<string, string> | undefined = undefined,
-	S extends number | undefined = undefined
-> implements SerializableResponse, TypedResponseInit {
-
-	data: D | null;
-	headers: H | undefined;
-	status: S | undefined;
-
-	constructor(data: D, init?: {
-		headers?: H;
-		status?: S;
-	}) {
-		this.data = data || null;
-		this.headers = init?.headers;
-		this.status = init?.status;
-	}
-
-	toResponse(): Response {
-
-		const body = this.data ? JSON.stringify(this.data) : null;
-		const headers = new Headers(this.headers);
-
-		if (this.data) headers.set('content-type', 'application/json');
-
-		return new Response(body, { headers, status: this.status });
 	}
 };

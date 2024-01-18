@@ -1,6 +1,6 @@
 import type { TypedHandler } from "../../lib/routes/handlers.ts";
 import type { FetchSchema, InferResponse } from "../../lib/routes/schema.ts";
-import { TypedResponse } from "../../lib/api/rest.ts";
+import { TypedResponse } from "../../lib/restapi/typedResponse.ts";
 import { RouteConfig } from "../../lib/middleware/router.ts";
 
 export const config: RouteConfig = {

@@ -1,4 +1,4 @@
-import { Handler } from "../../lib/middleware/router.ts";
+import { Handler } from "../../lib/routes/handlers.ts";
 
 export const handler: Handler = () => ({
 	data: {
