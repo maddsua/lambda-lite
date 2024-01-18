@@ -1,6 +1,18 @@
-import { unwrapResponse } from "../typedrest/response.ts";
 import type { FetchSchema } from "../middleware/typedRouter.ts";
 import { TypedRequest } from "../typedrest/request.ts";
+
+const unwrapResponse = async <T extends FetchSchema<any>> (response: Response): Promise<T['response']> => {
+
+	const contentIsJSON = response.headers.get('content-type')?.toLowerCase()?.includes('json');
+	const responseData = contentIsJSON ? await response.json().catch(() => null) : null;
+	if (contentIsJSON && !responseData) throw new Error('Invalid typed response: no data');
+
+	return {
+		data: responseData,
+		headers: Object.fromEntries(response.headers.entries()),
+		status: response.status
+	};
+};
 
 export const typedFetch = async <T extends FetchSchema<any>>(init: T['request'] & { url: string | URL }) => {
 
