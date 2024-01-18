@@ -31,19 +31,6 @@ export class TypedResponse<
 	}
 };
 
-export const unwrapResponse = async <T extends FetchSchema<any>> (response: Response): Promise<T['response']> => {
-
-	const contentIsJSON = response.headers.get('content-type')?.toLowerCase()?.includes('json');
-	const responseData = contentIsJSON ? await response.json().catch(() => null) : null;
-	if (contentIsJSON && !responseData) throw new Error('Invalid typed response: no data');
-
-	return {
-		data: responseData,
-		headers: Object.fromEntries(response.headers.entries()),
-		status: response.status
-	};
-};
-
 export type InferResponse<T extends FetchSchema<any>> = TypedResponse<
 	T['response']['data'],
 	T['response']['headers'],
