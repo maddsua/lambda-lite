@@ -10,9 +10,9 @@ Oh and don't use tsc with it. You've been warned.
 
 ### Supported platforms: 
 
-- Deno
+- Deno ✅
 
-- Cloudflare workers
+- Cloudflare Workers ✅
 
 - Node 18 and newer
 
