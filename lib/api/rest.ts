@@ -1,4 +1,4 @@
-import { FetchSchema } from "../middleware/router.ts";
+import type { FetchSchema } from "../routes/schema.ts";
 
 export interface SerializableResponse {
 	toResponse(): Response;
