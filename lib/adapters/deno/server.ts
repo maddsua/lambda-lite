@@ -16,7 +16,8 @@ export interface ServerOptions extends MiddlewareOptions {
 	routes?: LambdaRouter;
 
 	/**
-	 * Path to the directory containing handler functions
+	 * Path to the directory containing handler functions.
+	 * Can be overriden by "routes" property
 	 */
 	loadFunctions?: FunctionLoaderProps;
 };
