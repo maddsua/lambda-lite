@@ -1,6 +1,6 @@
 {
 	"name": "lambda-lite",
-	"version": "2.0.0-b3",
+	"version": "2.0.0-b4",
 	"type": "module",
 	"exports": {
 		".": {
@@ -33,7 +33,8 @@
 	},
 	"files": [
 		"lib/**/*.ts",
-		"cloudflare.mod.ts",
-		"deno.mod.ts"
+		"lib.mod.ts",
+		"plugins.mod.ts",
+		"adapters.mod.ts"
 	]
 }
