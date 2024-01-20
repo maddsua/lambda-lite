@@ -1,7 +1,7 @@
 import type { MiddlewareOptions } from "../../middleware/options.ts";
 import type { LambdaRouter } from "../../middleware/router.ts";
 import { LambdaMiddleware } from '../../middleware/middleware.ts';
-import { loadFunctionsFromFS } from './routes.ts';
+import { loadFunctionsFromFS, type FunctionLoaderProps } from './functionLoader.ts';
 
 export interface ServerOptions extends MiddlewareOptions {
 
@@ -16,15 +16,19 @@ export interface ServerOptions extends MiddlewareOptions {
 	routes?: LambdaRouter;
 
 	/**
-	 * Path to the directory containing handler functions
+	 * Path to the directory containing handler functions.
+	 * Can be overriden by "routes" property
 	 */
-	routesDir?: string;
+	loadFunctions?: FunctionLoaderProps;
 };
 
 export const startServer = async (opts?: ServerOptions) => {
 
-	const searchDir = opts?.routesDir || './functions';
-	const routes = opts?.routes || await loadFunctionsFromFS(searchDir);
+	const routeLoaderInit = opts?.loadFunctions || {
+		dir: './functions'
+	};
+
+	const routes = opts?.routes || await loadFunctionsFromFS(routeLoaderInit);
 	const middleware = new LambdaMiddleware(routes, opts);
 
 	if (!opts?.serve) {

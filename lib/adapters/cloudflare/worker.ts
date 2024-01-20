@@ -17,7 +17,7 @@ export const workerFetchHandler = async (request: Request, ctx: object, middlewa
 		remoteAddr: {
 			transport: 'tcp',
 			port: 443,
-			hostname: request.headers.get('x-real-ip') || request.headers.get('cf-connecting-ip') || 'unknown'
+			hostname: request.headers.get('x-real-ip') || request.headers.get('cf-connecting-ip') || '127.0.0.1'
 		}
 	};
 

@@ -2,20 +2,28 @@ import { existsSync } from "https://deno.land/std@0.212.0/fs/mod.ts";
 import type { BasicRouter } from '../../middleware/router.ts';
 import type { RouteConfig } from "../../routes/route.ts";
 
-export interface FileRouteConfig extends RouteConfig {
+interface FileRouteConfig extends RouteConfig {
 	url?: string;
 };
 
-export const loadFunctionsFromFS = async (fromDir: string): Promise<BasicRouter> => {
+export interface FunctionLoaderProps {
+	dir: string;
+	ignore?: RegExp[];
+};
+
+export const loadFunctionsFromFS = async (props: FunctionLoaderProps): Promise<BasicRouter> => {
 
 	//	check that directory exists
-	if (!existsSync(fromDir)) {
-		const errorMessage = 'Functions directory not found';
-		console.error(`\n%c ${errorMessage} %c\nPath "${fromDir}" doesn't exist`, 'background-color: red; color: white', 'background-color: inherit; color: inherit');
-		throw new Error(errorMessage.toLowerCase());
+	if (!existsSync(props.dir)) {
+		console.error(
+			`\n%c Functions directory not found %c\nPath "${props.dir}" doesn't exist\n`,
+			'background-color: red; color: white',
+			'background-color: inherit; color: inherit'
+		);
+		throw new Error('no functions directory found');
 	}
 
-	console.log(`\n%c Indexing functions in ${fromDir}... \n`, 'background-color: green; color: black');
+	console.log(`\n%c Indexing functions in ${props.dir}... \n`, 'background-color: green; color: black');
 
 	const allEntries: string[] = [];
 
@@ -30,11 +38,22 @@ export const loadFunctionsFromFS = async (fromDir: string): Promise<BasicRouter>
 			}
 		}
 	};
-	await iterateDirectory(fromDir);
+	await iterateDirectory(props.dir);
 
-	const importFileExtensions = ['ts','mts','js','mjs'];
-	const importEntries = allEntries.filter(item => importFileExtensions.some(ext => item.endsWith(`.${ext}`)));
-	if (!importEntries.length) throw new Error(`Failed to load route functions: no modules found in "${fromDir}"`);
+	const importFileExtensions = ['ts','mts','js','mjs'] as const;
+	const importEntries = allEntries.filter(item => (
+		importFileExtensions.some(ext => item.endsWith(`.${ext}`)) &&
+		!props.ignore?.some(ignoreItem => ignoreItem.test(item))
+	));
+
+	if (!importEntries.length) {
+		console.error(
+			`%c Failed to load route functions %c\nNo modules found in "${props.dir}"\n`,
+			'background-color: red; color: white',
+			'background-color: inherit; color: inherit'
+		);
+		throw new Error('no modules found');
+	}
 
 	const routes: BasicRouter = {};
 
@@ -42,7 +61,7 @@ export const loadFunctionsFromFS = async (fromDir: string): Promise<BasicRouter>
 
 		try {
 
-			const importPath = /^([A-z]\:)?[\\\/]/.test(entry) ? entry : `${Deno.cwd()}/${entry}`;
+			const importPath = /^([^:]\:)?[\\\/]+/.test(entry) ? entry : `${Deno.cwd()}/${entry}`;
 			const importURL = `file:///` + importPath.replace(/[\\\/]+/g, '/').replace(/\/[^\/]+\/[\.]{2}\//g, '/').replace(/\/\.\//g, '/');
 
 			console.log(`%c --> Loading function: %c${entry}`, 'color: blue', 'color: white');
@@ -55,7 +74,7 @@ export const loadFunctionsFromFS = async (fromDir: string): Promise<BasicRouter>
 			const config = (imported['config'] || {}) as FileRouteConfig;
 			if (typeof config !== 'object') throw new Error('Config invalid');
 
-			const pathNoExt = entry.slice(fromDir.length, entry.lastIndexOf('.'));
+			const pathNoExt = entry.slice(props.dir.length, entry.lastIndexOf('.'));
 			const indexIndex = pathNoExt.lastIndexOf('/index');
 			const fsRoutedUrl = indexIndex === -1 ? pathNoExt : (indexIndex === 0 ? '/' : pathNoExt.slice(0, indexIndex));
 			const customUrl = config.url?.replace(/[\/\*]+$/, '');

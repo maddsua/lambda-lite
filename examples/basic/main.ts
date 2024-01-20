@@ -17,7 +17,9 @@ await startDenoServer({
 	serve: {
 		port: env.port || 8080,
 	},
-	routesDir: 'examples/basic/functions',
+	loadFunctions: {
+		dir: 'examples/basic/functions',
+	},
 	healthcheckPath: '/health',
 	plugins: [
 		allowMethods('GET'),
