@@ -2,7 +2,7 @@
 
 ## What and why
 
-You can treat it like it's Netlify functions but it runs everywhere. I was working with Functions a lot and I really like it but they can't be run separately in docker containers and with other services.
+You can treat it like it's Netlify Functions but it runs everywhere. I was working with Functions a lot and I really like it but they can't be run separately in docker containers and with other services.
 
 ### 🚨 Warning: TypeScript only
 
@@ -66,6 +66,12 @@ startServer({
 Now launch it with `deno run -A main.ts`
 
 \* again, don't forget to replace `[tag]` with an actual version tag
+
+## Deploying
+
+The fastest way to deploy LambdaLite is Railwal.app, altho you can run it virtually anywhere.
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/YslOZk?referralCode=Mi0Jqj)
 
 ---
 
