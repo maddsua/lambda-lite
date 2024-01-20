@@ -15,13 +15,12 @@ export const loadFunctionsFromFS = async (props: FunctionLoaderProps): Promise<B
 
 	//	check that directory exists
 	if (!existsSync(props.dir)) {
-		const errorMessage = 'Functions directory not found';
 		console.error(
-			`\n%c ${errorMessage} %c\nPath "${props.dir}" doesn't exist`,
+			`\n%c Functions directory not found %c\nPath "${props.dir}" doesn't exist\n`,
 			'background-color: red; color: white',
 			'background-color: inherit; color: inherit'
 		);
-		throw new Error(errorMessage.toLowerCase());
+		throw new Error('no functions directory found');
 	}
 
 	console.log(`\n%c Indexing functions in ${props.dir}... \n`, 'background-color: green; color: black');
@@ -49,7 +48,7 @@ export const loadFunctionsFromFS = async (props: FunctionLoaderProps): Promise<B
 
 	if (!importEntries.length) {
 		console.error(
-			`%c Failed to load route functions %c\nNo modules found in "${props.dir}"`,
+			`%c Failed to load route functions %c\nNo modules found in "${props.dir}"\n`,
 			'background-color: red; color: white',
 			'background-color: inherit; color: inherit'
 		);
