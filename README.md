@@ -39,26 +39,27 @@ You can just import modules directly using http imports. It will work out of the
 Create a main file using the example:
 
 ```typescript
-import { startServer } from 'https://raw.githubusercontent.com/maddsua/lambda-lite/[tag]/mod.ts';
+import { startDenoServer } from "https://raw.githubusercontent.com/maddsua/lambda-lite/[tag]/adapters.mod.ts";
+import { serviceAuth } from "https://raw.githubusercontent.com/maddsua/lambda-lite/[tag]/plugins.mod.ts";
 
-startServer({
+startDenoServer({
   serve: {
     port: 8080
   },
   routes: {
+    '/': {
+      handler: () => new Resonse('Hi! This is a super secret API server xD')
+    },
     '/post_order': {
       handler: (requect, context) => {
         // do whatever
         return new Resonse(null, { status: 201 })
       }
     },
-    '/health': {
-      handler: () => new Response(null, { status: 200 }),
-      config: {
-        allowedOrigings: null
-      }
-    }
-  }
+  },
+  plugins: [
+    serviceAuth({ token: 'test_token'}),
+  ]
 });
 
 ```
