@@ -48,7 +48,8 @@ startDenoServer({
   },
   routes: {
     '/': {
-      handler: () => new Resonse('Hi! This is a super secret API server xD')
+      handler: () => new Resonse('Hi! This is a super secret API server xD'),
+	  inheritPlugins: false
     },
     '/post_order': {
       handler: (requect, context) => {
