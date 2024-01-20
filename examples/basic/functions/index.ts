@@ -1,4 +1,4 @@
-import type { RouteConfig, Handler } from '../../lib.mod.ts';
+import type { RouteConfig, Handler } from '../../../lib.mod.ts';
 import Component from './index.tsx';
 
 export const config: RouteConfig = {

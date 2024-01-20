@@ -1,4 +1,4 @@
-import type { RouteConfig } from "../../../lib.mod.ts";
+import type { RouteConfig } from "../../../../lib.mod.ts";
 
 export const config: RouteConfig = {
 	expand: true

@@ -1,10 +1,9 @@
 import {
 	type TypedHandler,
 	type FetchSchema,
-	type InferResponse,
 	type RouteConfig,
 	TypedResponse
-} from "../../lib.mod.ts";
+} from "../../../lib.mod.ts";
 
 export const config: RouteConfig = {
 	inheritPlugins: false
@@ -31,7 +30,7 @@ export type Schema = FetchSchema<{
 	}
 }>;
 
-export const handler: TypedHandler<Schema> = async (request, ctx): Promise<InferResponse<Schema>> => {
+export const handler: TypedHandler<Schema> = async (request, ctx) => {
 
 	const { data, headers } = await request.unwrap();
 

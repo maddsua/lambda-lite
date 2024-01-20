@@ -1,12 +1,12 @@
 import type { MiddlewareOptions } from "./lib/middleware/options.ts";
-import type { RouteConfig, BasicRouter, TypedRouter } from "./lib/middleware/router.ts";
+import type { RouteConfig, BasicRouteContext, TypedRouteContext } from "./lib/routes/route.ts";
+import type { BasicRouter, RouterSchema, TypedRouter, InferRouterSchema } from "./lib/middleware/router.ts";
 import type { Handler, TypedHandler } from "./lib/routes/handlers.ts";
-import { TypedRequest, type TypedRequestInit } from "./lib/restapi/typedRequest.ts";
-import { TypedResponse, type TypedResponseInit } from "./lib/restapi/typedResponse.ts";
-import type { FetchSchema, InferResponse } from "./lib/routes/schema.ts";
+import type { FetchSchema } from "./lib/routes/schema.ts";
 import { LambdaMiddleware } from "./lib/middleware/middleware.ts";
+import { TypedResponse, type SerializableResponse } from "./lib/middleware/rest.ts";
 import { typedFetch } from "./lib/client/fetch.ts";
-import { TypedFetchAgent } from "./lib/client/fetchAgent.ts";
+import { TypedFetchAgent } from "./lib/client/agent.ts";
 import { createEnv, type TypedEnv } from "./lib/util/env.ts";
 
 export {
@@ -17,16 +17,18 @@ export {
 	Handler,
 	TypedHandler,
 	RouteConfig,
+
+	FetchSchema,
+	RouterSchema,
+	InferRouterSchema,
+
+	BasicRouteContext,
 	BasicRouter,
+	TypedRouteContext,
 	TypedRouter,
 
-	TypedRequestInit,
-	TypedResponseInit,
-	FetchSchema,
-	InferResponse,
-
-	TypedRequest,
 	TypedResponse,
+	SerializableResponse,
 
 	typedFetch,
 	TypedFetchAgent,

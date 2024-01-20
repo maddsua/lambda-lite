@@ -1,4 +1,6 @@
-import type { BasicRouter, RouteConfig } from '../../middleware/router.ts';
+import { existsSync } from "https://deno.land/std@0.212.0/fs/mod.ts";
+import type { BasicRouter } from '../../middleware/router.ts';
+import type { RouteConfig } from "../../routes/route.ts";
 
 export interface FileRouteConfig extends RouteConfig {
 	url?: string;
@@ -6,7 +8,14 @@ export interface FileRouteConfig extends RouteConfig {
 
 export const loadFunctionsFromFS = async (fromDir: string): Promise<BasicRouter> => {
 
-	console.log(`\n%c Indexing functions in ${fromDir}...\n`, 'background-color: green; color: black');
+	//	check that directory exists
+	if (!existsSync(fromDir)) {
+		const errorMessage = 'Functions directory not found';
+		console.error(`\n%c ${errorMessage} %c\nPath "${fromDir}" doesn't exist`, 'background-color: red; color: white', 'background-color: inherit; color: inherit');
+		throw new Error(errorMessage.toLowerCase());
+	}
+
+	console.log(`\n%c Indexing functions in ${fromDir}... \n`, 'background-color: green; color: black');
 
 	const allEntries: string[] = [];
 

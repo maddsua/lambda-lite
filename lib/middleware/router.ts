@@ -1,33 +1,28 @@
-import type { MiddlewarePlugin } from "./plugins.ts";
-import { Handler, TypedHandler } from "../routes/handlers.ts";
-import { FetchSchema, RouterSchema } from "../routes/schema.ts";
+import type { FetchSchema } from "../routes/schema.ts";
+import type { BasicRouteContext, TypedRouteContext } from "../routes/route.ts";
+import { TypedHandler } from "../../lib.mod.ts";
 
-export interface RouteConfig {
+export type BasicRouter = Record<string, BasicRouteContext>;
 
-	/**
-	 * Exapnd path to catch subpaths too
-	 */
-	expand?: boolean;
-
-	/**
-	 * Set up route-specific plugins
-	 */
-	plugins?: MiddlewarePlugin[];
-
-	/**
-	 * Inherit global plugins
-	 */
-	inheritPlugins?: boolean;
-};
-
-export type BasicRouter = {
-	[index: string]: RouteConfig & {
-		handler: Handler;
-	};
+export type RouterSchema <T extends Record<string, Partial<FetchSchema<any>>>> = {
+	[K in keyof T]: {
+		request: T[K]['request'] extends object ? T[K]['request'] : undefined;
+		response: T[K]['response'] extends object ? T[K]['response'] : undefined;
+	}
 };
 
 export type TypedRouter <T extends RouterSchema<Record<string, FetchSchema<any>>>, C extends object = {}> = {
-	[K in keyof T]: RouteConfig & {
-		handler: TypedHandler<T[K], C>;
-	};
+	[K in keyof T]: TypedRouteContext<T[K], C>;
+};
+
+export type LambdaRouter = BasicRouter | TypedRouter<any, any>;
+
+type MixedRouter = Record<string, BasicRouteContext | TypedRouteContext<any, any>>;
+type ExtractRouterSchema <T extends TypedRouteContext> = T['handler'] extends TypedHandler<infer U> ? U : never;
+
+export type InferRouterSchema <T extends MixedRouter> = {
+	[K in keyof T]: T[K] extends TypedRouteContext ? FetchSchema<{
+		request: ExtractRouterSchema<T[K]>['request'];
+		response: ExtractRouterSchema<T[K]>['response'];
+	}> : never;
 };

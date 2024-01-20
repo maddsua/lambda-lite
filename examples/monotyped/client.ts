@@ -1,6 +1,6 @@
 
-import { TypedFetchAgent } from "../lib.mod.ts";
-import type { RouterType } from "./typedapi.server.test.ts";
+import { TypedFetchAgent } from "../../lib.mod.ts";
+import type { RouterType } from "./server.ts";
 
 const agent = new TypedFetchAgent<RouterType>({
 	endpoint: 'http://localhost:8080/'

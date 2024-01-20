@@ -1,13 +1,12 @@
-import type { BasicRouter, TypedRouter } from './router.ts';
+import type { LambdaRouter } from './router.ts';
 import type { Handler } from '../routes/handlers.ts';
 import type { NetworkInfo } from './context.ts';
 import type { MiddlewareOptions } from './options.ts';
 import type { MiddlewarePlugin } from './plugins.ts';
-import { TypedResponse } from '../restapi/typedResponse.ts';
+import { TypedResponse } from './rest.ts';
 import { ServiceConsole } from '../util/console.ts';
 import { getRequestIdFromProxy, generateRequestId } from '../util/misc.ts';
-import { LambdaRequest } from './request.ts';
-import { getResponseType } from './response.ts';
+import { LambdaRequest } from './rest.ts';
 
 interface HandlerCtx {
 	handler: Handler;
@@ -20,7 +19,7 @@ export class LambdaMiddleware {
 	config: Partial<MiddlewareOptions>;
 	handlersPool: Record<string, HandlerCtx>;
 
-	constructor (routes: BasicRouter | TypedRouter<any, any>, config?: Partial<MiddlewareOptions>) {
+	constructor (routes: LambdaRouter, config?: Partial<MiddlewareOptions>) {
 
 		this.config = config || {};
 
@@ -176,18 +175,10 @@ export class LambdaMiddleware {
 					} else if ('toResponse' in handlerResponse) {
 						middlewareResponse = handlerResponse.toResponse();
 					} else {
-
-						const responseBody = handlerResponse.data ? JSON.stringify(handlerResponse.data) : null;
-						const responseHeaders = new Headers(handlerResponse?.headers);
-
-						if (handlerResponse.data) {
-							responseHeaders.set('content-type', getResponseType(handlerResponse.type));
-						}
-
-						middlewareResponse = new Response(responseBody, {
-							headers: responseHeaders,
-							status: handlerResponse.status
-						});
+						const typeErrorReport = (handlerResponse && typeof handlerResponse === 'object') ?
+							`object keys ({${Object.keys(handlerResponse).join(', ')}}) don't match handler response interface` :
+							`variable of type "${typeof handlerResponse}" is not a valid handler response`;
+						throw new Error('Invalid function response: ' + typeErrorReport);
 					}
 
 				} catch (error) {

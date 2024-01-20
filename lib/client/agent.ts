@@ -1,19 +1,14 @@
-import type { FetchSchema, RouterSchema } from "../routes/schema.ts";
-import { TypedRequest, type TypedRequestInit } from "../restapi/typedRequest.ts";
+import type { RouterSchema } from "../middleware/router.ts";
+import type { FetchSchema } from "../routes/schema.ts";
+import type { TypedRequestInit } from "../routes/schema.ts";
 import { typedFetch } from "./fetch.ts";
 
 interface AgentConfig {
 	endpoint: string;
 };
 
-type InferRequest<T extends FetchSchema<any>> = TypedRequest<
-	T['request']['data'],
-	T['request']['headers'],
-	T['request']['query']
-> | T['request'];
-
 type QueryReponse <T extends FetchSchema<any>> = Promise<T['response']>;
-type QueryAction <T extends FetchSchema<any>> = T['request'] extends object ? (opts: InferRequest<T>) => QueryReponse<T> : () => QueryReponse<T>;
+type QueryAction <T extends FetchSchema<any>> = T['request'] extends object ? (opts: T['request']) => QueryReponse<T> : () => QueryReponse<T>;
 type RouterQueries <T extends RouterSchema<Record<string, FetchSchema<any>>>> = { [K in keyof T]: QueryAction<T[K]> };
 
 export class TypedFetchAgent <T extends RouterSchema<Record<string, FetchSchema<any>>>> {

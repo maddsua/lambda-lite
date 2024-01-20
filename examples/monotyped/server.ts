@@ -1,6 +1,5 @@
-import { TypedRouter, TypedResponse } from "../lib.mod.ts";
-import type { RouterSchema } from "../lib/routes/schema.ts";
-import { startDenoServer } from "../adapters.mod.ts";
+import { TypedRouter, TypedResponse, RouterSchema } from "../../lib.mod.ts";
+import { startDenoServer } from "../../adapters.mod.ts";
 
 export type RouterType = RouterSchema<{
 	action: {
@@ -35,9 +34,9 @@ const routes: TypedRouter<RouterType> = {
 
 			console.log(uwr.data);
 
-			return {
+			return new TypedResponse(null, {
 				status: 200
-			}
+			});
 		}
 	}
 };
