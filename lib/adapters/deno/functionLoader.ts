@@ -38,7 +38,10 @@ export const loadFunctionsFromFS = async (props: FunctionLoaderProps): Promise<B
 	await iterateDirectory(props.dir);
 
 	const importFileExtensions = ['ts','mts','js','mjs'];
-	const importEntries = allEntries.filter(item => importFileExtensions.some(ext => item.endsWith(`.${ext}`)));
+	const importEntries = allEntries.filter(item => (
+		importFileExtensions.some(ext => item.endsWith(`.${ext}`)) &&
+		!props.ignore?.some(ignoreItem => ignoreItem.test(item))
+	));
 	if (!importEntries.length) {
 		console.error(`%c Failed to load route functions %c\nNo modules found in "${props.dir}"`, 'background-color: red; color: white', 'background-color: inherit; color: inherit');
 		throw new Error('no modules found');
