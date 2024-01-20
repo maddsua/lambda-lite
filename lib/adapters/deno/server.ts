@@ -18,15 +18,16 @@ export interface ServerOptions extends MiddlewareOptions {
 	/**
 	 * Path to the directory containing handler functions
 	 */
-	routesDir?: string;
+	loadFunctions?: FunctionLoaderProps;
 };
 
 export const startServer = async (opts?: ServerOptions) => {
 
-	const searchDir = opts?.routesDir || './functions';
-	const routes = opts?.routes || await loadFunctionsFromFS({
-		dir: searchDir
-	});
+	const routeLoaderInit = opts?.loadFunctions || {
+		dir: './functions'
+	};
+
+	const routes = opts?.routes || await loadFunctionsFromFS(routeLoaderInit);
 	const middleware = new LambdaMiddleware(routes, opts);
 
 	if (!opts?.serve) {
