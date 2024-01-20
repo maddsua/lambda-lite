@@ -117,6 +117,11 @@ export class LambdaMiddleware {
 				}
 			}
 
+			//	try getting 404 fallback handler
+			if ('404' in this.handlersPool) {
+				routectx = this.handlersPool['404'];
+			}
+
 			const requestContext = Object.assign(invokContext || {}, {
 				requestID,
 				clientIP,
@@ -208,44 +213,9 @@ export class LambdaMiddleware {
 			//	so we only check for absence of "middlewareResponse",
 			//	which would indicate 404 and no plugin response
 			} else if (!middlewareResponse) {
-
-				middlewareResponse = (() => {
-
-					if (pathname === '/') {
-	
-						switch (this.config.defaultResponses?.index) {
-	
-							case 'forbidden': return new TypedResponse({
-								error_text: 'you\'re not really welcome here mate'
-							}, { status: 403 }).toResponse();
-	
-							case 'info': return new TypedResponse({
-								server: 'maddsua/lambda-lite',
-								status: 'operational'
-							}, { status: 200 }).toResponse();
-	
-							case 'teapot': return new TypedResponse({
-								error_text: 'yo bro r u lost?'
-							}, { status: 418 }).toResponse();
-						
-							default: return new TypedResponse({
-								error_text: 'route not found'
-							}, { status: 404 }).toResponse();
-						}
-					}
-
-					switch (this.config.defaultResponses?.notfound) {
-	
-						case 'forbidden': return new TypedResponse({
-							error_text: 'you\'re not really welcome here mate'
-						}, { status: 403 }).toResponse();
-	
-						default: return new TypedResponse({
-							error_text: 'route not found'
-						}, { status: 404 }).toResponse();
-					}
-
-				})();
+				middlewareResponse = new TypedResponse({
+					error_text: 'route not found'
+				}, { status: 404 }).toResponse();
 			}
 
 			//	run "after" plugin callbacks
