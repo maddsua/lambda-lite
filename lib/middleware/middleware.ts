@@ -90,7 +90,7 @@ export class LambdaMiddleware {
 
 		const invocationResponse = await (async () => {
 
-			const pathname = request.url.replace(/^[^\/]+\:\/\/[^\/]+/, '').replace(/[\?\#].*$/, '');
+			const pathname = request.url.replace(/^[^\/]+\:\/\/[^\/]+/, '').replace(/[\?\#].*$/, '') || '/';
 			requestDisplayUrl = pathname;
 
 			let middlewareResponse: Response | null = null;
