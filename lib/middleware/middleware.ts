@@ -87,156 +87,147 @@ export class LambdaMiddleware {
 
 		const console = new ServiceConsole(requestID);
 
-		const invocationResponse = await (async () => {
+		//	this scary shit replaces URL object parsing
+		//	and from my tests it's ~3x faster.
+		//	also it won't throw shit.
+		const pathname = request.url.replace(/^[^\/]+\:\/\/[^\/]+/, '').replace(/[\?\#].*$/, '') || '/';
+		requestDisplayUrl = pathname;
 
-			//	this scary shit replaces URL object parsing
-			//	and from my tests it's ~3x faster.
-			//	also it won't throw shit.
-			const pathname = request.url.replace(/^[^\/]+\:\/\/[^\/]+/, '').replace(/[\?\#].*$/, '') || '/';
-			requestDisplayUrl = pathname;
+		let middlewareResponse: Response | null = null;
 
-			let middlewareResponse: Response | null = null;
+		// find route path
+		const routePathname = pathname.slice(0, pathname.endsWith('/') ? pathname.length - 1 : undefined) || '/';
 
-			// find route path
-			const routePathname = pathname.slice(0, pathname.endsWith('/') ? pathname.length - 1 : undefined) || '/';
+		//	typescript is too dumb to figure it out so it might need a bin of help here
+		let routectx = this.handlersPool[routePathname] as HandlerCtx | undefined;
 
-			//	typescript is too dumb to figure it out so it might need a bin of help here
-			let routectx = this.handlersPool[routePathname] as HandlerCtx | undefined;
+		// try to find matching wildcart route path
+		if (!routectx) {
 
-			// try to find matching wildcart route path
-			if (!routectx) {
+			const pathComponents = routePathname.slice(1).split('/');
+			for (let idx = pathComponents.length; idx >= 0; idx--) {
 
-				const pathComponents = routePathname.slice(1).split('/');
-				for (let idx = pathComponents.length; idx >= 0; idx--) {
-	
-					const nextRoute = '/' + pathComponents.slice(0, idx).join('/');
-					const nextCtx = this.handlersPool[nextRoute];
-	
-					if (nextCtx?.expandPath) {
-						routectx = nextCtx;
-						break;
-					}
+				const nextRoute = '/' + pathComponents.slice(0, idx).join('/');
+				const nextCtx = this.handlersPool[nextRoute];
+
+				if (nextCtx?.expandPath) {
+					routectx = nextCtx;
+					break;
 				}
 			}
+		}
 
-			//	try getting 404 fallback handler
-			if (!routectx) {
-				routectx = this.handlersPool['/_404'];
-			}
+		//	try getting 404 fallback handler
+		if (!routectx) {
+			routectx = this.handlersPool['/_404'];
+		}
 
-			const requestContext = Object.assign(invokContext || {}, {
-				requestID,
-				clientIP,
-				console
-			}, info);
+		const requestContext = Object.assign(invokContext || {}, {
+			requestID,
+			clientIP,
+			console
+		}, info);
 
-			const pluginProps = Object.assign({
-				middleware: this
-			}, requestContext);
+		const pluginProps = Object.assign({
+			middleware: this
+		}, requestContext);
 
-			const pluginPromises = routectx?.plugins?.map(item => item.spawn(pluginProps));
-			const runPlugins = pluginPromises?.length ? await Promise.all(pluginPromises) : [];
+		const pluginPromises = routectx?.plugins?.map(item => item.spawn(pluginProps));
+		const runPlugins = pluginPromises?.length ? await Promise.all(pluginPromises) : [];
 
-			//	run "before" plugin callbacks
-			let pluginModifiedRequest: Request | null = null;
+		//	run "before" plugin callbacks
+		let pluginModifiedRequest: Request | null = null;
 
-			for (const plugin of runPlugins) {
-	
-				if (!plugin.executeBefore) continue;
+		for (const plugin of runPlugins) {
 
-				try {
+			if (!plugin.executeBefore) continue;
 
-					const temp = await plugin.executeBefore(pluginModifiedRequest || request);
-	
-					if (temp?.respondWith) {
-						middlewareResponse = temp.respondWith;
-						break;
-					}
-	
-					if (temp?.modifiedRequest) {
-						pluginModifiedRequest = temp.modifiedRequest;
-						if (temp?.chainable === false) break;
-					}
-					
-				} catch (error) {
-					console.error(`[Plugin error (${plugin.id})] In "before" callback:`, (error as Error | null)?.message || error);
-				}
-			}
+			try {
 
-			//	so the logic here is that if we successfully matched a route
-			//	and none of the plugins decicded to return request early
-			//	we are ok to call route handler and process it's result
-			if (routectx && !middlewareResponse) {
+				const temp = await plugin.executeBefore(pluginModifiedRequest || request);
 
-				const unwrapResponse = (response: HandlerResponse) => {
-					if (response instanceof Response)
-						return response;
-					else if (('toResponse' satisfies keyof SerializableResponse) in response)
-						return response.toResponse();
-					throw new Error('Invalid function response: ' + (response && typeof response === 'object') ?
-						`object keys ({${Object.keys(response).join(', ')}}) don't match handler response interface` :
-						`variable of type "${typeof response}" is not a valid handler response`);
-				};
-
-				try {
-
-					const dispatchRequest = new LambdaRequest(pluginModifiedRequest || request);
-					const endpointResponse = await routectx.handler(dispatchRequest, requestContext);
-					middlewareResponse = unwrapResponse(endpointResponse);
-
-				} catch (error) {
-
-					console.error('Lambda middleware error:', (error as Error | null)?.message || error);
-
-					middlewareResponse = new TypedResponse(Object.assign({
-						error_text: 'unhandled middleware error',
-					}, this.config.errorResponseType === 'log' ? {
-						error_log: (error as Error | null)?.message || JSON.stringify(error)
-					} : undefined), { status: 500 }).toResponse();
+				if (temp?.respondWith) {
+					middlewareResponse = temp.respondWith;
+					break;
 				}
 
-			//	but if we didn't have a route we'll get to this point
-			//	where we handle 404 cases
-			//	can't use just "else" here as it would override possible plugin response if a 404 occured.
-			//	so we only check for absence of "middlewareResponse",
-			//	which would indicate 404 and no plugin response
-			} else if (!middlewareResponse) {
-				middlewareResponse = new TypedResponse({
-					error_text: 'route not found'
-				}, { status: 404 }).toResponse();
-			}
-
-			//	run "after" plugin callbacks
-			for (const plugin of runPlugins) {
-
-				if (!plugin.executeAfter) continue;
-
-				try {
-
-					const temp = await plugin.executeAfter(middlewareResponse);
-
-					if (temp?.overrideResponse) {
-						if (temp.chainable === false) return temp.overrideResponse;
-						middlewareResponse = temp.overrideResponse;
-					}
-
-				} catch (error) {
-					console.error(`[Plugin error (${plugin.id})] In "after" callback:`, (error as Error | null)?.message || error);
+				if (temp?.modifiedRequest) {
+					pluginModifiedRequest = temp.modifiedRequest;
+					if (temp?.chainable === false) break;
 				}
+				
+			} catch (error) {
+				console.error(`[Plugin error (${plugin.id})] In "before" callback:`, (error as Error | null)?.message || error);
+			}
+		}
+
+		//	so the logic here is that if we successfully matched a route
+		//	and none of the plugins decicded to return request early
+		//	we are ok to call route handler and process it's result
+		if (routectx && !middlewareResponse) {
+
+			try {
+
+				const dispatchRequest = new LambdaRequest(pluginModifiedRequest || request);
+				const endpointResponse = await routectx.handler(dispatchRequest, requestContext);
+
+				if (endpointResponse instanceof Response)
+					middlewareResponse = endpointResponse;
+				else if (('toResponse' satisfies keyof SerializableResponse) in endpointResponse)
+					middlewareResponse = endpointResponse.toResponse();
+				throw new Error('Invalid function response: ' + (endpointResponse && typeof endpointResponse === 'object') ?
+					`object keys ({${Object.keys(endpointResponse).join(', ')}}) don't match handler response interface` :
+					`variable of type "${typeof endpointResponse}" is not a valid handler response`);
+
+			} catch (error) {
+
+				console.error('Lambda middleware error:', (error as Error | null)?.message || error);
+
+				middlewareResponse = new TypedResponse(Object.assign({
+					error_text: 'unhandled middleware error',
+				}, this.config.errorResponseType === 'log' ? {
+					error_log: (error as Error | null)?.message || JSON.stringify(error)
+				} : undefined), { status: 500 }).toResponse();
 			}
 
-			return middlewareResponse;
+		//	but if we didn't have a route we'll get to this point
+		//	where we handle 404 cases
+		//	can't use just "else" here as it would override possible plugin response if a 404 occured.
+		//	so we only check for absence of "middlewareResponse",
+		//	which would indicate 404 and no plugin response
+		} else if (!middlewareResponse) {
+			middlewareResponse = new TypedResponse({
+				error_text: 'route not found'
+			}, { status: 404 }).toResponse();
+		}
 
-		})();
+		//	run "after" plugin callbacks
+		for (const plugin of runPlugins) {
+
+			if (!plugin.executeAfter) continue;
+
+			try {
+
+				const temp = await plugin.executeAfter(middlewareResponse);
+
+				if (temp?.overrideResponse) {
+					if (temp.chainable === false) return temp.overrideResponse;
+					middlewareResponse = temp.overrideResponse;
+				}
+
+			} catch (error) {
+				console.error(`[Plugin error (${plugin.id})] In "after" callback:`, (error as Error | null)?.message || error);
+			}
+		}
 
 		//	add some headers so the shit always works
-		invocationResponse.headers.set('x-powered-by', 'maddsua/lambda');
-		invocationResponse.headers.set('x-request-id', requestID);
+		middlewareResponse.headers.set('x-powered-by', 'maddsua/lambda');
+		middlewareResponse.headers.set('x-request-id', requestID);
 
 		//	log for, you know, reasons
 		if (this.config.loglevel?.requests !== false)	
-			console.log(`(${clientIP}) ${request.method} ${requestDisplayUrl} --> ${invocationResponse.status}`);
+			console.log(`(${clientIP}) ${request.method} ${requestDisplayUrl} --> ${middlewareResponse.status}`);
 
-		return invocationResponse;
+		return middlewareResponse;
 	}
 };
