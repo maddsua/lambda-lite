@@ -183,21 +183,7 @@ export class LambdaMiddleware {
 
 					const dispatchRequest = new LambdaRequest(pluginModifiedRequest || request);
 					const endpointResponse = await routectx.handler(dispatchRequest, requestContext);
-					const responseValueType = typeof endpointResponse;
-
-					if (responseValueType !== 'object')
-						throw new Error(`Invalid handler response: unexpected return type ${responseValueType}`);
-
-					if (endpointResponse instanceof Response) {
-						middlewareResponse = endpointResponse;
-					} else if ('toResponse' in endpointResponse) {
-						middlewareResponse = endpointResponse.toResponse();
-					} else {
-						const typeErrorReport = (endpointResponse && typeof endpointResponse === 'object') ?
-							`object keys ({${Object.keys(endpointResponse).join(', ')}}) don't match handler response interface` :
-							`variable of type "${typeof endpointResponse}" is not a valid handler response`;
-						throw new Error('Invalid function response: ' + typeErrorReport);
-					}
+					middlewareResponse = unwrapResponse(endpointResponse);
 
 				} catch (error) {
 
