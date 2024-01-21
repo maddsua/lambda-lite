@@ -1,5 +1,6 @@
 import { startDenoServer } from "../../adapters.mod.ts";
 import { createEnv } from "../../lib.mod.ts";
+import { serviceAuth } from "../../plugins.mod.ts";
 
 const env = createEnv({
 	port: {
@@ -17,10 +18,16 @@ await startDenoServer({
 	errorResponseType: 'log',
 	routes: {
 		'_404': {
-			handler: () => new Response('endpoing not found', { status: 404 })
+			handler: () => new Response('endpoint not found', { status: 404 })
 		},
 		'/': {
 			handler: () => new Response('well hello there')
+		},
+		'/api': {
+			handler: () => new Response('congrats youre working for the CIA now'),
+			plugins: [
+				serviceAuth({ token: 'yourefired' })
+			]
 		}
 	}
 });
