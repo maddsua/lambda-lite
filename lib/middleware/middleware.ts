@@ -183,11 +183,19 @@ export class LambdaMiddleware {
 
 				console.error('Lambda middleware error:', (error as Error | null)?.message || error);
 
-				middlewareResponse = new TypedResponse(Object.assign({
+				interface ErrorResponseData {
+					error_text: string;
+					error_log?: string;
+				};
+
+				const responseData: ErrorResponseData = {
 					error_text: 'unhandled middleware error',
-				}, this.config.errorResponseType === 'log' ? {
-					error_log: (error as Error | null)?.message || JSON.stringify(error)
-				} : undefined), { status: 500 }).toResponse();
+				};
+
+				if (this.config.errorResponseType === 'log')
+					responseData.error_log = (error as Error | null)?.message || JSON.stringify(error);
+
+				middlewareResponse = new TypedResponse(responseData, { status: 500 }).toResponse();
 			}
 
 		//	but if we didn't have a route we'll get to this point
