@@ -175,9 +175,7 @@ export class LambdaMiddleware {
 					middlewareResponse = endpointResponse;
 				else if (('toResponse' satisfies keyof SerializableResponse) in endpointResponse)
 					middlewareResponse = endpointResponse.toResponse();
-				else throw new Error('Invalid function response: ' + (endpointResponse && typeof endpointResponse === 'object') ?
-					`object keys ({${Object.keys(endpointResponse).join(', ')}}) don't match handler response interface` :
-					`variable of type "${typeof endpointResponse}" is not a valid handler response`);
+				else throw new Error('Invalid function response: is not a standard response object or SerializableResponse');
 
 			} catch (error) {
 
