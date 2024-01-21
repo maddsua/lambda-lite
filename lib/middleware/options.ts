@@ -16,25 +16,11 @@ export interface MiddlewareOptions {
 	healthcheckPath?: `/${string}`;
 
 	/**
-	 * Default app response payloads
+	 * What data should be sent to a client in case of critical endpoint error
+	 * 
+	 * Defaults to 'minimal'
 	 */
-	defaultResponses?: {
-
-		/**
-		 * Default response to root http path when no handler was matched
-		 */
-		index?: 'notfound' | 'info' | 'teapot' | 'forbidden';
-
-		/**
-		 * Default not found response
-		 */
-		notfound?: 'notfound' | 'forbidden';
-
-		/**
-		 * Default error response
-		 */
-		error?: 'basic' | 'log';
-	};
+	errorResponseType?: 'minimal' | 'log';
 
 	/**
 	 * Logging settings

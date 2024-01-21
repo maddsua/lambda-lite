@@ -42,7 +42,7 @@ class ServiceAuthPluginImpl implements MiddlewarePluginInstance {
 				}, {
 					status: 401,
 					headers: {
-						'WWW-Authenticate': 'Basic realm="API"'
+						'WWW-Authenticate': 'Bearer realm="API"'
 					}
 				}).toResponse()
 			};

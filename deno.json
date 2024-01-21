@@ -2,12 +2,10 @@
 	"tasks": {
 		"check": "deno check lib.mod.ts; deno check adapters.mod.ts; deno check plugins.mod.ts",
 		"example:basic": "deno run -A examples/basic/main.ts",
+		"example:extended": "deno run -A examples/extended/main.ts",
 		"example:typed:server": "deno run -A examples/typed/server.ts",
 		"example:typed:client": "deno run -A examples/typed/client.ts",
 		"example:monotyped:server": "deno run -A examples/monotyped/server.ts",
-		"example:monotyped:client": "deno run -A examples/monotyped/client.ts",
-		"test": "deno run -A test/deno.test.ts",
-		"test:typed:server": "deno run -A test/typedapi.server.test.ts",
-		"test:typed:client": "deno run -A test/typedapi.client.test.ts"
+		"example:monotyped:client": "deno run -A examples/monotyped/client.ts"
 	}
 }

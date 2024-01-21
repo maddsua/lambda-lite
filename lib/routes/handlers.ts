@@ -2,9 +2,8 @@ import type { FetchSchema } from "../routes/schema.ts";
 import type { LambdaRequest, SerializableResponse, TypedResponse } from "../middleware/rest.ts";
 import type { LambdaContext } from "../middleware/context.ts";
 
-type HandlerResponseValue = SerializableResponse | Response;
-type HandlerResponse = Promise<HandlerResponseValue> | HandlerResponseValue;
-export type Handler<C extends object = {}> = (request: LambdaRequest<any>, context: LambdaContext & C) => HandlerResponse;
+export type HandlerResponse = SerializableResponse | Response;
+export type Handler<C extends object = {}> = (request: LambdaRequest<any>, context: LambdaContext & C) => Promise<HandlerResponse> | HandlerResponse;
 
 type InferResponse <T extends FetchSchema<any>> = TypedResponse<
 	T['response']['data'],
