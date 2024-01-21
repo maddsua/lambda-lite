@@ -20,9 +20,13 @@ export type LambdaRouter = BasicRouter | TypedRouter<any, any>;
 type MixedRouter = Record<string, BasicRouteContext | TypedRouteContext<any, any>>;
 type ExtractRouterSchema <T extends TypedRouteContext> = T['handler'] extends TypedHandler<infer U> ? U : never;
 
-export type InferRouterSchema <T extends MixedRouter> = {
+type RemoveNever<T> = {
+	[K in keyof T as T[K] extends never ? never : K]: T[K];
+};
+
+export type InferRouterSchema <T extends MixedRouter> = RemoveNever<{
 	[K in keyof T]: T[K] extends TypedRouteContext ? FetchSchema<{
 		request: ExtractRouterSchema<T[K]>['request'];
 		response: ExtractRouterSchema<T[K]>['response'];
 	}> : never;
-};
+}>;
