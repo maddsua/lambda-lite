@@ -17,6 +17,8 @@ export interface MiddlewareOptions {
 
 	/**
 	 * What data should be sent to a client in case of critical endpoint error
+	 * 
+	 * Defaults to 'minimal'
 	 */
 	errorResponseType?: 'minimal' | 'log';
 
