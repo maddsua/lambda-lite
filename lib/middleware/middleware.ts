@@ -1,9 +1,9 @@
 import type { LambdaRouter } from './router.ts';
-import type { Handler } from '../routes/handlers.ts';
+import type { Handler, HandlerResponse } from '../routes/handlers.ts';
 import type { NetworkInfo } from './context.ts';
 import type { MiddlewareOptions } from './options.ts';
 import type { MiddlewarePlugin } from './plugins.ts';
-import { TypedResponse } from './rest.ts';
+import { type SerializableResponse, TypedResponse } from './rest.ts';
 import { ServiceConsole } from '../util/console.ts';
 import { getRequestIdFromProxy, generateRequestId } from '../util/misc.ts';
 import { LambdaRequest } from './rest.ts';
@@ -169,23 +169,33 @@ export class LambdaMiddleware {
 			//	we are ok to call route handler and process it's result
 			if (routectx && !middlewareResponse) {
 
+				const unwrapResponse = (response: HandlerResponse) => {
+					if (response instanceof Response)
+						return response;
+					else if (('toResponse' satisfies keyof SerializableResponse) in response)
+						return response.toResponse();
+					throw new Error('Invalid function response: ' + (response && typeof response === 'object') ?
+						`object keys ({${Object.keys(response).join(', ')}}) don't match handler response interface` :
+						`variable of type "${typeof response}" is not a valid handler response`);
+				};
+
 				try {
 
 					const dispatchRequest = new LambdaRequest(pluginModifiedRequest || request);
-					const handlerResponse = await routectx.handler(dispatchRequest, requestContext);
-					const responseValueType = typeof handlerResponse;
+					const endpointResponse = await routectx.handler(dispatchRequest, requestContext);
+					const responseValueType = typeof endpointResponse;
 
 					if (responseValueType !== 'object')
 						throw new Error(`Invalid handler response: unexpected return type ${responseValueType}`);
 
-					if (handlerResponse instanceof Response) {
-						middlewareResponse = handlerResponse;
-					} else if ('toResponse' in handlerResponse) {
-						middlewareResponse = handlerResponse.toResponse();
+					if (endpointResponse instanceof Response) {
+						middlewareResponse = endpointResponse;
+					} else if ('toResponse' in endpointResponse) {
+						middlewareResponse = endpointResponse.toResponse();
 					} else {
-						const typeErrorReport = (handlerResponse && typeof handlerResponse === 'object') ?
-							`object keys ({${Object.keys(handlerResponse).join(', ')}}) don't match handler response interface` :
-							`variable of type "${typeof handlerResponse}" is not a valid handler response`;
+						const typeErrorReport = (endpointResponse && typeof endpointResponse === 'object') ?
+							`object keys ({${Object.keys(endpointResponse).join(', ')}}) don't match handler response interface` :
+							`variable of type "${typeof endpointResponse}" is not a valid handler response`;
 						throw new Error('Invalid function response: ' + typeErrorReport);
 					}
 
