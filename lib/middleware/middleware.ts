@@ -175,7 +175,7 @@ export class LambdaMiddleware {
 					middlewareResponse = endpointResponse;
 				else if (('toResponse' satisfies keyof SerializableResponse) in endpointResponse)
 					middlewareResponse = endpointResponse.toResponse();
-				else throw new Error('Invalid function response: is not a standard response object or SerializableResponse');
+				else throw new Error('Invalid function Response: is not a standard response object or SerializableResponse');
 
 			} catch (error) {
 
