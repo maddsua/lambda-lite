@@ -16,8 +16,6 @@ type Schema = FetchSchema<{
 	}
 }>;
 
-const startTime = new Date().getTime();
-
 export const handler: TypedHandler<Schema> = async (request) => {
 
 	const { data } = await request.unwrap();
