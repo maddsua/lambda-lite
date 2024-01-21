@@ -1,5 +1,5 @@
 import type { LambdaRouter } from './router.ts';
-import type { Handler, HandlerResponse } from '../routes/handlers.ts';
+import type { Handler } from '../routes/handlers.ts';
 import type { NetworkInfo } from './context.ts';
 import type { MiddlewareOptions } from './options.ts';
 import type { MiddlewarePlugin } from './plugins.ts';
