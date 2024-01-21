@@ -16,25 +16,16 @@ export interface MiddlewareOptions {
 	healthcheckPath?: `/${string}`;
 
 	/**
-	 * Default app response payloads
+	 * Enable service paths like /_404 to handle paths that don't exist
+	 * 
+	 * Defaults to true
 	 */
-	defaultResponses?: {
+	servicePathsEnabled?: boolean;
 
-		/**
-		 * Default response to root http path when no handler was matched
-		 */
-		index?: 'notfound' | 'info' | 'teapot' | 'forbidden';
-
-		/**
-		 * Default not found response
-		 */
-		notfound?: 'notfound' | 'forbidden';
-
-		/**
-		 * Default error response
-		 */
-		error?: 'basic' | 'log';
-	};
+	/**
+	 * What data should be sent to a client in case of critical endpoint error
+	 */
+	errorResponseType?: 'minimal' | 'log';
 
 	/**
 	 * Logging settings
