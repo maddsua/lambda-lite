@@ -34,7 +34,7 @@ export class LambdaMiddleware {
 
 			//	warn about path expansion
 			if (typeof routeCtx.expand === 'boolean' && routeExpandByUrl) {
-				console.warn(`Route %c"${route}"%c has both expanding path and %cconfig.expand%c set, the last will be used`, 'color: yellow', 'color: inherit', 'color: yellow', 'color: inherit');
+				console.warn(`Route "${route}" has both expanding path and "config.expand" property set, the latest will be used`);
 			}
 
 			const handlerCtx: HandlerCtx = {
