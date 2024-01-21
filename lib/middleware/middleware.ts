@@ -90,6 +90,9 @@ export class LambdaMiddleware {
 
 		const invocationResponse = await (async () => {
 
+			//	this scary shit replaces URL object parsing
+			//	and from my tests it's ~3x faster.
+			//	also it won't throw shit.
 			const pathname = request.url.replace(/^[^\/]+\:\/\/[^\/]+/, '').replace(/[\?\#].*$/, '') || '/';
 			requestDisplayUrl = pathname;
 
