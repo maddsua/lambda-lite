@@ -117,6 +117,11 @@ export class LambdaMiddleware {
 				}
 			}
 
+			//	try getting 404 fallback handler
+			if (!routectx && this.config.servicePathsEnabled !== false) {
+				routectx = this.handlersPool['/_404'];
+			}
+
 			const requestContext = Object.assign(invokContext || {}, {
 				requestID,
 				clientIP,
@@ -185,21 +190,10 @@ export class LambdaMiddleware {
 
 					console.error('Lambda middleware error:', (error as Error | null)?.message || error);
 
-					switch (this.config.defaultResponses?.error) {
-
-						case 'log': {
-							middlewareResponse = new TypedResponse({
-								error_text: 'unhandled middleware error',
-								error_log: (error as Error | null)?.message || JSON.stringify(error)
-							}, { status: 500 }).toResponse();
-						} break;
-	
-						default: { 
-							middlewareResponse = new TypedResponse({
-								error_text: 'unhandled middleware error'
-							}, { status: 500 }).toResponse();
-						} break;
-					}
+					middlewareResponse = new TypedResponse({
+						error_text: 'unhandled middleware error',
+						error_log: (error as Error | null)?.message || JSON.stringify(error)
+					}, { status: 500 }).toResponse();
 				}
 
 			//	but if we didn't have a route we'll get to this point
@@ -208,44 +202,9 @@ export class LambdaMiddleware {
 			//	so we only check for absence of "middlewareResponse",
 			//	which would indicate 404 and no plugin response
 			} else if (!middlewareResponse) {
-
-				middlewareResponse = (() => {
-
-					if (pathname === '/') {
-	
-						switch (this.config.defaultResponses?.index) {
-	
-							case 'forbidden': return new TypedResponse({
-								error_text: 'you\'re not really welcome here mate'
-							}, { status: 403 }).toResponse();
-	
-							case 'info': return new TypedResponse({
-								server: 'maddsua/lambda-lite',
-								status: 'operational'
-							}, { status: 200 }).toResponse();
-	
-							case 'teapot': return new TypedResponse({
-								error_text: 'yo bro r u lost?'
-							}, { status: 418 }).toResponse();
-						
-							default: return new TypedResponse({
-								error_text: 'route not found'
-							}, { status: 404 }).toResponse();
-						}
-					}
-
-					switch (this.config.defaultResponses?.notfound) {
-	
-						case 'forbidden': return new TypedResponse({
-							error_text: 'you\'re not really welcome here mate'
-						}, { status: 403 }).toResponse();
-	
-						default: return new TypedResponse({
-							error_text: 'route not found'
-						}, { status: 404 }).toResponse();
-					}
-
-				})();
+				middlewareResponse = new TypedResponse({
+					error_text: 'route not found'
+				}, { status: 404 }).toResponse();
 			}
 
 			//	run "after" plugin callbacks
