@@ -120,7 +120,7 @@ export class LambdaMiddleware {
 			}
 
 			//	try getting 404 fallback handler
-			if (!routectx && this.config.servicePathsEnabled !== false) {
+			if (!routectx) {
 				routectx = this.handlersPool['/_404'];
 			}
 
@@ -188,10 +188,11 @@ export class LambdaMiddleware {
 
 					console.error('Lambda middleware error:', (error as Error | null)?.message || error);
 
-					middlewareResponse = new TypedResponse({
+					middlewareResponse = new TypedResponse(Object.assign({
 						error_text: 'unhandled middleware error',
+					}, this.config.errorResponseType === 'log' ? {
 						error_log: (error as Error | null)?.message || JSON.stringify(error)
-					}, { status: 500 }).toResponse();
+					} : undefined), { status: 500 }).toResponse();
 				}
 
 			//	but if we didn't have a route we'll get to this point
