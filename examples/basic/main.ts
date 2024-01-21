@@ -14,6 +14,7 @@ await startDenoServer({
 		port: env.port || 8080,
 	},
 	healthcheckPath: '/health',
+	errorResponseType: 'log',
 	routes: {
 		'_404': {
 			handler: () => new Response('endpoing not found', { status: 404 })
