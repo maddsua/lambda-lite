@@ -90,13 +90,13 @@ export class LambdaMiddleware {
 
 		const invocationResponse = await (async () => {
 
-			const { pathname } = new URL(request.url);
+			const pathname = request.url.replace(/^[^\/]+\:\/\/[^\/]+/, '').replace(/[\?\#].*$/, '') || '/';
 			requestDisplayUrl = pathname;
 
 			let middlewareResponse: Response | null = null;
 
 			// find route path
-			const routePathname = pathname === '/' ? pathname : pathname.slice(0, pathname.endsWith('/') ? pathname.length - 1 : pathname.length);
+			const routePathname = pathname.slice(0, pathname.endsWith('/') ? pathname.length - 1 : undefined) || '/';
 
 			//	typescript is too dumb to figure it out so it might need a bin of help here
 			let routectx = this.handlersPool[routePathname] as HandlerCtx | undefined;
