@@ -24,11 +24,22 @@ export interface ServerOptions extends MiddlewareOptions {
 
 export const startServer = async (opts?: ServerOptions) => {
 
-	const routeLoaderInit = opts?.loadFunctions || {
-		dir: './functions'
-	};
+	let routes = opts?.routes || {};
 
-	const routes = opts?.routes || await loadFunctionsFromFS(routeLoaderInit);
+	if (opts?.loadFunctions) {
+		const loaded = await loadFunctionsFromFS(opts.loadFunctions);
+		routes = Object.assign({}, loaded, routes);
+	}
+
+	if (!Object.keys(routes).length) {
+		console.error(
+			`%c No routes loaded or provided %c\nAt least one route should be provided\n`,
+			'background-color: red; color: white',
+			'background-color: inherit; color: inherit'
+		);
+		throw new Error('no routes to serve');
+	}
+
 	const middleware = new LambdaMiddleware(routes, opts);
 
 	if (!opts?.serve) {
