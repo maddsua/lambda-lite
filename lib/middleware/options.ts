@@ -16,13 +16,6 @@ export interface MiddlewareOptions {
 	healthcheckPath?: `/${string}`;
 
 	/**
-	 * Enable service paths like /_404 to handle paths that don't exist
-	 * 
-	 * Defaults to true
-	 */
-	servicePathsEnabled?: boolean;
-
-	/**
 	 * What data should be sent to a client in case of critical endpoint error
 	 */
 	errorResponseType?: 'minimal' | 'log';
