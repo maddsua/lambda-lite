@@ -63,9 +63,8 @@ export class LambdaMiddleware {
 		//	setup healthcheck path
 		if (this.config?.healthcheckPath) {
 
-			if (this.handlersPool[this.config.healthcheckPath]) {
-				console.warn(`%cPath collision between healthcheck path and route function%c (${this.config.healthcheckPath})`, 'color: yellow', 'color: white');
-			}
+			if (this.handlersPool[this.config.healthcheckPath])
+				throw new Error(`Path collision between healthcheck path and endpoint (${this.config.healthcheckPath})`);
 
 			this.handlersPool[this.config.healthcheckPath] = {
 				handler: () => new Response(null, { status: 200 })
