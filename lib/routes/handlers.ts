@@ -3,7 +3,7 @@ import type { LambdaRequest, SerializableResponse, TypedResponse } from "../midd
 import type { LambdaContext } from "../middleware/context.ts";
 
 export type HandlerResponse = SerializableResponse | Response;
-export type Handler<C extends object = {}> = (request: LambdaRequest<any>, context: LambdaContext & C) => Promise<HandlerResponse> | HandlerResponse;
+export type Handler <C extends object = {}> = (request: LambdaRequest<any>, context: LambdaContext & C) => Promise<HandlerResponse> | HandlerResponse;
 
 type InferResponse <T extends FetchSchema<any>> = TypedResponse<
 	T['response']['data'],

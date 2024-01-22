@@ -20,8 +20,8 @@ export interface RouteConfig {
 	inheritPlugins?: boolean;
 };
 
-export interface BasicRouteContext extends RouteConfig {
-	handler: Handler;
+export interface BasicRouteContext <C extends object = {}> extends RouteConfig {
+	handler: Handler<C>;
 };
 
 export interface TypedRouteContext <T extends FetchSchema<any> = any, C extends object = {}> extends RouteConfig {
