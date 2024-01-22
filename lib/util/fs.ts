@@ -18,3 +18,5 @@ export const recursiveReaddir = async (dir: string) => {
 
 	return allEntries;
 };
+
+export const exists = async (entry: string) => Deno.stat(entry).then((_stat) => true).catch((_error) => false);
