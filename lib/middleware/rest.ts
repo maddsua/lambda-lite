@@ -6,6 +6,9 @@ export class LambdaRequest <T extends TypedRequestInit> extends Request {
 		super(init);
 	}
 
+	/**
+	 * Parse standart Request into it's typed components
+	 */
 	async unwrap(): Promise<T> {
 
 		const searchQuery = this.url.replace(/^[^?]*\?/, '').replace(/\#.+$/, '');
@@ -34,6 +37,13 @@ export class LambdaRequest <T extends TypedRequestInit> extends Request {
 		if (contentIsJSON && !data) throw new Error('Invalid typed request: unable to parse request body');
 
 		return { data, headers, query } as T;
+	}
+
+	/**
+	 * Parse request URL (saves you a few words of code lol)
+	 */
+	unwrapURL(): URL {
+		return new URL(this.url);
 	}
 };
 
