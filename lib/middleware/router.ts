@@ -2,7 +2,7 @@ import type { FetchSchema } from "../routes/schema.ts";
 import type { BasicRouteContext, TypedRouteContext } from "../routes/route.ts";
 import { TypedHandler } from "../../lib.mod.ts";
 
-export type LambdaRouter = Record<string, BasicRouteContext>;
+export type LambdaRouter <C extends object = {}> = Record<string, BasicRouteContext<C>>;
 
 export type RouterSchema <T extends Record<string, Partial<FetchSchema<any>>>> = {
 	[K in keyof T]: {

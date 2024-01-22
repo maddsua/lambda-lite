@@ -1,12 +1,12 @@
-import type { FetchSchema, TypedResponseInit } from "../routes/schema.ts";
+import type { TypedRequestInit, TypedResponseInit } from "../routes/schema.ts";
 
-export class LambdaRequest <T extends FetchSchema<any>> extends Request {
+export class LambdaRequest <T extends TypedRequestInit> extends Request {
 
 	constructor(init: Request) {
 		super(init);
 	}
 
-	async unwrap(): Promise<T['request']> {
+	async unwrap(): Promise<T> {
 
 		const searchQuery = this.url.replace(/^[^?]*\?/, '').replace(/\#.+$/, '');
 		const query: Record<string, string> = {};
@@ -27,13 +27,13 @@ export class LambdaRequest <T extends FetchSchema<any>> extends Request {
 		}
 
 		if (this.method === 'GET')
-			return { headers, query };
+			return { headers, query } as T;
 	
 		const contentIsJSON = this.headers.get('content-type')?.toLowerCase()?.includes('json');
 		const data = contentIsJSON ? await this.json().catch(() => null) : null;
 		if (contentIsJSON && !data) throw new Error('Invalid typed request: unable to parse request body');
 
-		return { data, headers, query };
+		return { data, headers, query } as T;
 	}
 };
 
