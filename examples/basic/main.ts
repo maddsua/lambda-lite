@@ -28,6 +28,15 @@ await startDenoServer({
 			plugins: [
 				serviceAuth({ token: 'yourefired' })
 			]
+		},
+		'/search': {
+			handler: async (request) => {
+				const { query } = await request.unwrap();
+				if (Object.keys(query).length) {
+					console.log('request search:', query);
+				}
+				return new Response(null, { status: 201 })
+			}
 		}
 	}
 });

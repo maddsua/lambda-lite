@@ -1,4 +1,4 @@
-import type { BasicRouter } from '../../middleware/router.ts';
+import type { LambdaRouter } from '../../middleware/router.ts';
 import type { RouteConfig } from "../../routes/route.ts";
 import { recursiveReaddir, exists } from '../../util/fs.ts';
 
@@ -13,7 +13,7 @@ export interface FunctionLoaderProps {
 	ignore?: RegExp[];
 };
 
-export const loadFunctionsFromFS = async (props: FunctionLoaderProps): Promise<BasicRouter> => {
+export const loadFunctionsFromFS = async (props: FunctionLoaderProps): Promise<LambdaRouter> => {
 
 	//	check that directory exists
 	if (!await exists(props.dir)) {
@@ -42,7 +42,7 @@ export const loadFunctionsFromFS = async (props: FunctionLoaderProps): Promise<B
 		throw new Error('no modules found');
 	}
 
-	const routes: BasicRouter = {};
+	const routes: LambdaRouter = {};
 
 	for (const entry of importEntries) {
 

@@ -2,7 +2,7 @@ import type { FetchSchema } from "../routes/schema.ts";
 import type { BasicRouteContext, TypedRouteContext } from "../routes/route.ts";
 import { TypedHandler } from "../../lib.mod.ts";
 
-export type BasicRouter = Record<string, BasicRouteContext>;
+export type LambdaRouter = Record<string, BasicRouteContext>;
 
 export type RouterSchema <T extends Record<string, Partial<FetchSchema<any>>>> = {
 	[K in keyof T]: {
@@ -14,8 +14,6 @@ export type RouterSchema <T extends Record<string, Partial<FetchSchema<any>>>> =
 export type TypedRouter <T extends RouterSchema<Record<string, FetchSchema<any>>>, C extends object = {}> = {
 	[K in keyof T]: TypedRouteContext<T[K], C>;
 };
-
-export type LambdaRouter = BasicRouter | TypedRouter<any, any>;
 
 type MixedRouter = Record<string, BasicRouteContext | TypedRouteContext<any, any>>;
 type ExtractRouterSchema <T extends TypedRouteContext> = T['handler'] extends TypedHandler<infer U> ? U : never;

@@ -1,6 +1,6 @@
 import type { MiddlewareOptions } from "./lib/middleware/options.ts";
 import type { RouteConfig, BasicRouteContext, TypedRouteContext } from "./lib/routes/route.ts";
-import type { BasicRouter, RouterSchema, TypedRouter, InferRouterSchema } from "./lib/middleware/router.ts";
+import type { LambdaRouter, RouterSchema, TypedRouter, InferRouterSchema } from "./lib/middleware/router.ts";
 import type { Handler, TypedHandler } from "./lib/routes/handlers.ts";
 import type { FetchSchema } from "./lib/routes/schema.ts";
 import { LambdaMiddleware } from "./lib/middleware/middleware.ts";
@@ -23,7 +23,7 @@ export {
 	InferRouterSchema,
 
 	BasicRouteContext,
-	BasicRouter,
+	LambdaRouter,
 	TypedRouteContext,
 	TypedRouter,
 
