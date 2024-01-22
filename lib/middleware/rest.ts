@@ -7,25 +7,35 @@ export class LambdaRequest <T extends FetchSchema<any>> extends Request {
 	}
 
 	async unwrap(): Promise<T['request']> {
-		const { searchParams } = new URL(this.url);
 
-		if (this.method === 'GET') return {
-			headers: Object.fromEntries(this.headers.entries()),
-			query: Object.fromEntries(searchParams.entries()),
-		};
+		const searchQuery = this.url.replace(/^[^?]*\?/, '').replace(/\#.+$/, '');
+		const query: Record<string, string> = {};
+
+		if (searchQuery.length) {
+			const params = searchQuery.split('&');
+			for (const item of params) {
+				const [key, value] = item.split('=');
+				if (key.length && value.length) {
+					query[key] = value;
+				}
+			}
+		}
+
+		const headers: Record<string, string> = {};
+		for (const [header, value] of this.headers) {
+			headers[header] = value;
+		}
+
+		if (this.method === 'GET')
+			return { headers, query };
 	
 		const contentIsJSON = this.headers.get('content-type')?.toLowerCase()?.includes('json');
-		const requestData = contentIsJSON ? await this.json().catch(() => null) : null;
-		if (contentIsJSON && !requestData) throw new Error('Invalid typed request: no data');
-	
-		return {
-			data: requestData,
-			headers: Object.fromEntries(this.headers.entries()),
-			query: Object.fromEntries(searchParams.entries())
-		};
+		const data = contentIsJSON ? await this.json().catch(() => null) : null;
+		if (contentIsJSON && !data) throw new Error('Invalid typed request: unable to parse request body');
+
+		return { data, headers, query };
 	}
 };
-
 
 export interface SerializableResponse {
 	toResponse(): Response;
