@@ -1,7 +1,6 @@
-import { existsSync } from 'https://deno.land/std@0.212.0/fs/exists.ts';
 import type { BasicRouter } from '../../middleware/router.ts';
 import type { RouteConfig } from "../../routes/route.ts";
-import { recursiveReaddir } from '../../util/fs.ts';
+import { recursiveReaddir, exists } from '../../util/fs.ts';
 
 const importFileExtensions = ['ts','mts','js','mjs'] as const;
 
@@ -17,7 +16,7 @@ export interface FunctionLoaderProps {
 export const loadFunctionsFromFS = async (props: FunctionLoaderProps): Promise<BasicRouter> => {
 
 	//	check that directory exists
-	if (!existsSync(props.dir)) {
+	if (!await exists(props.dir)) {
 		console.error(
 			`\n%c Functions directory not found %c\nPath "${props.dir}" doesn't exist\n`,
 			'background-color: red; color: white',
