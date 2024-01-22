@@ -1,9 +1,6 @@
 import { startDenoServer } from "../../adapters.mod.ts";
 import { createEnv } from "../../lib.mod.ts";
-import {
-	allowMethods,
-	originController,
-} from "../../plugins.mod.ts";
+import { allowMethods, originController } from "../../plugins.mod.ts";
 
 const env = createEnv({
 	port: {
