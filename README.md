@@ -15,14 +15,23 @@ Oh and don't use tsc with it. You've been warned.
 
 ## Supported platforms: 
 
-- Deno ✅
+- ✅ Deno
 
-- Cloudflare Workers ✅
+- ✅ Cloudflare Workers
 
-- NodeJS 😱
+- ❌ NodeJS 😱
 
 	Look, I honestly don't care about node. If you do, nobody stops you from wasting a few hours of your time making typescript work in both environments. But if you just wanna make it work, you can reuse code from Cloudflare adapter and hook it up to `node:http` instead of exporting that stuff.
 
+
+## Features
+
+- ✅ TRPC-like typed routes
+- ✅ Type and runtime checked environment variables
+- ✅ Custom response objects
+- ✅ Plugins
+- ✅ Basic routing
+- ✅ Deno-powered web APIs
 
 ## Building
 
