@@ -1,6 +1,6 @@
 import type { TypedRequestInit, TypedResponseInit } from "../routes/schema.ts";
 
-export class LambdaRequest <T extends TypedRequestInit = any> extends Request {
+export class LambdaRequest <T extends TypedRequestInit> extends Request {
 
 	constructor(init: Request) {
 		super(init);
