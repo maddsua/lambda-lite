@@ -31,9 +31,9 @@ await startDenoServer({
 		},
 		'/search': {
 			handler: async (request) => {
-				const { query } = await request.unwrap();
-				if (Object.keys(query).length) {
-					console.log('request search:', query);
+				const { searchParams } = new URL(request.url);
+				if (searchParams.size) {
+					console.log('request search:', Object.fromEntries(searchParams.entries()));
 				}
 				return new Response(null, { status: 201 })
 			}
