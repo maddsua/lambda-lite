@@ -69,9 +69,21 @@ Now launch it with `deno run -A main.ts`
 
 \* again, don't forget to replace `[tag]` with an actual version tag
 
+## Routing
+
+### 404 pages
+
+Create a route with a path `/_404` to provide custom 404 response.
+
+### Expanded paths
+
+A path that ends with a star (`/path/*`) or has `expand` config propery set to true will catch all requests that would be covered by a glob.
+
+Yeah, I can't use words, whatever, it just means that a path like `/api/*` would "catch" requests to `/api/beer` IF the last one is not defined.
+
 ## Deploying
 
-The fastest way to deploy LambdaLite is Railwal.app, altho you can run it virtually anywhere.
+The fastest way to deploy LambdaLite is Railwal.app, altho you can run it virtually anywhere (including Cloudflare Workers 🤠).
 
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/YslOZk?referralCode=Mi0Jqj)
 
