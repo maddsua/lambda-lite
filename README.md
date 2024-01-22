@@ -1,4 +1,4 @@
-# A ~~deno based~~ API server framework that tries to reinvent the wheel but better.
+# An ~~deno based~~ API server framework that tries to reinvent the wheel but better.
 
 ## What and why
 
@@ -12,6 +12,7 @@ It's npm package only provides TypeScript version of the library (there are no o
 
 Oh and don't use tsc with it. You've been warned.
 
+
 ## Supported platforms: 
 
 - Deno ✅
@@ -21,6 +22,7 @@ Oh and don't use tsc with it. You've been warned.
 - NodeJS 😱
 
 	Look, I honestly don't care about node. If you do, nobody stops you from wasting a few hours of your time making typescript work in both environments. But if you just wanna make it work, you can reuse code from Cloudflare adapter and hook it up to `node:http` instead of exporting that stuff.
+
 
 ## Building
 
@@ -34,48 +36,37 @@ You can just import modules directly using http imports. It will work out of the
 
 2. Bundle into runable javascript using esbuild or any other bundler that won't choke on imports that have .ts extensions.
 
+
 ## Usage
 
-Create a main file using the example:
+I hate writing docs so just check the [examples](examples/). It's a dead simple tool and you don't need to be a rocket scientist to figure how to use it.
 
-```typescript
-import { startDenoServer } from "https://raw.githubusercontent.com/maddsua/lambda-lite/[tag]/adapters.mod.ts";
-import { serviceAuth } from "https://raw.githubusercontent.com/maddsua/lambda-lite/[tag]/plugins.mod.ts";
+## Routing
 
-startDenoServer({
-  serve: {
-    port: 8080
-  },
-  routes: {
-    '/': {
-      handler: () => new Resonse('Hi! This is a super secret API server xD'),
-	  inheritPlugins: false
-    },
-    '/post_order': {
-      handler: (requect, context) => {
-        // do whatever
-        return new Resonse(null, { status: 201 })
-      }
-    },
-  },
-  plugins: [
-    serviceAuth({ token: 'test_token'}),
-  ]
-});
+### 404 pages
 
-```
+Create a route with a path `/_404` to provide custom 404 response.
 
-Now launch it with `deno run -A main.ts`
+### Expanded paths
 
-\* again, don't forget to replace `[tag]` with an actual version tag
+A path that ends with a star (`/path/*`) or has `expand` config propery set to true will catch all requests that would be covered by a glob.
+
+Yeah, I can't use words, whatever, it just means that a path like `/api/*` would "catch" requests to `/api/beer` IF the last one is not defined.
+
+## Typed endpoints
+
+A cool new feature are typed endpoints, which allow both client and server share a contract on what data is sent or received. It's implemented purely in TypeScript and doesn't do any runtime type checks like is done by TRPC. I do think it's not necessary. If you really need them you can always duct tape zod no top of your endpoint, but it’s not included by default.
+
+Usage example can be found [here](examples/typed/)
 
 ## Deploying
 
-The fastest way to deploy LambdaLite is Railwal.app, altho you can run it virtually anywhere.
+The fastest way to deploy LambdaLite is Railwal.app, altho you can run it virtually anywhere (including Cloudflare Workers 🤠).
 
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/YslOZk?referralCode=Mi0Jqj)
 
 ---
+
 
 ## More
 
