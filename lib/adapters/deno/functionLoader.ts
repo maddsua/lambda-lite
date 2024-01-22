@@ -1,6 +1,9 @@
-import { existsSync } from "https://deno.land/std@0.212.0/fs/mod.ts";
+import { existsSync } from 'https://deno.land/std@0.212.0/fs/exists.ts';
 import type { BasicRouter } from '../../middleware/router.ts';
 import type { RouteConfig } from "../../routes/route.ts";
+import { recursiveReaddir } from '../../util/fs.ts';
+
+const importFileExtensions = ['ts','mts','js','mjs'] as const;
 
 interface FileRouteConfig extends RouteConfig {
 	url?: string;
@@ -25,23 +28,8 @@ export const loadFunctionsFromFS = async (props: FunctionLoaderProps): Promise<B
 
 	console.log(`\n%c Indexing functions in ${props.dir}... \n`, 'background-color: green; color: black');
 
-	const allEntries: string[] = [];
-
-	const iterateDirectory = async (dir: string) => {
-		const nextEntries = Deno.readDir(dir);
-		for await (const item of nextEntries) {
-			const itemPath = `${dir}/${item.name}`;
-			if (item.isDirectory) {
-				await iterateDirectory(itemPath);
-			} else if (item.isFile) {
-				allEntries.push(itemPath);
-			}
-		}
-	};
-	await iterateDirectory(props.dir);
-
-	const importFileExtensions = ['ts','mts','js','mjs'] as const;
-	const importEntries = allEntries.filter(item => (
+	const functionsDirEntries = await recursiveReaddir(props.dir);
+	const importEntries = functionsDirEntries.filter(item => (
 		importFileExtensions.some(ext => item.endsWith(`.${ext}`)) &&
 		!props.ignore?.some(ignoreItem => ignoreItem.test(item))
 	));
@@ -89,7 +77,7 @@ export const loadFunctionsFromFS = async (props: FunctionLoaderProps): Promise<B
 		}
 	}
 
-	console.log(`\n%cLoaded ${allEntries.length} functions`, 'color: green')
+	console.log(`\n%cLoaded ${importEntries.length} functions`, 'color: green')
 
 	return routes;
 };
