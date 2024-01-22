@@ -1,0 +1,21 @@
+name: Run type checks on examples
+
+on:
+  push:
+    branches: ['main']
+    paths: ['lib/**','examples/**']
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  deno_check_examples:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: denoland/setup-deno@v1
+      with:
+        deno-version: v1.36.x
+    - run: deno task check:examples
