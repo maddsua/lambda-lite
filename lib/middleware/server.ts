@@ -1,5 +1,5 @@
 import { FunctionLoaderProps, loadFunctionsFromFS } from "../functions/loader.ts";
-import { FunctionsRouter } from "../functions/router.ts";
+import { FunctionsRouter } from "./router.ts";
 import { LambdaMiddleware } from "./middleware.ts";
 import { MiddlewareOptions } from "./opions.ts";
 

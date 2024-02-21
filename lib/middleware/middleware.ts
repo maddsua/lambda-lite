@@ -1,9 +1,10 @@
 import type { MiddlewareOptions } from "./opions.ts";
 import type { FunctionContext } from "../functions/handler.ts";
-import type { FunctionCtx, FunctionsRouter } from "../functions/router.ts";
+import type { FunctionCtx, FunctionsRouter } from "./router.ts";
 import { generateRequestId, getRequestIdFromProxy } from "./service.ts";
 import { renderErrorResponse } from "../api/errorPage.ts";
 import { safeHandlerCall } from "./functionCaller.ts";
+import { ServiceConsole } from "../functions/console.ts";
 
 interface Flags {
 	behindProxy: boolean;
@@ -111,7 +112,8 @@ export class LambdaMiddleware {
 		const requestContext: FunctionContext = {
 			relativePath: requestDisplayUrl,
 			clientIP: requestID,
-			requestID: requestID
+			requestID: requestID,
+			console: new ServiceConsole(requestID)
 		};
 
 		const functionResponse = routectx ? await safeHandlerCall({
