@@ -1,29 +1,18 @@
-import type { LambdaRouter } from './router.ts';
-import type { Handler } from '../routes/handlers.ts';
-import type { NetworkInfo } from './context.ts';
-import type { MiddlewareOptions } from './options.ts';
-import type { MiddlewarePlugin } from './plugins.ts';
-import { type SerializableResponse, TypedResponse } from './rest.ts';
-import { ServiceConsole } from '../util/console.ts';
-import { getRequestIdFromProxy, generateRequestId } from '../util/misc.ts';
-import { LambdaRequest } from './rest.ts';
-
-interface HandlerCtx {
-	handler: Handler;
-	expandPath?: boolean;
-	plugins?: MiddlewarePlugin[];
-};
+import type { MiddlewareOptions } from "./opions.ts";
+import type { FunctionContext } from "../functions/handler.ts";
+import type { FunctionCtx, FunctionsRouter } from "../functions/router.ts";
+import type { SerializableResponse } from "../api/responeses.ts";
+import { generateRequestId, getRequestIdFromProxy } from "../util/misc.ts";
+import { renderErrorPage } from "../api/errorPage.ts";
 
 export class LambdaMiddleware {
 
 	config: Partial<MiddlewareOptions>;
-	handlersPool: Record<string, HandlerCtx>;
+	handlersPool: FunctionsRouter;
 
-	constructor (routes: LambdaRouter, config?: Partial<MiddlewareOptions>) {
+	constructor (routes: FunctionsRouter, config?: Partial<MiddlewareOptions>) {
 
 		this.config = config || {};
-
-		//	transform routes
 		this.handlersPool = {};
 
 		for (const route in routes) {
@@ -33,24 +22,16 @@ export class LambdaMiddleware {
 			const routeExpandByUrl = route.endsWith('/*');
 
 			//	warn about path expansion
-			if (typeof routeCtx.expand === 'boolean' && routeExpandByUrl) {
+			if (typeof routeCtx?.options?.expand === 'boolean' && routeExpandByUrl) {
 				console.warn(`Route "${route}" has both expanding path and "config.expand" property set, the latest will be used`);
 			}
 
-			const handlerCtx: HandlerCtx = {
+			const handlerCtx: FunctionCtx = {
 				handler: routeCtx.handler,
-				expandPath: typeof routeCtx.expand === 'boolean' ? routeCtx.expand : routeExpandByUrl
+				options: {
+					expand: typeof routeCtx?.options?.expand === 'boolean' ? routeCtx.options.expand : routeExpandByUrl
+				}
 			};
-
-			//	setup route plugins
-			if (routeCtx.plugins || this.config.plugins) {
-
-				const handlerPluginsSet = new Set<string>(routeCtx.plugins?.map(item => item.id));
-				const inheritPlugins = typeof routeCtx.inheritPlugins === 'boolean' ? routeCtx.inheritPlugins : true;
-
-				const applyGlobal = inheritPlugins ? this.config.plugins?.filter(item => !handlerPluginsSet.has(item.id)) : undefined;
-				handlerCtx.plugins = (applyGlobal || []).concat(routeCtx.plugins || []);
-			}
 
 			let applyHandlerPath = route.replace(/\/\*?$/i, '');
 
@@ -72,7 +53,7 @@ export class LambdaMiddleware {
 		}
 	}
 
-	async handler(request: Request, info: NetworkInfo, invokContext?: object): Promise<Response> {
+	async handler(request: Request, info: Deno.ServeHandlerInfo): Promise<Response> {
 
 		const getProxyRemoteIP = () => {
 			const header = this.config.proxy?.forwardedIPHeader;
@@ -85,21 +66,17 @@ export class LambdaMiddleware {
 
 		let requestDisplayUrl = '/';
 
-		const console = new ServiceConsole(requestID);
-
 		//	this scary shit replaces URL object parsing
 		//	and from my tests it's ~3x faster.
 		//	also it won't throw shit.
 		const pathname = request.url.replace(/^[^\/]+\:\/\/[^\/]+/, '').replace(/[\?\#].*$/, '') || '/';
 		requestDisplayUrl = pathname;
 
-		let middlewareResponse: Response | null = null;
-
 		// find route path
 		const routePathname = pathname.slice(0, pathname.endsWith('/') ? pathname.length - 1 : undefined) || '/';
 
 		//	typescript is too dumb to figure it out so it might need a bin of help here
-		let routectx = this.handlersPool[routePathname] as HandlerCtx | undefined;
+		let routectx = this.handlersPool[routePathname] as FunctionCtx | undefined;
 
 		// try to find matching wildcart route path
 		if (!routectx) {
@@ -110,7 +87,7 @@ export class LambdaMiddleware {
 				const nextRoute = '/' + pathComponents.slice(0, idx).join('/');
 				const nextCtx = this.handlersPool[nextRoute];
 
-				if (nextCtx?.expandPath) {
+				if (nextCtx?.options?.expand) {
 					routectx = nextCtx;
 					break;
 				}
@@ -122,118 +99,43 @@ export class LambdaMiddleware {
 			routectx = this.handlersPool['/_404'];
 		}
 
-		const requestContext = Object.assign(invokContext || {}, {
-			requestID,
-			clientIP,
-			console
-		}, info);
+		const requestContext: FunctionContext = {
+			relativePath: requestDisplayUrl,
+			clientIP: requestID,
+			requestID: requestID
+		};
 
-		const pluginProps = Object.assign({
-			middleware: this
-		}, requestContext);
+		let functionResponse: Response;
 
-		const pluginPromises = routectx?.plugins?.map(item => item.spawn(pluginProps));
-		const runPlugins = pluginPromises?.length ? await Promise.all(pluginPromises) : [];
-
-		//	run "before" plugin callbacks
-		let pluginModifiedRequest: Request | null = null;
-
-		for (const plugin of runPlugins) {
-
-			if (!plugin.executeBefore) continue;
+		if (routectx) {
 
 			try {
 
-				const temp = await plugin.executeBefore(pluginModifiedRequest || request);
+				const callbackResult = await routectx.handler(request, requestContext);
 
-				if (temp?.respondWith) {
-					middlewareResponse = temp.respondWith;
-					break;
-				}
-
-				if (temp?.modifiedRequest) {
-					pluginModifiedRequest = temp.modifiedRequest;
-					if (temp?.chainable === false) break;
-				}
-				
-			} catch (error) {
-				console.error(`[Plugin error (${plugin.id})] In "before" callback:`, (error as Error | null)?.message || error);
-			}
-		}
-
-		//	so the logic here is that if we successfully matched a route
-		//	and none of the plugins decicded to return request early
-		//	we are ok to call route handler and process it's result
-		if (routectx && !middlewareResponse) {
-
-			try {
-
-				const dispatchRequest = new LambdaRequest(pluginModifiedRequest || request);
-				const endpointResponse = await routectx.handler(dispatchRequest, requestContext);
-
-				if (endpointResponse instanceof Response)
-					middlewareResponse = endpointResponse;
-				else if (('toResponse' satisfies keyof SerializableResponse) in endpointResponse)
-					middlewareResponse = endpointResponse.toResponse();
+				if (callbackResult instanceof Response)
+					functionResponse = callbackResult;
+				else if (('toResponse' satisfies keyof SerializableResponse) in callbackResult)
+					functionResponse = callbackResult.toResponse();
 				else throw new Error('Invalid function esponse: is not a standard Response object or SerializableResponse');
 
 			} catch (error) {
 
 				console.error('Lambda middleware error:', (error as Error | null)?.message || error);
-
-				interface ErrorResponseData {
-					error_text: string;
-					error_log?: string;
-				};
-
-				const responseData: ErrorResponseData = {
-					error_text: 'unhandled middleware error',
-				};
-
-				if (this.config.errorResponseType === 'log')
-					responseData.error_log = (error as Error | null)?.message || JSON.stringify(error);
-
-				middlewareResponse = new TypedResponse(responseData, { status: 500 }).toResponse();
+				functionResponse = renderErrorPage('unhandled middleware error', 500, this.config.errorPageType);
 			}
 
-		//	but if we didn't have a route we'll get to this point
-		//	where we handle 404 cases
-		//	can't use just "else" here as it would override possible plugin response if a 404 occured.
-		//	so we only check for absence of "middlewareResponse",
-		//	which would indicate 404 and no plugin response
-		} else if (!middlewareResponse) {
-			middlewareResponse = new TypedResponse({
-				error_text: 'route not found'
-			}, { status: 404 }).toResponse();
-		}
-
-		//	run "after" plugin callbacks
-		for (const plugin of runPlugins) {
-
-			if (!plugin.executeAfter) continue;
-
-			try {
-
-				const temp = await plugin.executeAfter(middlewareResponse);
-
-				if (temp?.overrideResponse) {
-					if (temp.chainable === false) return temp.overrideResponse;
-					middlewareResponse = temp.overrideResponse;
-				}
-
-			} catch (error) {
-				console.error(`[Plugin error (${plugin.id})] In "after" callback:`, (error as Error | null)?.message || error);
-			}
+		} else {
+			functionResponse = renderErrorPage('function not found', 404, this.config.errorPageType);
 		}
 
 		//	add some headers so the shit always works
-		middlewareResponse.headers.set('x-powered-by', 'maddsua/lambda');
-		middlewareResponse.headers.set('x-request-id', requestID);
+		functionResponse.headers.set('x-powered-by', 'maddsua/lambda');
+		functionResponse.headers.set('x-request-id', requestID);
 
 		//	log for, you know, reasons
-		if (this.config.loglevel?.requests !== false)	
-			console.log(`(${clientIP}) ${request.method} ${requestDisplayUrl} --> ${middlewareResponse.status}`);
+		console.log(`(${clientIP}) ${request.method} ${requestDisplayUrl} --> ${functionResponse.status}`);
 
-		return middlewareResponse;
+		return functionResponse;
 	}
 };

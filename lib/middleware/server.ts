@@ -1,7 +1,7 @@
-import type { MiddlewareOptions } from "../../middleware/options.ts";
-import type { LambdaRouter } from "../../middleware/router.ts";
-import { LambdaMiddleware } from '../../middleware/middleware.ts';
-import { loadFunctionsFromFS, type FunctionLoaderProps } from './functionLoader.ts';
+import { FunctionLoaderProps, loadFunctionsFromFS } from "../functions/loader.ts";
+import { FunctionsRouter } from "../functions/router.ts";
+import { LambdaMiddleware } from "./middleware.ts";
+import { MiddlewareOptions } from "./opions.ts";
 
 export interface ServerOptions extends MiddlewareOptions {
 
@@ -13,7 +13,7 @@ export interface ServerOptions extends MiddlewareOptions {
 	/**
 	 * Define function handlers if FS module loading is not in use
 	 */
-	routes?: LambdaRouter;
+	routes?: FunctionsRouter;
 
 	/**
 	 * Path to the directory containing handler functions.

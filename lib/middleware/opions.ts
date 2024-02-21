@@ -1,4 +1,4 @@
-import type { MiddlewarePlugin } from "./plugins.ts";
+import type { ErrorPageType } from "../api/errorPage.ts";
 
 export interface MiddlewareOptions {
 
@@ -20,26 +20,7 @@ export interface MiddlewareOptions {
 	 * 
 	 * Defaults to 'minimal'
 	 */
-	errorResponseType?: 'minimal' | 'log';
+	errorLogDetail?: 'minimal' | 'log';
 
-	/**
-	 * Logging settings
-	 */
-	loglevel?: {
-
-		/**
-		 * Log incoming requests and their response metadata
-		 */
-		requests?: boolean;
-
-		/**
-		 * Log plugin events
-		 */
-		plugins?: boolean;
-	};
-
-	/**
-	 * Middleware plugins
-	 */
-	plugins?: MiddlewarePlugin[];
+	errorPageType?: ErrorPageType;
 };
