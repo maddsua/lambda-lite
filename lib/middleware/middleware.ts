@@ -4,7 +4,7 @@ import type { FunctionCtx, FunctionsRouter } from "../functions/router.ts";
 import type { SerializableResponse } from "../api/responeses.ts";
 import { generateRequestId, getRequestIdFromProxy } from "./service.ts";
 import { ErrorPageType, renderErrorPage } from "../api/errorPage.ts";
-import { HandlerFunction } from "../../mod.ts";
+import { HandlerFunction, JSONResponse } from "../../mod.ts";
 
 interface HandlerCallProps {
 	handler: HandlerFunction<any>;
@@ -16,7 +16,8 @@ interface HandlerCallProps {
 
 interface ErrorResponse {
 	error_text: string;
-	error_message?: string;
+	error_log?: string;
+	error_stack?: string;
 };
 
 const safeHandlerCall = async (props: HandlerCallProps): Promise<Response> => {
@@ -32,34 +33,53 @@ const safeHandlerCall = async (props: HandlerCallProps): Promise<Response> => {
 		else throw new Error('Invalid function esponse: is not a standard Response object or SerializableResponse');
 
 	} catch (error) {
+		
+		console.error('Lambda middleware error:', error);
 
-		console.error('Lambda middleware error:', (error as Error | null)?.message || error);
+		const handlerErrorText = (error as Error | null)?.message || JSON.stringify(error);
+		const handlerErrorStack = (error as Error | null)?.stack || 'unknown stack';
 
-		switch (type) {
+		switch (props.errorPageType) {
 
 			case 'json': {
 	
 				const errorObject: ErrorResponse = {
-					error_text: message
+					error_text: 'unhandled middleware error'
 				};
+
+				if (props.showErrorDetails) {
+					errorObject.error_log = handlerErrorText;
+					errorObject.error_stack = handlerErrorStack;
+				}
 	
-				return new JSONResponse(errorObject, status).toResponse();
+				return new JSONResponse(errorObject, 500).toResponse();
 			};
 		
 			default: {
+
+				const errorLines: Array<string | null> = [
+					'Unhandled middleware error',
+					null
+				];
+
+				if (props.showErrorDetails) {
+					errorLines.push(`Error message: ${handlerErrorText}`);
+					errorLines.push(`Error stack: ${handlerErrorStack}`);
+				}
+
+				errorLines.push(null);
+				errorLines.push('maddsua/lambda');
+
+				const errorPageText = errorLines.map(item => item ? item : '').join('\r\n');
 	
-				const errorMessage = `Backend error: ${message} \r\nmaddsua/lambda\r\n`
-	
-				return new Response(errorMessage, {
+				return new Response(errorPageText, {
 					headers: {
 						'content-type': 'text/plain'
 					},
-					status
+					status: 500
 				});
 			}
 		}
-
-		return renderErrorPage('unhandled middleware error', 500, props.errorPageType);
 	}
 };
 
