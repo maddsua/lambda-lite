@@ -5,10 +5,15 @@ import { generateRequestId, getRequestIdFromProxy } from "./service.ts";
 import { renderErrorResponse } from "../api/errorPage.ts";
 import { safeHandlerCall } from "./functionCaller.ts";
 
+interface Flags {
+	behindProxy: boolean;
+};
+
 export class LambdaMiddleware {
 
 	config: Partial<MiddlewareOptions>;
 	handlersPool: FunctionsRouter;
+	flags: Flags;
 
 	constructor (routes: FunctionsRouter, config?: Partial<MiddlewareOptions>) {
 
@@ -51,6 +56,10 @@ export class LambdaMiddleware {
 				handler: () => new Response(null, { status: 200 })
 			};
 		}
+
+		this.flags = {
+			behindProxy: Object.values(this.config.proxy || {}).some(item => item.length)
+		};
 	}
 
 	async handler(request: Request, info: Deno.ServeHandlerInfo): Promise<Response> {
@@ -118,7 +127,7 @@ export class LambdaMiddleware {
 		});
 
 		//	add some headers so the shit always works
-		functionResponse.headers.set('x-powered-by', 'maddsua/lambda');
+		functionResponse.headers.set(this.flags.behindProxy ? 'x-powered-by' : 'server', 'maddsua/lambda');
 		functionResponse.headers.set('x-request-id', requestID);
 
 		//	log for, you know, reasons
