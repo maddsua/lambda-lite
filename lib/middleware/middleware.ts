@@ -1,10 +1,8 @@
 import type { MiddlewareOptions } from "./opions.ts";
 import type { FunctionContext } from "../functions/handler.ts";
 import type { FunctionCtx, FunctionsRouter } from "../functions/router.ts";
-import type { SerializableResponse } from "../api/responeses.ts";
 import { generateRequestId, getRequestIdFromProxy } from "./service.ts";
-import { ErrorPageType, renderErrorPage } from "../api/errorPage.ts";
-import { HandlerFunction, JSONResponse } from "../../mod.ts";
+import { renderErrorResponse } from "../api/errorPage.ts";
 import { safeHandlerCall } from "./functionCaller.ts";
 
 export class LambdaMiddleware {
@@ -113,7 +111,11 @@ export class LambdaMiddleware {
 			context: requestContext,
 			errorPageType: this.config.errorPage?.type,
 			errorDetails: this.config.errorPage?.detailLevel
-		}) : renderErrorPage('function not found', 404, this.config.errorPage?.type);
+		}) : renderErrorResponse({
+			message: 'function not found',
+			status: 404,
+			errorPageType: this.config.errorPage?.type
+		});
 
 		//	add some headers so the shit always works
 		functionResponse.headers.set('x-powered-by', 'maddsua/lambda');

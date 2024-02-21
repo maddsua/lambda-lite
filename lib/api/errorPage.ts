@@ -1,32 +1,58 @@
 import type { ErrorPageType } from "../middleware/opions.ts";
-import { JSONResponse } from "./responeses.ts";
+import { ErrorResponse, JSONResponse } from "./responeses.ts";
 
-export interface ErrorResponse {
-	error_text: string;
+interface ErrorPageProps {
+	message: string;
+	status?: number;
+	error?: any;
+	errorPageType?: ErrorPageType;
 };
 
-export const renderErrorPage = (message: string, status: number, type?: ErrorPageType): Response => {
+export const renderErrorResponse = (props: ErrorPageProps): Response => {
 
-	switch (type) {
+	const responeseStatus = props.status || 500;
+
+	const handlerErrorText = props.error ? ((props.error as Error)?.message || JSON.stringify(props.error)) : undefined;
+	const handlerErrorStack = props.error ? ((props.error as Error)?.stack || 'unknown stack') : undefined;
+
+	switch (props.errorPageType) {
 
 		case 'json': {
 
 			const errorObject: ErrorResponse = {
-				error_text: message
+				error_text: props.message
 			};
 
-			return new JSONResponse(errorObject, status).toResponse();
+			if (props.error) {
+				errorObject.error_log = handlerErrorText;
+				errorObject.error_stack = handlerErrorStack;
+			}
+
+			return new JSONResponse(errorObject, responeseStatus).toResponse();
 		};
 	
 		default: {
 
-			const errorMessage = `Backend error: ${message} \r\nmaddsua/lambda\r\n`
+			const errorLines: Array<string | null> = [
+				props.message,
+				null
+			];
 
-			return new Response(errorMessage, {
+			if (props.error) {
+				errorLines.push(`Error message: ${handlerErrorText}`);
+				errorLines.push(`Error stack: ${handlerErrorStack}`);
+				errorLines.push(null);
+			}
+
+			errorLines.push('maddsua/lambda');
+
+			const errorPageText = errorLines.map(item => item ? item : '').join('\r\n');
+
+			return new Response(errorPageText, {
 				headers: {
 					'content-type': 'text/plain'
 				},
-				status
+				status: responeseStatus
 			});
 		}
 	}
