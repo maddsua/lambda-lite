@@ -1,19 +1,15 @@
-import type { LambdaRouter } from '../../middleware/router.ts';
-import type { RouteConfig } from "../../routes/route.ts";
-import { recursiveReaddir, exists } from '../../util/fs.ts';
+import { recursiveReaddir, exists } from '../polyfills/fsops.ts';
+import type { FunctionConfig } from './options.ts';
+import type { FunctionsRouter } from '../middleware/router.ts';
 
 const importFileExtensions = ['ts','mts','js','mjs'] as const;
-
-interface FileRouteConfig extends RouteConfig {
-	url?: string;
-};
 
 export interface FunctionLoaderProps {
 	dir: string;
 	ignore?: RegExp[];
 };
 
-export const loadFunctionsFromFS = async (props: FunctionLoaderProps): Promise<LambdaRouter> => {
+export const loadFunctionsFromFS = async (props: FunctionLoaderProps): Promise<FunctionsRouter> => {
 
 	//	check that directory exists
 	if (!await exists(props.dir)) {
@@ -28,23 +24,23 @@ export const loadFunctionsFromFS = async (props: FunctionLoaderProps): Promise<L
 	console.log(`\n%c Indexing functions in ${props.dir}... \n`, 'background-color: green; color: black');
 
 	const functionsDirEntries = await recursiveReaddir(props.dir);
-	const importEntries = functionsDirEntries.filter(item => (
+	const moduleImportList = functionsDirEntries.filter(item => (
 		importFileExtensions.some(ext => item.endsWith(`.${ext}`)) &&
 		!props.ignore?.some(ignoreItem => ignoreItem.test(item))
 	));
 
-	if (!importEntries.length) {
+	if (!moduleImportList.length) {
 		console.error(
-			`%c Failed to load route functions %c\nNo modules found in "${props.dir}"\n`,
+			`%c Failed to load functions %c\nNo modules found in "${props.dir}"\n`,
 			'background-color: red; color: white',
 			'background-color: inherit; color: inherit'
 		);
 		throw new Error('no modules found');
 	}
 
-	const routes: LambdaRouter = {};
+	const result: FunctionsRouter = {};
 
-	for (const entry of importEntries) {
+	for (const entry of moduleImportList) {
 
 		try {
 
@@ -58,25 +54,21 @@ export const loadFunctionsFromFS = async (props: FunctionLoaderProps): Promise<L
 			const handler = (imported['default'] || imported['handler']);
 			if (!handler || typeof handler !== 'function') throw new Error('No handler exported');
 	
-			const config = (imported['config'] || {}) as FileRouteConfig;
-			if (typeof config !== 'object') throw new Error('Config invalid');
+			const options = (imported['config'] || {}) as FunctionConfig;
+			if (typeof options !== 'object') throw new Error('Config invalid');
 
 			const pathNoExt = entry.slice(props.dir.length, entry.lastIndexOf('.'));
 			const indexIndex = pathNoExt.lastIndexOf('/index');
 			const fsRoutedUrl = indexIndex === -1 ? pathNoExt : (indexIndex === 0 ? '/' : pathNoExt.slice(0, indexIndex));
-			const customUrl = config.url?.replace(/[\/\*]+$/, '');
 
-			const pathname = typeof customUrl === 'string' ? customUrl : fsRoutedUrl;
-			if (!pathname.startsWith('/')) throw new Error(`Invalid route url: ${pathname}`);
-
-			routes[pathname as keyof typeof routes] = Object.assign({}, config, { handler });
+			result[fsRoutedUrl as keyof typeof result] = { handler, options };
 
 		} catch (error) {
 			throw new Error(`Failed to import route module ${entry}: ${(error as Error | null)?.message}`);
 		}
 	}
 
-	console.log(`\n%cLoaded ${importEntries.length} functions`, 'color: green')
+	console.log(`\n%cLoaded ${moduleImportList.length} functions`, 'color: green')
 
-	return routes;
+	return result;
 };

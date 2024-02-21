@@ -1,4 +1,4 @@
-import { recursiveReaddir } from "../lib/util/fs.ts";
+import { recursiveReaddir } from "../lib/polyfills/fsops.ts";
 import { runTypeChecks } from "./typechecks.ts";
 
 const modulesMatch = /^[^\/]+\/[^\/]+\/[^\/]+\.ts$/;

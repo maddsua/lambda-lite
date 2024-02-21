@@ -1,6 +1,5 @@
-import { startDenoServer } from "../../adapters.mod.ts";
-import { createEnv } from "../../lib.mod.ts";
-import { serviceAuth } from "../../plugins.mod.ts";
+import { startServer, type FunctionContext } from "../../mod.ts";
+import { createEnv } from "../deps.ts";
 
 const env = createEnv({
 	port: {
@@ -10,32 +9,37 @@ const env = createEnv({
 	}
 }, Deno.env.toObject());
 
-await startDenoServer({
+await startServer({
 	serve: {
 		port: env.port || 8080,
 	},
 	healthcheckPath: '/health',
-	errorResponseType: 'log',
+	errorPage: {
+		detailLevel: 'log',
+	},
 	routes: {
 		'_404': {
 			handler: () => new Response('endpoint not found', { status: 404 })
+		},
+		'error': {
+			handler: () => {
+				throw new Error('test error');
+				return new Response('yo wtf', { status: 500 });
+			}
 		},
 		'/': {
 			handler: () => new Response('well hello there')
 		},
 		'/api': {
-			handler: () => new Response('congrats youre working for the CIA now'),
-			plugins: [
-				serviceAuth({ token: 'yourefired' })
-			]
+			handler: () => new Response('congrats youre working for the CIA now')
 		},
-		'/search': {
-			handler: async (request) => {
-				const { searchParams } = request.unwrapURL();
-				if (searchParams.size) {
-					console.log('request search:', Object.fromEntries(searchParams.entries()));
-				}
-				return new Response(null, { status: 201 })
+		'/catch': {
+			handler: (_, ctx: FunctionContext) => {
+				console.log('Relative path:', ctx.relativePath);
+				return new Response('got it!\r\n' + ctx.relativePath, { status: 200 });
+			},
+			options: {
+				expand: true
 			}
 		}
 	}

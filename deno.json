@@ -4,10 +4,6 @@
 		"check:lib": "deno run -A tests/typechecks.lib.test.ts",
 		"check:examples": "deno run -A tests/typechecks.ex.test.ts",
 		"example:basic": "deno run -A examples/basic/main.ts",
-		"example:extended": "deno run -A examples/extended/main.ts",
-		"example:typed:server": "deno run -A examples/typed/server.ts",
-		"example:typed:client": "deno run -A examples/typed/client.ts",
-		"example:monotyped:server": "deno run -A examples/monotyped/server.ts",
-		"example:monotyped:client": "deno run -A examples/monotyped/client.ts"
+		"example:extended": "deno run -A examples/extended/main.ts"
 	}
 }

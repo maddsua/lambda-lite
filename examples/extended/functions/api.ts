@@ -1,6 +1,6 @@
-import { Handler, TypedResponse } from "../../../lib.mod.ts";
+import { HandlerFunction, JSONResponse } from "../../../mod.ts";
 
-export const handler: Handler = () => new TypedResponse({
+export const handler: HandlerFunction = () => new JSONResponse({
 	success: true,
 	purpose: 'imitates a REST API',
 	action: 'use your imagination'

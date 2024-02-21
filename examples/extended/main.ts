@@ -1,6 +1,5 @@
-import { startDenoServer } from "../../adapters.mod.ts";
-import { createEnv } from "../../lib.mod.ts";
-import { allowMethods, originController } from "../../plugins.mod.ts";
+import { startServer } from "../../mod.ts";
+import { createEnv } from "../deps.ts";
 
 const env = createEnv({
 	port: {
@@ -10,16 +9,12 @@ const env = createEnv({
 	}
 }, Deno.env.toObject());
 
-await startDenoServer({
+await startServer({
 	serve: {
 		port: env.port || 8080,
 	},
 	loadFunctions: {
 		dir: 'examples/extended/functions',
 	},
-	healthcheckPath: '/health',
-	plugins: [
-		allowMethods('GET'),
-		originController({ allowOrigins: 'all' }),
-	]
+	healthcheckPath: '/health'
 });
