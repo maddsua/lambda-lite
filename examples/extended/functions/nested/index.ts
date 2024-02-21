@@ -1,6 +1,6 @@
-import type { RouteConfig } from "../../../../lib.mod.ts";
+import type { FunctionConfig } from "../../../../mod.ts";
 
-export const config: RouteConfig = {
+export const config: FunctionConfig = {
 	expand: true
 };
 

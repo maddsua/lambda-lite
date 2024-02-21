@@ -1,5 +1,5 @@
 
-export interface FunctionOptions {
+export interface FunctionConfig {
 	/**
 	 * Exapnd path to catch subpaths too
 	 */

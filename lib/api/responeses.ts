@@ -3,7 +3,7 @@ export interface SerializableResponse {
 	toResponse(): Response;
 };
 
-export class TypedResponse <T extends object> implements SerializableResponse {
+export class JSONResponse <T extends object> implements SerializableResponse {
 
 	data: T;
 	status: number;

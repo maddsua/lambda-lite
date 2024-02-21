@@ -1,4 +1,4 @@
-import { TypedResponse } from "./responeses.ts";
+import { JSONResponse } from "./responeses.ts";
 
 export type ErrorPageType = 'json' | 'basic';
 
@@ -16,7 +16,7 @@ export const renderErrorPage = (message: string, status: number, type?: ErrorPag
 				error_text: message
 			};
 
-			return new TypedResponse(errorObject, status).toResponse();
+			return new JSONResponse(errorObject, status).toResponse();
 		};
 	
 		default: {

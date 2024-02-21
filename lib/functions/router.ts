@@ -1,9 +1,9 @@
 import { HandlerFunction } from "./handler.ts";
-import { FunctionOptions } from "./options.ts";
+import { FunctionConfig } from "./options.ts";
 
 export interface FunctionCtx {
 	handler: HandlerFunction<any>;
-	options?: FunctionOptions;
+	options?: FunctionConfig;
 };
 
 export type FunctionsRouter = Record<string, FunctionCtx>;

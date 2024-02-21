@@ -1,5 +1,5 @@
 import { recursiveReaddir, exists } from './fsops.ts';
-import type { FunctionOptions } from './options.ts';
+import type { FunctionConfig } from './options.ts';
 import { FunctionsRouter } from './router.ts';
 
 const importFileExtensions = ['ts','mts','js','mjs'] as const;
@@ -54,7 +54,7 @@ export const loadFunctionsFromFS = async (props: FunctionLoaderProps): Promise<F
 			const handler = (imported['default'] || imported['handler']);
 			if (!handler || typeof handler !== 'function') throw new Error('No handler exported');
 	
-			const options = (imported['config'] || {}) as FunctionOptions;
+			const options = (imported['config'] || {}) as FunctionConfig;
 			if (typeof options !== 'object') throw new Error('Config invalid');
 
 			const pathNoExt = entry.slice(props.dir.length, entry.lastIndexOf('.'));

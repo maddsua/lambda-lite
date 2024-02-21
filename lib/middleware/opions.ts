@@ -20,7 +20,7 @@ export interface MiddlewareOptions {
 	 * 
 	 * Defaults to 'minimal'
 	 */
-	errorLogDetail?: 'minimal' | 'log';
+	//errorLogDetail?: 'minimal' | 'log';
 
 	errorPageType?: ErrorPageType;
 };

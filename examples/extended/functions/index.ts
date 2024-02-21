@@ -1,12 +1,7 @@
-import type { RouteConfig, Handler } from '../../../lib.mod.ts';
+import { HandlerFunction } from "../../../mod.ts";
 import Component from './index.tsx';
 
-export const config: RouteConfig = {
-	//expand: true,
-	inheritPlugins: false
-};
-
-export const handler: Handler = (request, context) => {
+export const handler: HandlerFunction = (request, context) => {
 	const htmlcontent = Component().render();
 	return new Response(htmlcontent, {
 		headers: {
