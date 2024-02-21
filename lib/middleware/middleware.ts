@@ -14,6 +14,7 @@ interface HandlerCallProps {
 };
 
 const safeHandlerCall = async (props: HandlerCallProps): Promise<Response> => {
+
 	try {
 
 		const callbackResult = await props.handler(props.request, props.context);
