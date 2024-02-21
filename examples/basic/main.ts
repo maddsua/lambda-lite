@@ -14,10 +14,15 @@ await startServer({
 		port: env.port || 8080,
 	},
 	healthcheckPath: '/health',
-	//errorLogDetail: 'log',
+	errorPage: {
+		detailLevel: 'log'
+	},
 	routes: {
 		'_404': {
-			handler: () => new Response('endpoint not found', { status: 404 })
+			handler: () => {
+				throw new Error('test error')
+				return new Response('endpoint not found', { status: 404 })
+			}
 		},
 		'/': {
 			handler: () => new Response('well hello there')
