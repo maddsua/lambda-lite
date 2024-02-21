@@ -1,5 +1,9 @@
-import { HandlerFunction } from "../../../mod.ts";
+import { FunctionConfig, HandlerFunction } from "../../../mod.ts";
 import Component from './index.tsx';
+
+export const config: FunctionConfig = {
+	expand: true
+};
 
 export const handler: HandlerFunction = (request, context) => {
 	const htmlcontent = Component().render();
