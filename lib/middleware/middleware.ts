@@ -11,6 +11,12 @@ interface HandlerCallProps {
 	request: Request;
 	context: FunctionContext;
 	errorPageType?: ErrorPageType;
+	showErrorDetails?: boolean;
+};
+
+interface ErrorResponse {
+	error_text: string;
+	error_message?: string;
 };
 
 const safeHandlerCall = async (props: HandlerCallProps): Promise<Response> => {
@@ -26,7 +32,33 @@ const safeHandlerCall = async (props: HandlerCallProps): Promise<Response> => {
 		else throw new Error('Invalid function esponse: is not a standard Response object or SerializableResponse');
 
 	} catch (error) {
+
 		console.error('Lambda middleware error:', (error as Error | null)?.message || error);
+
+		switch (type) {
+
+			case 'json': {
+	
+				const errorObject: ErrorResponse = {
+					error_text: message
+				};
+	
+				return new JSONResponse(errorObject, status).toResponse();
+			};
+		
+			default: {
+	
+				const errorMessage = `Backend error: ${message} \r\nmaddsua/lambda\r\n`
+	
+				return new Response(errorMessage, {
+					headers: {
+						'content-type': 'text/plain'
+					},
+					status
+				});
+			}
+		}
+
 		return renderErrorPage('unhandled middleware error', 500, props.errorPageType);
 	}
 };
@@ -135,8 +167,9 @@ export class LambdaMiddleware {
 			handler: routectx.handler,
 			request: request,
 			context: requestContext,
-			errorPageType: this.config.errorPageType
-		}) : renderErrorPage('function not found', 404, this.config.errorPageType);
+			errorPageType: this.config.errorPage?.type,
+			showErrorDetails: this.config.errorPage?.detailLevel == 'log'
+		}) : renderErrorPage('function not found', 404, this.config.errorPage?.type);
 
 		//	add some headers so the shit always works
 		functionResponse.headers.set('x-powered-by', 'maddsua/lambda');
