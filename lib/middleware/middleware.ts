@@ -3,7 +3,32 @@ import type { FunctionContext } from "../functions/handler.ts";
 import type { FunctionCtx, FunctionsRouter } from "../functions/router.ts";
 import type { SerializableResponse } from "../api/responeses.ts";
 import { generateRequestId, getRequestIdFromProxy } from "./service.ts";
-import { renderErrorPage } from "../api/errorPage.ts";
+import { ErrorPageType, renderErrorPage } from "../api/errorPage.ts";
+import { HandlerFunction } from "../../mod.ts";
+
+interface HandlerCallProps {
+	handler: HandlerFunction<any>;
+	request: Request;
+	context: FunctionContext;
+	errorPageType?: ErrorPageType;
+};
+
+const safeHandlerCall = async (props: HandlerCallProps): Promise<Response> => {
+	try {
+
+		const callbackResult = await props.handler(props.request, props.context);
+
+		if (callbackResult instanceof Response)
+			return callbackResult;
+		else if (('toResponse' satisfies keyof SerializableResponse) in callbackResult)
+			return callbackResult.toResponse();
+		else throw new Error('Invalid function esponse: is not a standard Response object or SerializableResponse');
+
+	} catch (error) {
+		console.error('Lambda middleware error:', (error as Error | null)?.message || error);
+		return renderErrorPage('unhandled middleware error', 500, props.errorPageType);
+	}
+};
 
 export class LambdaMiddleware {
 
@@ -105,29 +130,12 @@ export class LambdaMiddleware {
 			requestID: requestID
 		};
 
-		let functionResponse: Response;
-
-		if (routectx) {
-
-			try {
-
-				const callbackResult = await routectx.handler(request, requestContext);
-
-				if (callbackResult instanceof Response)
-					functionResponse = callbackResult;
-				else if (('toResponse' satisfies keyof SerializableResponse) in callbackResult)
-					functionResponse = callbackResult.toResponse();
-				else throw new Error('Invalid function esponse: is not a standard Response object or SerializableResponse');
-
-			} catch (error) {
-
-				console.error('Lambda middleware error:', (error as Error | null)?.message || error);
-				functionResponse = renderErrorPage('unhandled middleware error', 500, this.config.errorPageType);
-			}
-
-		} else {
-			functionResponse = renderErrorPage('function not found', 404, this.config.errorPageType);
-		}
+		const functionResponse = routectx ? await safeHandlerCall({
+			handler: routectx.handler,
+			request: request,
+			context: requestContext,
+			errorPageType: this.config.errorPageType
+		}) : renderErrorPage('function not found', 404, this.config.errorPageType);
 
 		//	add some headers so the shit always works
 		functionResponse.headers.set('x-powered-by', 'maddsua/lambda');
