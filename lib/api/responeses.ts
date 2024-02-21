@@ -1,4 +1,10 @@
 
+export interface ErrorResponse {
+	error_text: string;
+	error_log?: string;
+	error_stack?: string;
+};
+
 export interface SerializableResponse {
 	toResponse(): Response;
 };

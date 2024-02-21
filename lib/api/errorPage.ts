@@ -1,6 +1,5 @@
+import type { ErrorPageType } from "../middleware/opions.ts";
 import { JSONResponse } from "./responeses.ts";
-
-export type ErrorPageType = 'json' | 'basic';
 
 export interface ErrorResponse {
 	error_text: string;

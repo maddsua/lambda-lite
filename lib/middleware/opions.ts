@@ -1,4 +1,6 @@
-import type { ErrorPageType } from "../api/errorPage.ts";
+
+export type ErrorPageDetailLevel = 'minimal' | 'log';
+export type ErrorPageType = 'json' | 'plain';
 
 export interface MiddlewareOptions {
 
@@ -25,6 +27,6 @@ export interface MiddlewareOptions {
 		 * 
 		 * Defaults to 'minimal'
 		 */
-		detailLevel?: 'minimal' | 'log';
+		detailLevel?: ErrorPageDetailLevel
 	};
 };

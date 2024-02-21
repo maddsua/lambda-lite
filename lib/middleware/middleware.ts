@@ -5,83 +5,7 @@ import type { SerializableResponse } from "../api/responeses.ts";
 import { generateRequestId, getRequestIdFromProxy } from "./service.ts";
 import { ErrorPageType, renderErrorPage } from "../api/errorPage.ts";
 import { HandlerFunction, JSONResponse } from "../../mod.ts";
-
-interface HandlerCallProps {
-	handler: HandlerFunction<any>;
-	request: Request;
-	context: FunctionContext;
-	errorPageType?: ErrorPageType;
-	showErrorDetails?: boolean;
-};
-
-interface ErrorResponse {
-	error_text: string;
-	error_log?: string;
-	error_stack?: string;
-};
-
-const safeHandlerCall = async (props: HandlerCallProps): Promise<Response> => {
-
-	try {
-
-		const callbackResult = await props.handler(props.request, props.context);
-
-		if (callbackResult instanceof Response)
-			return callbackResult;
-		else if (('toResponse' satisfies keyof SerializableResponse) in callbackResult)
-			return callbackResult.toResponse();
-		else throw new Error('Invalid function esponse: is not a standard Response object or SerializableResponse');
-
-	} catch (error) {
-		
-		console.error('Lambda middleware error:', error);
-
-		const handlerErrorText = (error as Error | null)?.message || JSON.stringify(error);
-		const handlerErrorStack = (error as Error | null)?.stack || 'unknown stack';
-
-		switch (props.errorPageType) {
-
-			case 'json': {
-	
-				const errorObject: ErrorResponse = {
-					error_text: 'unhandled middleware error'
-				};
-
-				if (props.showErrorDetails) {
-					errorObject.error_log = handlerErrorText;
-					errorObject.error_stack = handlerErrorStack;
-				}
-	
-				return new JSONResponse(errorObject, 500).toResponse();
-			};
-		
-			default: {
-
-				const errorLines: Array<string | null> = [
-					'Unhandled middleware error',
-					null
-				];
-
-				if (props.showErrorDetails) {
-					errorLines.push(`Error message: ${handlerErrorText}`);
-					errorLines.push(`Error stack: ${handlerErrorStack}`);
-				}
-
-				errorLines.push(null);
-				errorLines.push('maddsua/lambda');
-
-				const errorPageText = errorLines.map(item => item ? item : '').join('\r\n');
-	
-				return new Response(errorPageText, {
-					headers: {
-						'content-type': 'text/plain'
-					},
-					status: 500
-				});
-			}
-		}
-	}
-};
+import { safeHandlerCall } from "./functionCaller.ts";
 
 export class LambdaMiddleware {
 
@@ -188,7 +112,7 @@ export class LambdaMiddleware {
 			request: request,
 			context: requestContext,
 			errorPageType: this.config.errorPage?.type,
-			showErrorDetails: this.config.errorPage?.detailLevel == 'log'
+			errorDetails: this.config.errorPage?.detailLevel
 		}) : renderErrorPage('function not found', 404, this.config.errorPage?.type);
 
 		//	add some headers so the shit always works

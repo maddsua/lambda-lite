@@ -15,13 +15,16 @@ await startServer({
 	},
 	healthcheckPath: '/health',
 	errorPage: {
-		detailLevel: 'log'
+		detailLevel: 'log',
 	},
 	routes: {
 		'_404': {
+			handler: () => new Response('endpoint not found', { status: 404 })
+		},
+		'error': {
 			handler: () => {
-				throw new Error('test error')
-				return new Response('endpoint not found', { status: 404 })
+				throw new Error('test error');
+				return new Response('yo wtf', { status: 500 });
 			}
 		},
 		'/': {
