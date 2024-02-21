@@ -1,4 +1,4 @@
-import { startServer } from "../../mod.ts";
+import { startServer, type FunctionContext } from "../../mod.ts";
 import { createEnv } from "../deps.ts";
 
 const env = createEnv({
@@ -32,6 +32,15 @@ await startServer({
 		},
 		'/api': {
 			handler: () => new Response('congrats youre working for the CIA now')
+		},
+		'/catch': {
+			handler: (_, ctx: FunctionContext) => {
+				console.log('Relative path:', ctx.relativePath);
+				return new Response('got it!\r\n' + ctx.relativePath, { status: 200 });
+			},
+			options: {
+				expand: true
+			}
 		}
 	}
 });
