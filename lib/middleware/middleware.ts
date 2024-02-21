@@ -2,7 +2,7 @@ import type { MiddlewareOptions } from "./opions.ts";
 import type { FunctionContext } from "../functions/handler.ts";
 import type { FunctionCtx, FunctionsRouter } from "../functions/router.ts";
 import type { SerializableResponse } from "../api/responeses.ts";
-import { generateRequestId, getRequestIdFromProxy } from "../util/misc.ts";
+import { generateRequestId, getRequestIdFromProxy } from "./service.ts";
 import { renderErrorPage } from "../api/errorPage.ts";
 
 export class LambdaMiddleware {
