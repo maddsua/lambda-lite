@@ -17,6 +17,9 @@ export interface MiddlewareOptions {
 	 */
 	healthcheckPath?: `/${string}`;
 
+	/**
+	 * Error page settings
+	 */
 	errorPage?: {
 		/**
 		 * What kind of error page to display

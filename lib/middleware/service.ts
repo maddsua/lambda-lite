@@ -7,6 +7,11 @@ export const getRequestIdFromProxy = (headers: Headers, headerName: string | nul
 	return shortid.length <= 8 ? shortid : shortid.slice(0, 8);
 };
 
+export const getProxyHeader = (headers: Headers, headerName: string | null | undefined) => {
+	if (!headerName) return null;
+	return headers.get(headerName);
+};
+
 export const generateRequestId = () => {
 	const characters = '0123456789abcdef';
 	const randomChar = () => characters.charAt(Math.floor(Math.random() * characters.length));

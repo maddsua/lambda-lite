@@ -1,5 +1,5 @@
 import { recursiveReaddir, exists } from '../polyfills/fsops.ts';
-import type { FunctionConfig } from './options.ts';
+import type { FunctionConfig } from '../../mod.ts';
 import type { FunctionsRouter } from '../middleware/router.ts';
 
 const importFileExtensions = ['ts','mts','js','mjs'] as const;

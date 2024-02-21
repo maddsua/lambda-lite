@@ -1,7 +1,7 @@
 import type { MiddlewareOptions } from "./opions.ts";
 import type { FunctionContext } from "../functions/handler.ts";
 import type { FunctionCtx, FunctionsRouter } from "./router.ts";
-import { generateRequestId, getRequestIdFromProxy } from "./service.ts";
+import { generateRequestId, getProxyHeader, getRequestIdFromProxy } from "./service.ts";
 import { renderErrorResponse } from "../api/errorPage.ts";
 import { safeHandlerCall } from "./functionCaller.ts";
 import { ServiceConsole } from "../functions/console.ts";
@@ -65,14 +65,8 @@ export class LambdaMiddleware {
 
 	async handler(request: Request, info: Deno.ServeHandlerInfo): Promise<Response> {
 
-		const getProxyRemoteIP = () => {
-			const header = this.config.proxy?.forwardedIPHeader;
-			if (!header?.length) return null;
-			return request.headers.get(header);
-		};
-
 		const requestID = getRequestIdFromProxy(request.headers, this.config.proxy?.requestIdHeader) || generateRequestId();
-		const clientIP = getProxyRemoteIP() || info.remoteAddr.hostname;
+		const clientIP = getProxyHeader(request.headers, this.config.proxy?.forwardedIPHeader) || info.remoteAddr.hostname;
 
 		//	this scary shit replaces URL object parsing
 		//	and from my tests it's ~3x faster.
@@ -122,7 +116,7 @@ export class LambdaMiddleware {
 			request: request,
 			context: requestContext,
 			errorPageType: this.config.errorPage?.type,
-			errorDetails: this.config.errorPage?.detailLevel
+			detailLevel: this.config.errorPage?.detailLevel
 		}) : renderErrorResponse({
 			message: 'function not found',
 			status: 404,

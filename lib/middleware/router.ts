@@ -1,5 +1,4 @@
-import { HandlerFunction } from "../functions/handler.ts";
-import { FunctionConfig } from "../functions/options.ts";
+import type { HandlerFunction, FunctionConfig } from "../functions/handler.ts";
 
 export interface FunctionCtx {
 	handler: HandlerFunction<any>;

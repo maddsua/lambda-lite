@@ -8,7 +8,7 @@ export interface HandlerCallProps {
 	request: Request;
 	context: FunctionContext;
 	errorPageType?: ErrorPageType;
-	errorDetails?: ErrorPageDetailLevel;
+	detailLevel?: ErrorPageDetailLevel;
 };
 
 export const safeHandlerCall = async (props: HandlerCallProps): Promise<Response> => {
@@ -30,7 +30,7 @@ export const safeHandlerCall = async (props: HandlerCallProps): Promise<Response
 		return renderErrorResponse({
 			message: 'unhandled middleware error',
 			status: 500,
-			error: props.errorDetails === 'log' ? error : undefined,
+			error: props.detailLevel === 'log' ? error : undefined,
 			errorPageType: props.errorPageType
 		});
 	}

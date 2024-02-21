@@ -1,6 +1,13 @@
 import type { SerializableResponse } from "../api/responeses.ts";
 import type { ServiceConsole } from "./console.ts";
 
+export interface FunctionConfig {
+	/**
+	 * Exapnd path to catch subpaths too
+	 */
+	expand?: boolean;
+};
+
 export interface FunctionContext {
 	relativePath: string;
 	clientIP: string;
