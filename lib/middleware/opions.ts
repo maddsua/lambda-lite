@@ -15,12 +15,16 @@ export interface MiddlewareOptions {
 	 */
 	healthcheckPath?: `/${string}`;
 
-	/**
-	 * What data should be sent to a client in case of critical endpoint error
-	 * 
-	 * Defaults to 'minimal'
-	 */
-	//errorLogDetail?: 'minimal' | 'log';
-
-	errorPageType?: ErrorPageType;
+	errorPage?: {
+		/**
+		 * What kind of error page to display
+		 */
+		type?: ErrorPageType;
+		/**
+		 * What data should be sent to a client in case of critical endpoint error
+		 * 
+		 * Defaults to 'minimal'
+		 */
+		detailLevel?: 'minimal' | 'log';
+	};
 };
