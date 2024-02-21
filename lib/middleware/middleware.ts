@@ -74,19 +74,17 @@ export class LambdaMiddleware {
 		const requestID = getRequestIdFromProxy(request.headers, this.config.proxy?.requestIdHeader) || generateRequestId();
 		const clientIP = getProxyRemoteIP() || info.remoteAddr.hostname;
 
-		let requestDisplayUrl = '/';
-
 		//	this scary shit replaces URL object parsing
 		//	and from my tests it's ~3x faster.
 		//	also it won't throw shit.
-		const pathname = request.url.replace(/^[^\/]+\:\/\/[^\/]+/, '').replace(/[\?\#].*$/, '') || '/';
-		requestDisplayUrl = pathname;
+		const requestPathname = request.url.replace(/^[^\/]+\:\/\/[^\/]+/, '').replace(/[\?\#].*$/, '') || '/';
 
 		// find route path
-		const routePathname = pathname.slice(0, pathname.endsWith('/') ? pathname.length - 1 : undefined) || '/';
+		const routePathname = requestPathname.slice(0, requestPathname.endsWith('/') ? requestPathname.length - 1 : undefined) || '/';
 
 		//	typescript is too dumb to figure it out so it might need a bin of help here
 		let routectx = this.handlersPool[routePathname] as FunctionCtx | undefined;
+		let matchedRoutePathname = routePathname;
 
 		// try to find matching wildcart route path
 		if (!routectx) {
@@ -98,11 +96,14 @@ export class LambdaMiddleware {
 				const nextCtx = this.handlersPool[nextRoute];
 
 				if (nextCtx?.options?.expand) {
+					matchedRoutePathname = nextRoute;
 					routectx = nextCtx;
 					break;
 				}
 			}
 		}
+
+		const relativePath = (routectx ? requestPathname.slice(matchedRoutePathname.length) : requestPathname) || '/';
 
 		//	try getting 404 fallback handler
 		if (!routectx) {
@@ -110,9 +111,9 @@ export class LambdaMiddleware {
 		}
 
 		const requestContext: FunctionContext = {
-			relativePath: requestDisplayUrl,
-			clientIP: requestID,
-			requestID: requestID,
+			relativePath,
+			clientIP,
+			requestID,
 			console: new ServiceConsole(requestID)
 		};
 
@@ -133,7 +134,7 @@ export class LambdaMiddleware {
 		functionResponse.headers.set('x-request-id', requestID);
 
 		//	log for, you know, reasons
-		console.log(`(${clientIP}) ${request.method} ${requestDisplayUrl} --> ${functionResponse.status}`);
+		console.log(`(${clientIP}) ${request.method} ${requestPathname} --> ${functionResponse.status}`);
 
 		return functionResponse;
 	}
