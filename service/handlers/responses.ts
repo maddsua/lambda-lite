@@ -31,4 +31,3 @@ export class JSONResponse <T extends object> implements SerializableResponse {
 		});
 	}
 };
-
