@@ -1,4 +1,4 @@
-import { ServiceContext } from "./context.ts";
+import type { ServiceContext } from "./context.ts";
 import type { SerializableResponse } from "./responses.ts";
 
 export type HandlerResponse = SerializableResponse | Response;
