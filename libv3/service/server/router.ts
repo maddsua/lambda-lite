@@ -76,7 +76,7 @@ export class ServiceRouter {
 		}
 
 		//	pick a handler
-		const { mod } = worker;
+		const { mod, env: workerEnv } = worker;
 		const handlerFunc = mod[request.method as keyof typeof mod] || mod.ALL || mod.handler || mod.default;
 		if (!handlerFunc) {
 			console.error('No handler registered for worker');
@@ -85,7 +85,8 @@ export class ServiceRouter {
 
 		try {
 			
-			const workerResponse = await handlerFunc(request, { clientIP: 'test', requestID: 'test' });
+			const requestCtx = Object.assign({}, workerEnv, { clientIP: 'test', requestID: 'test' });
+			const workerResponse = await handlerFunc(request, requestCtx);
 			
 			if (workerResponse instanceof Response)
 				return workerResponse;
