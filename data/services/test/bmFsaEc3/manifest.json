@@ -1,6 +1,0 @@
-{
-	"env": {
-		"TEST_VAR": "test variable value",
-		"TEST_VAR_2": "one more variable"
-	}
-}
