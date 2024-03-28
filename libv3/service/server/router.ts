@@ -76,15 +76,17 @@ export class ServiceRouter {
 		}
 
 		//	pick a handler
-		const { mod, env: workerEnv } = worker;
-		const handlerFunc = mod[request.method as keyof typeof mod] || mod.ALL || mod.handler || mod.default;
+		const { mod: modhandler, env: workerEnv } = worker;
+		const handlerFunc = modhandler[request.method as keyof typeof modhandler] ||
+			modhandler.ALL || modhandler.handler || modhandler.default;
+
 		if (!handlerFunc) {
 			console.error('No handler registered for worker');
 			return new Response('Worker is not ready', { status: 502 });
 		}
 
 		try {
-			
+
 			const requestCtx = Object.assign({}, workerEnv, { clientIP: 'test', requestID: 'test' });
 			const workerResponse = await handlerFunc(request, requestCtx);
 			
