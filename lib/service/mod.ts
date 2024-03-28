@@ -3,6 +3,18 @@ import { ServiceRouter } from './server/router.ts';
 import { StateManager } from './state/manager.ts';
 import type { ActiveDeployEntry } from "./state/schema.ts";
 import type { HandlerContext } from '../workers/handlers/context.ts';
+import { createEnv } from "./server/env.ts";
+
+const env = createEnv({
+	OCTO_PROXY_CLIENT_IP: {
+		type: 'string',
+		optional: true
+	},
+	OCTO_PROXY_REQUEST_ID: {
+		type: 'string',
+		optional: true
+	},
+});
 
 const rootRouter = new ServiceRouter();
 
