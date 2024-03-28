@@ -23,7 +23,7 @@ const server = Deno.serve({ port: 8264 }, async (req, info) => {
 
 	const hctx: HandlerContext = {
 		clientIP: info.remoteAddr.hostname,
-		requestID: crypto.randomUUID(),
+		requestID: crypto.randomUUID().split('-').slice(0,3).join('-'),
 	};
 
 	const routerResponse = await rootRouter.routeRequest(req, hctx);
