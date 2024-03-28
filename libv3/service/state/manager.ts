@@ -51,6 +51,10 @@ export class StateManager {
 		`);
 	}
 
+	shutdown() {
+		this.m_db.close();
+	}
+
 	async createWorker(init: WorkerInit): Promise<string> {
 
 		let workerId: string | null = null;
