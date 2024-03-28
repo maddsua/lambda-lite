@@ -2,7 +2,13 @@ import { ServiceRouter } from './libv3/service/server/router.ts';
 import { StateManager } from './libv3/service/state/manager.ts';
 import { ActiveDeployEntry } from "./libv3/service/state/schema.ts";
 
-const router = new ServiceRouter();
+import { startServer } from './libv3/service/server/http.ts';
+
+const server = startServer();
+
+//server.shutdown();
+
+/*const router = new ServiceRouter();
 
 const manager = new StateManager('data', {
 	deployService: router.pushService.bind(router),
@@ -15,7 +21,7 @@ const logRestoreError = (ctx: ActiveDeployEntry, error: Error | null) =>
 for (const deploy of await manager.listActiveDeploys()) {
 	await manager.publishDeploy(deploy.deploy_id)
 		.catch(err => logRestoreError(deploy, err));
-}
+}*/
 
 /*
 const newworker = await stmgr.createWorker({ name: 'test' });
@@ -30,7 +36,7 @@ const newDeployId = await stmgr.createDeploy(newworker, {
 });
 
 await stmgr.publishDeploy(newDeployId);*/
-
+/*
 await manager.listActiveDeploys();
 
 //console.log(await stmgr.listWorkers());
@@ -40,4 +46,4 @@ const testRequest = new Request('https://octo.host/test/api?v=2');
 
 const result = await router.routeRequest(testRequest);
 
-console.log(result.status, await result.text());
+console.log(result.status, await result.text());*/
