@@ -7,8 +7,8 @@ export const compressResponse = async (req: Request, resp: Response): Promise<Re
 	if (acceptEncodings.includes('gzip')) {
 
 		const readable = await resp.blob()
-			.then(data => data.stream())
-			.then(stream => stream.pipeThrough(new CompressionStream('gzip')));
+			.then(data => data.stream()
+				.pipeThrough(new CompressionStream('gzip')));
 
 		const response = new Response(readable, {
 			status: resp.status,
