@@ -22,6 +22,7 @@ const server = Deno.serve({ port: 8264 }, (req, info) => rootRouter.routeRequest
 const exitcall = async () => {
 	await server.shutdown();
 	manager.shutdown();
+	Deno.exit(0);
 };
 
 if (Deno.build.os !== 'windows') {
