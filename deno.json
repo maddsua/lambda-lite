@@ -1,5 +1,6 @@
 {
 	"tasks": {
+		"start": "deno run -A libv3/service/mod.ts",
 		"check": "deno task check:lib && deno task check:examples",
 		"check:lib": "deno run -A tests/typechecks.lib.test.ts",
 		"check:examples": "deno run -A tests/typechecks.ex.test.ts",
