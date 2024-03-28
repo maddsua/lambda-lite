@@ -59,7 +59,7 @@ export class StateManager {
 
 		let workerId: string | null = null;
 
-		for (let index = 0; index < 64; index++) {
+		for (let idx = 0; idx < 64; idx++) {
 			
 			const next = crypto.randomUUID();
 			if (await this.workerExists(next)) {
@@ -117,7 +117,7 @@ export class StateManager {
 
 		let deploy_id: string | null = null;
 
-		for (let index = 0; index < 64; index++) {
+		for (let idx = 0; idx < 64; idx++) {
 			
 			const next = crypto.randomUUID();
 
