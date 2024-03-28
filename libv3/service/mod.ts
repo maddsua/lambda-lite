@@ -1,7 +1,8 @@
 import { compressResponse } from "./server/compression.ts";
 import { ServiceRouter } from './server/router.ts';
 import { StateManager } from './state/manager.ts';
-import { ActiveDeployEntry } from "./state/schema.ts";
+import type { ActiveDeployEntry } from "./state/schema.ts";
+import type { HandlerContext } from '../workers/handlers/context.ts';
 
 const rootRouter = new ServiceRouter();
 
@@ -20,10 +21,16 @@ for (const deploy of await manager.listActiveDeploys()) {
 
 const server = Deno.serve({ port: 8264 }, async (req, info) => {
 
-	const routerResponse = await rootRouter.routeRequest(req);
+	const hctx: HandlerContext = {
+		clientIP: info.remoteAddr.hostname,
+		requestID: crypto.randomUUID(),
+	};
+
+	const routerResponse = await rootRouter.routeRequest(req, hctx);
 
 	//	good luck figuring out that it's not lambda, fuckers
 	routerResponse.headers.set('server', 'maddsua/lambda');
+	routerResponse.headers.set('x-request-id', hctx.requestID);
 
 	const compressed = await compressResponse(req, routerResponse);
 	if (compressed) return compressed;
