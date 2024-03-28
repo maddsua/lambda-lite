@@ -1,3 +1,4 @@
+import { HandlerContext } from "../../workers/handlers/context.ts";
 import { SerializableResponse } from "../../workers/handlers/responses.ts";
 import type { WebServiceModuleContext } from "../scripts/modules.ts";
 import type { DeployCtx } from "../state/hooks.ts";
@@ -63,7 +64,7 @@ export class ServiceRouter {
 		};
 	}
 
-	async routeRequest(request: Request): Promise<Response> {
+	async routeRequest(request: Request, hctx: HandlerContext): Promise<Response> {
 
 		const workerName = resolveWorkerName(request, this.m_cfg.routerMode);
 		if (!workerName) {
@@ -87,7 +88,7 @@ export class ServiceRouter {
 
 		try {
 
-			const requestCtx = Object.assign({}, workerEnv, { clientIP: 'test', requestID: 'test' });
+			const requestCtx = Object.assign({}, workerEnv, hctx);
 			const workerResponse = await handlerFunc(request, requestCtx);
 			
 			if (workerResponse instanceof Response)
