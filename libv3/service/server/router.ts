@@ -2,16 +2,16 @@ import { SerializableResponse } from "../../workers/handlers/responses.ts";
 import type { WebServiceModuleContext } from "../scripts/modules.ts";
 import type { DeployCtx } from "../state/hooks.ts";
 
-type RoutingMode = 'path' | 'host';
+type RouterMode = 'path' | 'host';
 
 export interface RouterSettings {
-	mode: RoutingMode;
+	routerMode: RouterMode;
 	proxiedClientIp?: string;
 };
 
 type PoolInit = [string, WebServiceModuleContext][];
 
-const resolveWorkerName = (request: Request, mode: RoutingMode): string | null => {
+const resolveWorkerName = (request: Request, mode: RouterMode): string | null => {
 	switch (mode) {
 
 		case 'host': {
@@ -43,7 +43,7 @@ export class ServiceRouter {
 	constructor(cfg?: Partial<RouterSettings>, workersInit?: PoolInit) {
 
 		this.m_cfg = Object.assign({
-			mode: 'path'
+			routerMode: 'path'
 		} satisfies RouterSettings, cfg || {});
 
 		if (workersInit?.length) {
@@ -65,7 +65,7 @@ export class ServiceRouter {
 
 	async routeRequest(request: Request): Promise<Response> {
 
-		const workerName = resolveWorkerName(request, this.m_cfg.mode);
+		const workerName = resolveWorkerName(request, this.m_cfg.routerMode);
 		if (!workerName) {
 			return new Response(`Worker name not provided`, { status: 404 });
 		}
