@@ -1,3 +1,4 @@
+import { compressResponse } from "./server/compression.ts";
 import { ServiceRouter } from './server/router.ts';
 import { StateManager } from './state/manager.ts';
 import { ActiveDeployEntry } from "./state/schema.ts";
@@ -22,6 +23,9 @@ const server = Deno.serve({ port: 8264 }, async (req, info) => {
 	const routerResponse = await rootRouter.routeRequest(req);
 
 	routerResponse.headers.set('server', 'octopuss');
+
+	const compressed = await compressResponse(req, routerResponse);
+	if (compressed) return compressed;
 
 	return routerResponse;
 });
