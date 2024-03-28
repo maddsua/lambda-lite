@@ -17,7 +17,14 @@ for (const deploy of await manager.listActiveDeploys()) {
 		.catch(err => logRestoreError(deploy, err));
 }
 
-const server = Deno.serve({ port: 8264 }, (req, info) => rootRouter.routeRequest(req));
+const server = Deno.serve({ port: 8264 }, async (req, info) => {
+
+	const routerResponse = await rootRouter.routeRequest(req);
+
+	routerResponse.headers.set('server', 'octopuss');
+
+	return routerResponse;
+});
 
 const exitcall = async () => {
 	await server.shutdown();
