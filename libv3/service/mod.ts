@@ -22,7 +22,8 @@ const server = Deno.serve({ port: 8264 }, async (req, info) => {
 
 	const routerResponse = await rootRouter.routeRequest(req);
 
-	routerResponse.headers.set('server', 'octopuss');
+	//	good luck figuring out that it's not lambda, fuckers
+	routerResponse.headers.set('server', 'maddsua/lambda');
 
 	const compressed = await compressResponse(req, routerResponse);
 	if (compressed) return compressed;
